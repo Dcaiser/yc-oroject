@@ -82,9 +82,6 @@
 
                             <!-- Price and Stock -->
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-lg font-bold text-blue-600">
-                                    Rp{{ number_format($product['price'] ?? 0, 0, ',', '.') }}
-                                </span>
                                 <span class="flex text-sm text-gray-500">
                                     <p class="">
                                         Stok: {{ $product['stock_quantity'] ?? 0  }}
@@ -99,7 +96,7 @@
                                     @click="op = true"
                                     type="button"
                                     class="flex-1 px-3 py-2 text-sm font-medium text-center text-gray-800 transition-colors bg-gray-100 rounded hover:bg-gray-200">
-                                    <i class="mr-1 fas fa-edit"></i>Edit
+                                    <i class="mr-1 fas fa-edit"></i>detail
                                 </button>
 
                                 <!-- Modal -->
@@ -189,10 +186,32 @@
                                             </div>
 
                                             <!-- Harga -->
-                                            <div>
-                                                <label class="block mb-1 text-sm font-medium text-gray-700">Harga</label>
-                                                <input type="number" name="price1" value="{{ $product['price'] ?? '' }}" class="w-full p-2 border border-gray-300 rounded">
-                                            </div>
+<h3 class="mt-6 mb-2 text-lg font-semibold">Harga per Kategori Customer</h3>
+        <div class="grid grid-cols-1 gap-4">
+            @foreach ($customertypes as $type)
+                <div>
+                    <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
+                     <div x-data="{ harga: '' }">
+                            <label for="harga" class="block mb-1 text-sm font-medium text-gray-700">
+                            </label>
+                            <div class="relative">
+                                <span class="absolute text-gray-500 left-3 top-2">Rp</span>
+                                <input type="text"
+                                    id="harga"
+                                    name="prices[{{ $type }}]"
+                                    x-model="harga"
+                                    x-on:input="harga = new Intl.NumberFormat('id-ID').format(harga.replace(/[^0-9]/g, ''))"
+
+                                    class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value="">
+                            </div>
+                            @error('harga')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                </div>
+            @endforeach
+        </div>
                                             <div>
                                                 <label for="kategori_id" class="block mb-1 text-sm font-medium text-gray-700">Kategori</label>
                                                 <select id="kategori_id" required
@@ -231,7 +250,7 @@
                                                 </button>
                                             </div>
                                         </form>
-                                                <form action="{{ route('products.destroy', $product->id) }}" class="" method="POST">
+                                                <form action="{{ route('products.destroy', $product->id) }}" onsubmit="return confirm('yakin ingin hapus?')" class="" method="POST">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="px-4 py-2 text-white bg-red-500 rounded shadow hover:bg-red-800">

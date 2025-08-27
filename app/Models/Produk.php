@@ -23,4 +23,9 @@ class Produk extends Model
         'description',
         'satuan'
     ];
+
+    public function prices()
+{
+    return $this->hasMany(Price::class, 'product_id');
+}
 }

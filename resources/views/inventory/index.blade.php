@@ -73,18 +73,19 @@
                     <tr class="bg-gray-100">
                         <th class="px-4 py-2 border">ID</th>
                         <th class="px-4 py-2 border">Nama</th>
-                        <th class="px-4 py-2 border">Harga</th>
+                        <th class="px-4 py-2 border-b-4 border-red-500">Harga Agen (Rp)</th>
+                        <th class="px-4 py-2 border-b-4 border-yellow-400">Harga Reseller (Rp)</th>
+                        <th class="px-4 py-2 border-b-4 border-green-600">Harga Pelanggan (Rp)</th>
                         <th class="px-4 py-2 border">SKU</th>
                         <th class="px-4 py-2 border">Stok</th>
                         <th class="px-4 py-2 border">satuan</th>
                         <th class="px-4 py-2 border">Kategori</th>
-                        <th class="px-4 py-2 border">Deskripsi</th>
                         <th class="px-4 py-2 border">aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($products as $p)
-                    <tr class="text-center border-b hover:bg-gray-50">
+                    <tr class="text-sm text-center border-b font-[2px] hover:bg-gray-50">
                         <td class="px-4 py-2 border">
                             {{ $p->id }}
                             <input type="hidden" name="produk[{{ $p->id }}][id]" value="{{ $p->id }}">
@@ -92,9 +93,26 @@
                         <td class="px-4 py-2 border">
                             <input type="text" name="produk[{{ $p->id }}][name]" value="{{ $p->name }}" class="w-full border-none">
                         </td>
-                        <td class="px-4 py-2 border">
-                            <input type="number" name="produk[{{ $p->id }}][price]" value="{{ $p->price }}" class="w-full border-none">
-                        </td>
+                         {{-- Harga Agen --}}
+        <td class="px-3 py-2 border">
+            <input type="number" name="produk[{{ $p->id }}][prices][agent]"
+                value="{{ $p->prices->where('customer_type','agent')->first()->price ?? '' }}"
+                class="w-full border-none">
+        </td>
+
+        {{-- Harga Reseller --}}
+        <td class="px-3 py-2 border">
+            <input type="number" name="produk[{{ $p->id }}][prices][reseller]"
+                value="{{ $p->prices->where('customer_type','reseller')->first()->price ?? '' }}"
+                class="w-full border-none">
+        </td>
+
+        {{-- Harga Pelanggan --}}
+        <td class="px-3 py-2 border">
+            <input type="number" name="produk[{{ $p->id }}][prices][pelanggan]"
+                value="{{ $p->prices->where('customer_type','pelanggan')->first()->price ?? '' }}"
+                class="w-full border-none">
+        </td>
                         <td class="px-4 py-2 border">
                             <input type="text" name="produk[{{ $p->id }}][sku]" value="{{ $p->sku }}" class="w-full border-none">
                         </td>
@@ -113,9 +131,6 @@
                                 @endforeach
                             </select>
                         </td>
-                        <td class="px-4 py-2 border">
-                            <input type="text" name="produk[{{ $p->id }}][description]" value="{{ $p->description }}" class="w-full border-none">
-                        </td>
                         <td class="p-5">
                         </td>
                     </tr>
@@ -124,7 +139,7 @@
             </table>
 
             <div class="flex justify-center p-4 mt-4">
-                <button type="submit" class="px-4 py-2 text-white bg-blue-500 rounded shadow hover:bg-blue-600">
+                <button type="submit" onclick="return confirm('simpan perubahan?')" class="px-4 py-2 text-white bg-blue-500 rounded shadow hover:bg-blue-600">
                     <i class="fa-solid fa-arrows-rotate"></i>
                 </button>
             </div>
