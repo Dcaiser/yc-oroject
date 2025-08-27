@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                <i class="fas fa-box mr-2"></i>{{ __('Kategori') }}
+                <i class="fas fa-tags mr-2"></i>{{ __('Kategori') }}
             </h2>
             <a href="{{route('addcategory')}}"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">

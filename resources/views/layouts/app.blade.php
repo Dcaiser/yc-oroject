@@ -96,7 +96,7 @@
                     Inventory
                 </a>
 
-                <a href="#" class="flex items-center px-6 py-3 text-white nav-item">
+                <a href="{{ route('suppliers.index') }}" class="flex items-center px-6 py-3 text-white nav-item {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
                     <i class="w-4 mr-3 fas fa-truck"></i>
                     Supplier
                 </a>

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                <i class="mr-2 fas fa-box"></i>{{ __('inventory') }}
+                <i class="mr-2 fas fa-shopping-cart"></i>{{ __('inventory') }}
             </h2>
             <a href="{{ route('products.create') }}"
                 class="flex items-center px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">

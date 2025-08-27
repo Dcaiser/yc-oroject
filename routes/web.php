@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Categorycontroller;
 use App\Http\Controllers\InventController;
 use App\Http\Controllers\activityController;
+use App\Http\Controllers\SupplierController;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashController;
@@ -84,5 +85,21 @@ Route::get('/activities', [ActivityController::class, 'index'])->name('activitie
 Route::delete('/activities/clear', [ActivityController::class, 'clear'])->name('activities.clear');
 });
 
+// suppliers
+Route::middleware('auth')->group(function () {
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('/suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('/suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('/suppliers/{supplier}', [SupplierController::class, 'show'])->name('suppliers.show');
+    Route::get('/suppliers/{supplier}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('/suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
+});
+
 // Hanya include login dan logout, tanpa register
 require __DIR__.'/auth.php';
+
+use App\Http\Controllers\ReportController;
+
+Route::resource('laporan', ReportController::class);
+
