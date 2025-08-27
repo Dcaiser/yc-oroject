@@ -5,6 +5,7 @@ use Illuminate\Support\Str;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\Price;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
 use App\Models\Produk;
@@ -16,7 +17,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Produk::with('category') // ambil data kategori juga
+        $products = Produk::with('category')// ambil data kategori juga
         ->when($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
                          ->orWhere('description', 'like', "%{$search}%");
@@ -24,15 +25,15 @@ class ProductController extends Controller
         ->paginate(10);
 
         $category = Kategori::all();
-
-        return view('products.index', compact(['products','category']));
+        $customertypes = ['agent', 'reseller', 'pelanggan'];
+        return view('products.index', compact(['products','category','customertypes']));
     }
 
     public function create()
     {
         $category = Kategori::paginate(5);
-
-        return view('products.create', compact('category'));
+        $customertypes = ['agent', 'reseller', 'pelanggan'];
+        return view('products.create', compact(['category','customertypes']));
     }
 
     public function store(Request $request)
@@ -43,30 +44,25 @@ class ProductController extends Controller
             'stok' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
             'kategori_id' => 'required|int|max:255',
+            'prices' => 'required|array',
+            'prices.*' => 'required|numeric|min:0',
         ]);
 
-                  $price = preg_replace('/[^0-9]/', '', $request->harga); // hapus semua selain angka
-
-        // Kalau pakai DECIMAL dan mau simpan dalam format 1.200.000,00
-                  $price = number_format($price, 2, '.', '');
                  // Ambil kode kategori (3 huruf pertama)
                 $kodeKategori = strtoupper(Str::limit(preg_replace('/\s+/', '', $request->kategori_id), 3, ''));
 
                  // Ambil kode nama (3 huruf pertama)
                 $kodeNama = strtoupper(Str::limit(preg_replace('/\s+/', '', $request->nama), 3, ''));
 
-                // Ambil 4 digit harga terakhir
-                $kodeHarga = str_pad(substr((int)$request->harga, -4), 4, '0', STR_PAD_LEFT);
-
                 // SKU Final
-                $sku = $kodeKategori . '-' . $kodeNama . '-' . $kodeHarga;
+                $sku = $kodeKategori . '-' . $kodeNama;
 
                 // Cek apakah SKU ini sudah ada
                 $produk = Produk::where('sku', $sku)->first();
 
                  if ($produk) {
                     // Kalau sudah ada → tambahkan stok
-                   $produk->stok += $request->stok;
+                   $produk->stock_quantity += $request->stok;
                     $produk->save();
                  } else {
                 // Simpan gambar jika ada
@@ -82,7 +78,7 @@ class ProductController extends Controller
      // Kalau belum ada → buat produk baru
 $pro = Produk::create([
     'name'           => $request->nama,        // pastikan field DB kamu pakai "name"
-    'price'          => $price,
+    ##'price'          => $price,
     'category_id'    => $request->kategori_id,
     'satuan'         => $request->satuan,
     'sku'            => $sku,
@@ -91,6 +87,13 @@ $pro = Produk::create([
     // 'gambar'      => $path, // aktifkan kalau ada upload gambar
 ]);
 
+ foreach ($request->prices as $customerType => $price) {
+            Price::create([
+                'product_id'    => $pro->id,
+                'customer_type' => $customerType,
+                'price'         => $price,
+            ]);
+        }
 // Simpan aktivitas
 Activity::create([
     'user'       => Auth::check() ? Auth::user()->name : 'Guest',
@@ -138,7 +141,6 @@ Activity::create([
         $product->update(
             [
     'name'           => $request->title1,        // pastikan field DB kamu pakai "name"
-    'price'          => $request->price1,
     'category_id'    => $request->kategori_id1,
     'satuan'         => $request->satuan1,
     'sku'            => $request->sku1,
@@ -244,4 +246,5 @@ Activity::create([
         Produk::query()->delete();
         return redirect()->back()->with('success', 'Semua data berhasil dihapus!');
     }
+
 }
