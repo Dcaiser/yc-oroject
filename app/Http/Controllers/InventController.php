@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ActivityController;
 
 
+
 class InventController extends Controller
 {
     /**

@@ -113,6 +113,11 @@
                     aktivitas
                 </a>
                 @endif
+                <a href="" class="flex items-center px-6 py-3 text-white nav-item">
+                    <i class="fa-solid fa-cart-shopping"></i>&nbsp
+                    POS
+                </a>
+
 
             </nav>
 

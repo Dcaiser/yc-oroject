@@ -15,6 +15,7 @@ class DashController extends Controller
     public function index()
     {
         $total = Produk::count();
+        
         return view('dashboard', compact('total'));
     }
 
