@@ -98,11 +98,11 @@
 
                 <a href="{{ route('suppliers.index') }}" class="flex items-center px-6 py-3 text-white nav-item {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
                     <i class="w-4 mr-3 fas fa-truck"></i>
-                    Supplier
+                    Supplier 
                 </a>
 
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="#" class="flex items-center px-6 py-3 text-white nav-item">
+                <a href="{{ route('laporan.index') }}" class="flex items-center px-6 py-3 text-white nav-item {{ request()->routeIs('laporan.*') ? 'active-nav-link' : '' }}">
                     <i class="w-4 mr-3 fas fa-chart-line"></i>
                     Laporan
                 </a>

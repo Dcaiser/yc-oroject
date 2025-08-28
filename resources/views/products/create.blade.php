@@ -13,7 +13,7 @@
 
     <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
         <div class="p-6">
-            <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data" class="space-y-6">
+            <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data" class="space-y-6" x-data="{ pName: '{{ old('nama') }}', pSku: '{{ old('sku') }}', pCategoryText: '', pStock: {{ old('stok', 0) }}, pSatuan: '{{ old('satuan') }}', pImage: null }">
                 @csrf
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -27,9 +27,25 @@
                                 name="nama"
                                 value="{{ old('nama') }}"
                                 required
+                                x-model="pName"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Masukkan nama produk">
                             @error('nama')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- SKU -->
+                        <div>
+                            <label for="sku" class="block mb-1 text-sm font-medium text-gray-700">SKU</label>
+                            <input type="text"
+                                id="sku"
+                                name="sku"
+                                value="{{ old('sku') }}"
+                                x-model="pSku"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Masukkan SKU (opsional)">
+                            @error('sku')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -53,29 +69,22 @@
             @foreach ($customertypes as $type)
                 <div>
                     <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
-                     <div x-data="{ harga: '' }">
-                            <label for="harga" class="block mb-1 text-sm font-medium text-gray-700">
-                            </label>
+                     <div x-data="{ harga: '', numericVal: '' , fmt(){ this.harga = new Intl.NumberFormat('id-ID').format(this.numericVal); } }" x-init="harga=''; numericVal='';">
                             <div class="relative">
                                 <span class="absolute text-gray-500 left-3 top-2">Rp</span>
                                 <input type="text"
-                                    id="harga"
-                                    name="prices[{{ $type }}]"
                                     x-model="harga"
-                                    x-on:input="harga = new Intl.NumberFormat('id-ID').format(harga.replace(/[^0-9]/g, ''))"
-
+                                    x-on:input="numericVal = harga.replace(/[^0-9]/g,''); harga = new Intl.NumberFormat('id-ID').format(numericVal)"
                                     class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="0">
+                                <input type="hidden" name="prices[{{ $type }}]" :value="numericVal">
                             </div>
-                            @error('harga')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
                         </div>
                 </div>
             @endforeach
         </div>
                         <!-- Stock -->
-                        <div x-data="{ qty: {{ old('stok', 0) }} }" class="w-48">
+                        <div x-data="{ qty: {{ old('stok', 0) }} }" x-init="$watch('qty', v => pStock = v)" class="w-48">
                             <label for="stok" class="block mb-1 text-sm font-medium text-gray-700">
                                 Stok Barang <span class="text-red-500">*</span>
                             </label>
@@ -118,6 +127,7 @@
                                     name="satuan"
                                     value="{{ old('satuan') }}"
                                     required
+                                    x-model="pSatuan"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Masukkan satuan stok produk (kg/liter/..)">
                                 @error('nama')
@@ -130,7 +140,8 @@
                             <label for="kategori_id" class="block mb-1 text-sm font-medium text-gray-700">Kategori</label>
                             <select id="kategori_id" required
                                 name="kategori_id"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                @change="pCategoryText = $event.target.options[$event.target.selectedIndex].text">
                                 @foreach($category as $cat)
                                 <option value="{{$cat->id}}">{{$cat->name}}</option>
                                 @endforeach
@@ -182,7 +193,7 @@
                                     x-ref="fileInput"
                                     name="gambar"
                                     accept="image/*"
-                                    @change="updatePreview($event.target.files[0])"
+                                    @change="updatePreview($event.target.files[0]); pImage = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
                                     class="hidden">
 
                                 <p class="text-xs text-gray-500">
@@ -192,6 +203,55 @@
                             @error('gambar')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Preview -->
+                <div class="pt-6 border-t border-gray-200">
+                    <h3 class="mb-4 text-lg font-semibold">Preview Produk</h3>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="overflow-hidden transition-shadow duration-300 bg-white border border-gray-200 rounded-lg">
+                            <div class="bg-gray-200 aspect-w-16 aspect-h-12">
+                                <img :src="pImage ?? 'https://via.placeholder.com/300x200?text=No+Image'" alt="Preview Gambar" class="object-cover w-full h-48">
+                            </div>
+                            <div class="p-4">
+                                <h3 class="mb-2 text-lg font-semibold line-clamp-2" x-text="pName || 'Nama Produk' "></h3>
+                                <p class="mb-2 text-sm text-gray-600" x-text="pSku || '-' "></p>
+                                <p class="mb-3 text-sm text-gray-600" x-text="pCategoryText || '-' "></p>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-sm text-gray-500" x-text="`Stok: ${pStock || 0} ${pSatuan || ''}`"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ringkasan Data -->
+                <div class="pt-6 border-t border-gray-200">
+                    <h3 class="mb-4 text-lg font-semibold">Ringkasan Data</h3>
+                    <div class="overflow-hidden bg-white border border-gray-200 rounded-lg">
+                        <div class="grid grid-cols-1 gap-0 p-4 md:grid-cols-2">
+                            <div class="py-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase">Nama</p>
+                                <p class="text-gray-900" x-text="pName || '-' "></p>
+                            </div>
+                            <div class="py-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase">SKU</p>
+                                <p class="text-gray-900" x-text="pSku || '-' "></p>
+                            </div>
+                            <div class="py-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase">Kategori</p>
+                                <p class="text-gray-900" x-text="pCategoryText || '-' "></p>
+                            </div>
+                            <div class="py-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase">Stok</p>
+                                <p class="text-gray-900" x-text="pStock || 0"></p>
+                            </div>
+                            <div class="py-2">
+                                <p class="text-xs font-semibold text-gray-500 uppercase">Satuan</p>
+                                <p class="text-gray-900" x-text="pSatuan || '-' "></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -211,4 +271,6 @@
             </form>
         </div>
     </div>
+    
+    
 </x-app-layout>

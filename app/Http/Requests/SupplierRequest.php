@@ -23,14 +23,22 @@ class SupplierRequest extends FormRequest
     public function rules(): array
     {
         $supplierId = $this->route('supplier');
+        $isUpdate = !is_null($supplierId);
         
         return [
-            'supplier_code' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('suppliers', 'supplier_code')->ignore($supplierId),
-            ],
+            'supplier_code' => $isUpdate
+                ? [
+                    'required',
+                    'string',
+                    'max:50',
+                    Rule::unique('suppliers', 'supplier_code')->ignore($supplierId),
+                  ]
+                : [
+                    'nullable',
+                    'string',
+                    'max:50',
+                    Rule::unique('suppliers', 'supplier_code'),
+                  ],
             'name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',

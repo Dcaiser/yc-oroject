@@ -95,23 +95,35 @@
                         </td>
                          {{-- Harga Agen --}}
         <td class="px-3 py-2 border">
-            <input type="number" name="produk[{{ $p->id }}][prices][agent]"
-                value="{{ $p->prices->where('customer_type','agent')->first()->price ?? '' }}"
-                class="w-full border-none">
+            @php $agentPrice = $p->prices->where('customer_type','agent')->first()->price ?? ''; @endphp
+            <div x-data="{ harga: '{{ $agentPrice !== '' ? number_format($agentPrice,0,',','.') : '' }}', raw: '{{ $agentPrice }}' }">
+                <input type="text" x-model="harga"
+                    x-on:input="raw = harga.replace(/[^0-9]/g,''); harga = new Intl.NumberFormat('id-ID').format(raw)"
+                    class="w-full border-none" />
+                <input type="hidden" name="produk[{{ $p->id }}][prices][agent]" :value="raw" />
+            </div>
         </td>
 
         {{-- Harga Reseller --}}
         <td class="px-3 py-2 border">
-            <input type="number" name="produk[{{ $p->id }}][prices][reseller]"
-                value="{{ $p->prices->where('customer_type','reseller')->first()->price ?? '' }}"
-                class="w-full border-none">
+            @php $resPrice = $p->prices->where('customer_type','reseller')->first()->price ?? ''; @endphp
+            <div x-data="{ harga: '{{ $resPrice !== '' ? number_format($resPrice,0,',','.') : '' }}', raw: '{{ $resPrice }}' }">
+                <input type="text" x-model="harga"
+                    x-on:input="raw = harga.replace(/[^0-9]/g,''); harga = new Intl.NumberFormat('id-ID').format(raw)"
+                    class="w-full border-none" />
+                <input type="hidden" name="produk[{{ $p->id }}][prices][reseller]" :value="raw" />
+            </div>
         </td>
 
         {{-- Harga Pelanggan --}}
         <td class="px-3 py-2 border">
-            <input type="number" name="produk[{{ $p->id }}][prices][pelanggan]"
-                value="{{ $p->prices->where('customer_type','pelanggan')->first()->price ?? '' }}"
-                class="w-full border-none">
+            @php $custPrice = $p->prices->where('customer_type','pelanggan')->first()->price ?? ''; @endphp
+            <div x-data="{ harga: '{{ $custPrice !== '' ? number_format($custPrice,0,',','.') : '' }}', raw: '{{ $custPrice }}' }">
+                <input type="text" x-model="harga"
+                    x-on:input="raw = harga.replace(/[^0-9]/g,''); harga = new Intl.NumberFormat('id-ID').format(raw)"
+                    class="w-full border-none" />
+                <input type="hidden" name="produk[{{ $p->id }}][prices][pelanggan]" :value="raw" />
+            </div>
         </td>
                         <td class="px-4 py-2 border">
                             <input type="text" name="produk[{{ $p->id }}][sku]" value="{{ $p->sku }}" class="w-full border-none">

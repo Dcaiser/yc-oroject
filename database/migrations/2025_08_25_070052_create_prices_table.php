@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained('products')->onDelete('cascade');
             $table->enum('customer_type', ['agent', 'reseller', 'pelanggan']);
-            $table->decimal('price', 15, 2);
+            $table->decimal('price', 15, 0);
             $table->timestamps();
         });
     }

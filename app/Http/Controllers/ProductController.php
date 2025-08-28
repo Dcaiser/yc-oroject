@@ -17,7 +17,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Produk::with('category')// ambil data kategori juga
+        $products = Produk::with(['category','prices'])// ambil data kategori juga
         ->when($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
                          ->orWhere('description', 'like', "%{$search}%");
@@ -123,13 +123,15 @@ Activity::create([
   // validasi input
         $validated = $request->validate([
             'title1' => 'required|string|max:255',
-            'price1' => 'required|numeric',
+            'price1' => 'nullable|numeric',
             'stock1'  => 'required|integer',
             'satuan1' => 'required|string',
             'description1' => 'required|string',
             'sku1' => 'required|string',
             'description1' => 'required|string',
             'kategori_id1' => 'required|string',
+            'prices' => 'sometimes|array',
+            'prices.*' => 'nullable|numeric|min:0',
 
 
         ]);
@@ -156,6 +158,22 @@ Activity::create([
             'model'      => 'Produk', // konsisten, karena modelmu bernama Produk
             'record_id'  => $id,
 ]);
+
+        // Update/insert harga per tipe customer jika dikirim
+        if ($request->filled('prices')) {
+            foreach ($request->input('prices') as $customerType => $price) {
+                if ($price === null || $price === '') { continue; }
+                Price::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'customer_type' => $customerType,
+                    ],
+                    [
+                        'price' => $price,
+                    ]
+                );
+            }
+        }
 
 
         // redirect balik dengan pesan sukses

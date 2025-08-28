@@ -189,26 +189,22 @@
 <h3 class="mt-6 mb-2 text-lg font-semibold">Harga per Kategori Customer</h3>
         <div class="grid grid-cols-1 gap-4">
             @foreach ($customertypes as $type)
+                @php
+                    $existing = optional($product->prices->firstWhere('customer_type', $type))->price;
+                    $formatted = $existing !== null ? number_format($existing, 0, ',', '.') : '';
+                @endphp
                 <div>
                     <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
-                     <div x-data="{ harga: '' }">
-                            <label for="harga" class="block mb-1 text-sm font-medium text-gray-700">
-                            </label>
+                     <div x-data="{ harga: '{{ $formatted }}', numericVal: '{{ $existing ?? '' }}' }">
                             <div class="relative">
                                 <span class="absolute text-gray-500 left-3 top-2">Rp</span>
                                 <input type="text"
-                                    id="harga"
-                                    name="prices[{{ $type }}]"
                                     x-model="harga"
-                                    x-on:input="harga = new Intl.NumberFormat('id-ID').format(harga.replace(/[^0-9]/g, ''))"
-
-                                    class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value="">
+                                    x-on:input="numericVal = harga.replace(/[^0-9]/g,''); harga = new Intl.NumberFormat('id-ID').format(numericVal)"
+                                    class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="hidden" name="prices[{{ $type }}]" :value="numericVal">
                             </div>
-                            @error('harga')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                </div>
                 </div>
             @endforeach
         </div>
