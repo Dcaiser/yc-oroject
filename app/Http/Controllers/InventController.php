@@ -6,6 +6,12 @@ use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kategori;
 
+use App\Models\Price;
+use App\Models\Activity;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ActivityController;
+
+
 class InventController extends Controller
 {
     /**
@@ -30,6 +36,17 @@ class InventController extends Controller
      * Show the form for creating a new resource.
      */
     public function create()
+    {
+        //
+    }
+    public function createStock()
+    {
+        $produk = Produk::all();
+        $category = Kategori::all();
+        return view('inventory.create_stock',compact(['produk', 'category']));
+
+    }
+    public function updateStock()
     {
         //
     }
@@ -63,25 +80,35 @@ class InventController extends Controller
      */
     public function update(Request $request)
     {
-        $produkData = $request->input('produk', []);
+ $produkData = $request->input('produk', []);
 
-        foreach ($produkData as $data) {
-            $produk = Produk::find($data['id']);
-            if ($produk) {
-                $produk->update([
-                    'name'           => $data['name'],
-                    'price'          => $data['price'],
-                    'sku'            => $data['sku'],
-                    'stock_quantity' => $data['stock_quantity'],
-                    'category_id'    => $data['category_id'],
-                    'description'    => $data['description'],
-                    'satuan'        => $data['satuan']
-                ]);
+    foreach ($produkData as $id => $data) {
+        $product = Produk::find($id);
+
+        if ($product) {
+            // update data produk utama
+            $product->update([
+                'name'           => $data['name'] ?? $product->name,
+                'sku'            => $data['sku'] ?? $product->sku,
+                'stock_quantity' => $data['stock_quantity'] ?? $product->stock_quantity,
+                'satuan'         => $data['satuan'] ?? $product->satuan,
+                'category_id'    => $data['category_id'] ?? $product->category_id,
+                'description'    => $data['description'] ?? $product->description,
+            ]);
+
+            // update harga (agen, reseller, pelanggan)
+            if (isset($data['prices'])) {
+                foreach ($data['prices'] as $customertype => $price) {
+                    $product->prices()->updateOrCreate(
+                        ['customer_type' => $customertype], // kondisi cari dulu
+                        ['price' => $price] // update/insert harga
+                    );
+                }
             }
         }
-    
-        return back()->with('success', 'Semua data berhasil diperbarui.');
     }
+
+    return redirect()->back()->with('success', 'Semua produk berhasil diperbarui!');    }
 
     /**
      * Remove the specified resource from storage.
@@ -90,10 +117,15 @@ class InventController extends Controller
     {
         $data = Produk::findOrFail($id);
         $data->delete();
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Data berhasil dihapus'
         ]);
+    }
+    public function deleteall() {
+        Produk::query()->delete();
+        return redirect()->back()->with('success', 'Semua data berhasil dihapus!');
+
     }
 }

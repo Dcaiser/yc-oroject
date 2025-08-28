@@ -1,6 +1,10 @@
 {
   "resources/css/app.css": {
+<<<<<<< HEAD
     "file": "assets/app-CelX-weI.css",
+=======
+    "file": "assets/app-CHWlZxOE.css",
+>>>>>>> stock/create
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [

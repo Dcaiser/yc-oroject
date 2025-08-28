@@ -26,7 +26,7 @@
                         </div>
                         <div class="ml-4">
                             <div class="text-sm font-medium text-gray-500">Total Produk</div>
-                            <div class="text-2xl font-bold text-gray-900">0</div>
+                            <div class="text-2xl font-bold text-gray-900">{{$total}}</div>
                         </div>
                     </div>
                 </div>

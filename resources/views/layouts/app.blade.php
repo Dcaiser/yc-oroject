@@ -39,19 +39,19 @@
     </style>
 </head>
 
-<body class="bg-gray-100 font-sans antialiased">
-    <div class="min-h-screen flex">
+<body class="font-sans antialiased bg-gray-100">
+    <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="sidebar-green h-screen w-64 hidden lg:block shadow-xl fixed z-30">
+        <aside class="fixed z-30 hidden w-64 h-screen shadow-xl sidebar-green lg:block">
             <!-- Logo & Brand -->
             <div class="p-6 border-b border-green-600">
                 <div class="flex items-center gap-3">
                     <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                         alt="Al-Ruhamaa Logo"
-                        class="w-10 h-10 object-contain">
+                        class="object-contain w-10 h-10">
                     <div>
-                        <h1 class="text-white font-bold text-lg">Al-Ruhamaa'</h1>
-                        <p class="text-green-200 text-xs">Inventory System</p>
+                        <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
+                        <p class="text-xs text-green-200">Inventory System</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                 <!-- Dashboard - Semua user yang login -->
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center text-white py-3 px-6 nav-item {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
-                    <i class="fas fa-tachometer-alt mr-3 w-4"></i>
+                    <i class="w-4 mr-3 fas fa-tachometer-alt"></i>
                     Dashboard
                 </a>
 
@@ -69,7 +69,7 @@
                 @if(Auth::user()->role === 'admin')
                 <a href="{{ route('users.index') }}"
                     class="flex items-center text-white py-3 px-6 nav-item {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
-                    <i class="fas fa-users mr-3 w-4"></i>
+                    <i class="w-4 mr-3 fas fa-users"></i>
                     Manajemen User
                 </a>
                 @endif
@@ -78,37 +78,37 @@
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('products.index') }}"
                     class="flex items-center text-white py-3 px-6 nav-item {{ request()->routeIs('products.*') ? 'active-nav-link' : '' }}">
-                    <i class="fas fa-box mr-3 w-4"></i>
+                    <i class="w-4 mr-3 fas fa-box"></i>
                     Produk
                 </a>
                 @endif
 
                 <!-- Menu lainnya untuk semua role -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="{{route('category')}}" class="flex items-center text-white py-3 px-6 nav-item">
-                    <i class="fas fa-tags mr-3 w-4"></i>
+                <a href="{{route('category')}}" class="flex items-center px-6 py-3 text-white nav-item">
+                    <i class="w-4 mr-3 fas fa-tags"></i>
                     Kategori Produk
                 </a>
                 @endif
 
-                <a href="{{route('invent')}}" class="flex items-center text-white py-3 px-6 nav-item">
-                    <i class="fas fa-warehouse mr-3 w-4"></i>
+                <a href="{{route('invent')}}" class="flex items-center px-6 py-3 text-white nav-item">
+                    <i class="w-4 mr-3 fas fa-warehouse"></i>
                     Inventory
                 </a>
 
-                <a href="#" class="flex items-center text-white py-3 px-6 nav-item">
-                    <i class="fas fa-truck mr-3 w-4"></i>
+                <a href="{{ route('suppliers.index') }}" class="flex items-center px-6 py-3 text-white nav-item {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
+                    <i class="w-4 mr-3 fas fa-truck"></i>
                     Supplier
                 </a>
 
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="#" class="flex items-center text-white py-3 px-6 nav-item">
-                    <i class="fas fa-chart-line mr-3 w-4"></i>
+                <a href="#" class="flex items-center px-6 py-3 text-white nav-item">
+                    <i class="w-4 mr-3 fas fa-chart-line"></i>
                     Laporan
                 </a>
                 @endif
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="#" class="flex items-center text-white py-3 px-6 nav-item">
+                <a href="{{ route('activities.index') }}" class="flex items-center px-6 py-3 text-white nav-item">
                     <i class="fa-solid fa-note-sticky"></i>&nbsp
                     aktivitas
                 </a>
@@ -118,35 +118,35 @@
 
             <!-- User Profile Section -->
             <div class="absolute bottom-0 w-64">
-                <div class="sidebar-green-dark p-4 border-t border-green-600">
+                <div class="p-4 border-t border-green-600 sidebar-green-dark">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
-                                <i class="fas fa-user text-green-800 text-sm"></i>
+                            <div class="flex items-center justify-center w-8 h-8 bg-green-200 rounded-full">
+                                <i class="text-sm text-green-800 fas fa-user"></i>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-white text-sm font-medium truncate">{{ Auth::user()->name }}</p>
-                                <p class="text-green-200 text-xs capitalize">{{ Auth::user()->role }}</p>
+                                <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
+                                <p class="text-xs text-green-200 capitalize">{{ Auth::user()->role }}</p>
                             </div>
                         </div>
 
                         <!-- Dropdown Menu -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="text-green-200 hover:text-white">
-                                <i class="fas fa-chevron-up text-xs"></i>
+                                <i class="text-xs fas fa-chevron-up"></i>
                             </button>
 
                             <div x-show="open" @click.away="open = false"
-                                class="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                class="absolute right-0 z-50 w-48 py-1 mb-2 bg-white rounded-md shadow-lg bottom-full">
                                 <a href="{{ route('profile.edit') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user-cog mr-2"></i>Profile
+                                    <i class="mr-2 fas fa-user-cog"></i>Profile
                                 </a>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                        class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                        <i class="mr-2 fas fa-sign-out-alt"></i>Logout
                                     </button>
                                 </form>
                             </div>
@@ -159,53 +159,53 @@
         <!-- Mobile Sidebar -->
         <div x-data="{ sidebarOpen: false }" class="lg:hidden">
             <!-- Mobile menu button -->
-            <div class="fixed top-0 left-0 right-0 bg-white shadow-sm z-40 lg:hidden">
+            <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-sm lg:hidden">
                 <div class="flex items-center justify-between px-4 py-3">
                     <div class="flex items-center space-x-3">
                         <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                             alt="Al-Ruhamaa Logo"
-                            class="w-8 h-8 object-contain">
-                        <h1 class="text-gray-900 font-bold">Al-Ruhamaa'</h1>
+                            class="object-contain w-8 h-8">
+                        <h1 class="font-bold text-gray-900">Al-Ruhamaa'</h1>
                     </div>
                     <button @click="sidebarOpen = !sidebarOpen" class="text-gray-600">
-                        <i class="fas fa-bars text-xl"></i>
+                        <i class="text-xl fas fa-bars"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" @click.away="sidebarOpen = false"
-                class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden">
-                <aside class="sidebar-green h-full w-64 shadow-xl">
+                class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden">
+                <aside class="w-64 h-full shadow-xl sidebar-green">
                     <div class="p-6 border-b border-green-600">
                         <div class="flex items-center gap-3">
                             <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                                 alt="Al-Ruhamaa Logo"
-                                class="w-10 h-10 object-contain">
+                                class="object-contain w-10 h-10">
                             <div>
-                                <h1 class="text-white font-bold text-lg">Al-Ruhamaa'</h1>
-                                <p class="text-green-200 text-xs">Inventory System</p>
+                                <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
+                                <p class="text-xs text-green-200">Inventory System</p>
                             </div>
                         </div>
                     </div>
 
-                    <nav class="text-white text-sm font-medium pt-4">
+                    <nav class="pt-4 text-sm font-medium text-white">
                         <a href="{{ route('dashboard') }}" @click="sidebarOpen = false"
-                            class="flex items-center text-white py-3 px-6 nav-item">
-                            <i class="fas fa-tachometer-alt mr-3 w-4"></i>Dashboard
+                            class="flex items-center px-6 py-3 text-white nav-item">
+                            <i class="w-4 mr-3 fas fa-tachometer-alt"></i>Dashboard
                         </a>
 
                         @if(Auth::user()->role === 'admin')
                         <a href="{{ route('users.index') }}" @click="sidebarOpen = false"
-                            class="flex items-center text-white py-3 px-6 nav-item">
-                            <i class="fas fa-users mr-3 w-4"></i>Manajemen User
+                            class="flex items-center px-6 py-3 text-white nav-item">
+                            <i class="w-4 mr-3 fas fa-users"></i>Manajemen User
                         </a>
                         @endif
 
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
                         <a href="{{ route('products.index') }}" @click="sidebarOpen = false"
-                            class="flex items-center text-white py-3 px-6 nav-item">
-                            <i class="fas fa-box mr-3 w-4"></i>Produk
+                            class="flex items-center px-6 py-3 text-white nav-item">
+                            <i class="w-4 mr-3 fas fa-box"></i>Produk
                         </a>
                         @endif
                     </nav>
@@ -218,8 +218,8 @@
             <div class="h-16 lg:hidden"></div>
 
             @isset($header)
-            <header class="bg-white shadow-sm border-b border-gray-200">
-                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <header class="bg-white border-b border-gray-200 shadow-sm">
+                <div class="px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>
