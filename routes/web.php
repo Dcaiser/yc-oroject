@@ -75,6 +75,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/inventory', [InventController::class, 'index'])->name('invent');
     Route::put('/produk/update-all', [InventController::class, 'update'])->name('updateAll');
     Route::delete('/inventdelete', [InventController::class, 'deleteall'])->name('deleteallinvent');
+    Route::get('/inventory/create-stock', [InventController::class, 'createStock'])->name('stock.create');
+
 
 });
 
@@ -101,5 +103,4 @@ require __DIR__.'/auth.php';
 
 use App\Http\Controllers\ReportController;
 
-Route::resource('laporan', ReportController::class);
 

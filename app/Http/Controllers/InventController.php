@@ -39,6 +39,17 @@ class InventController extends Controller
     {
         //
     }
+    public function createStock()
+    {
+        $produk = Produk::all();
+        $category = Kategori::all();
+        return view('inventory.create_stock',compact(['produk', 'category']));
+
+    }
+    public function updateStock()
+    {
+        //
+    }
 
     /**
      * Store a newly created resource in storage.

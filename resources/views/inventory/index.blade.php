@@ -4,11 +4,17 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 <i class="mr-2 fas fa-shopping-cart"></i>{{ __('inventory') }}
             </h2>
+            <div class="flex gap-4">
+            <a href="{{ route('stock.create') }}"
+                class="flex items-center px-4 py-2 font-medium text-green-600 transition-colors bg-green-200 rounded-lg hover:bg-green-700">
+                <i class="mr-2 fas fa-plus"></i>Tambah stok
+            </a>
+
             <a href="{{ route('products.create') }}"
                 class="flex items-center px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
                 <i class="mr-2 fas fa-plus"></i>Tambah Produk
             </a>
-
+            </div>
         </div>
     </x-slot>
         @if(isset($products) && count($products) > 0)
