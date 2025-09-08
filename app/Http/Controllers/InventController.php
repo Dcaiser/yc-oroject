@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kategori;
+use App\Models\Stockin;
 
 use App\Models\Price;
 use App\Models\Activity;
@@ -38,7 +39,10 @@ class InventController extends Controller
      */
     public function create()
     {
-        //
+        $produk = Produk::all();
+        $stock = Stockin::all();
+        return view('inventory.invent_activity',compact(['stock','produk']));
+
     }
     public function createStock()
     {
@@ -47,9 +51,33 @@ class InventController extends Controller
         return view('inventory.create_stock',compact(['produk', 'category']));
 
     }
-    public function updateStock()
+    public function updateStock(request $request)
     {
-        //
+            $validated = $request->validate([
+            'name_p' => 'required|exists:products,id',
+            'harga_p' => 'required|numeric|min:0',
+            'stok'  => 'required|integer',
+            'satuan' => 'required|string',
+            'harga_t' => 'required|numeric|min:0',
+
+        ]);
+                $produk = Produk::findOrFail($request->name_p);
+
+          if ($request->satuan !== $produk->satuan) {
+        return redirect()->back()->withErrors([
+            'satuan' => 'Satuan yang diinput tidak sesuai dengan satuan produk (' . $produk->satuan . ')'
+        ])->withInput();
+    }
+    Stockin::create([
+        'product_id' => $request->name_p,
+        'stock_qty' => $request->stok,
+        'satuan' => $request->satuan,
+        'prices' => $request->harga_p,
+        'total_price' => $request->harga_t,
+    ]);
+        $produk->stock_quantity += $request->stok;
+        $produk->save();
+        return redirect()->route('invent')->with('success','berhasil menambahkan stok');
     }
 
     /**
@@ -65,7 +93,6 @@ class InventController extends Controller
      */
     public function show(string $id)
     {
-        //
     }
 
     /**

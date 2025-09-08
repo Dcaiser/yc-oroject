@@ -248,7 +248,7 @@
                                                 <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded shadow hover:bg-blue-700">
                                                     Simpan Perubahan
                                                 </button>
-                                            </div>
+
                                         </form>
                                                 <form action="{{ route('products.destroy', $product->id) }}" onsubmit="return confirm('yakin ingin hapus?')" class="" method="POST">
                                                     @csrf
@@ -257,7 +257,7 @@
                                                         hapus
                                                     </button>
                                                 </form>
-
+                                             </div>
                                     </div>
                                 </div>
                             </div>

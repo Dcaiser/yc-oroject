@@ -5,15 +5,22 @@
                 <i class="mr-2 fas fa-shopping-cart"></i>{{ __('inventory') }}
             </h2>
             <div class="flex gap-4">
+
+            @if(isset($products) && count($products) > 0)
             <a href="{{ route('stock.create') }}"
                 class="flex items-center px-4 py-2 font-medium text-green-600 transition-colors bg-green-200 rounded-lg hover:bg-green-700">
                 <i class="mr-2 fas fa-plus"></i>Tambah stok
             </a>
+            @else
 
+            @endif
+
+            @if(in_array(Auth::user()->role, ['manager', 'admin']))
             <a href="{{ route('products.create') }}"
                 class="flex items-center px-4 py-2 font-medium text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700">
                 <i class="mr-2 fas fa-plus"></i>Tambah Produk
             </a>
+            @endif
             </div>
         </div>
     </x-slot>
@@ -44,10 +51,15 @@
 
                 <!-- Filter Options -->
                 <div class="flex items-center space-x-2">
+                        <a href="{{ route('invent_notes') }}" class="flex items-center p-2 text-green-800 bg-green-400 rounded nav-item">
+                            <i class="fa-solid fa-boxes-stacked"></i>&nbsp
+                            note
+                        </a>
+
                         <form action="{{ route('deleteallinvent') }}" method="post" class=""  onsubmit="return confirm('Yakin hapus semua data?')">
                             @csrf
                             @method('DELETE')
-                            <button class="p-3 text-white bg-red-600 rounded active:bg-red-800" type="submit">
+                            <button class="p-2 text-white bg-red-600 rounded active:bg-red-800" type="submit">
                                 <i class="fa-solid fa-trash"></i> hapus semua
                             </button>
                         </form>

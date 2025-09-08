@@ -76,6 +76,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/produk/update-all', [InventController::class, 'update'])->name('updateAll');
     Route::delete('/inventdelete', [InventController::class, 'deleteall'])->name('deleteallinvent');
     Route::get('/inventory/create-stock', [InventController::class, 'createStock'])->name('stock.create');
+    Route::post('/inventory/create-stock', [InventController::class, 'updateStock'])->name('addstock');
+    Route::get('/inventory/notes', [InventController::class, 'create'])->name('invent_notes');
 
 
 });

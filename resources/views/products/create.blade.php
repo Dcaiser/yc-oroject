@@ -48,7 +48,7 @@
                         </div>
 
                         <!-- Price -->
-<h3 class="mt-6 mb-2 text-lg font-semibold">Harga per Kategori Customer</h3>
+<h3 class="mt-6 mb-2 text-lg font-semibold">Harga jual per Kategori Customer</h3>
         <div class="grid grid-cols-1 gap-4">
             @foreach ($customertypes as $type)
                 <div>

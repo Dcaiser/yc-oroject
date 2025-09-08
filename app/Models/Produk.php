@@ -15,6 +15,7 @@ class Produk extends Model
 
     // Kolom yang bisa diisi massal
     protected $fillable = [
+        'id',
         'name',
         'price',
         'category_id',
@@ -27,5 +28,9 @@ class Produk extends Model
     public function prices()
 {
     return $this->hasMany(Price::class, 'product_id');
+}
+public function stockin()
+{
+    return $this->hasMany(Stockin::class, 'id');
 }
 }

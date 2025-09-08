@@ -9,7 +9,7 @@
     <title>{{ config('app.name', 'Al-Ruhamaa Inventory') }}</title>
 
     <link rel="icon" href="https://yatimcenter-alruhamaa.org/assets/images/logo/logo-green.png" class="bg-[#047857]">
-    </title>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -90,6 +90,7 @@
                     Kategori Produk
                 </a>
                 @endif
+
 
                 <a href="{{route('invent')}}" class="flex items-center px-6 py-3 text-white nav-item">
                     <i class="w-4 mr-3 fas fa-warehouse"></i>
