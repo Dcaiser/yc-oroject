@@ -64,22 +64,20 @@
                             </button>
                         </form>
 
-                    <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Semua Kategori</option>
-                        <select name="" id=""></select>
-                    </select>
-                    <select name="sort" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="nama">Nama A-Z</option>
-                        <option value="harga_asc">Harga Terendah</option>
-                        <option value="harga_desc">Harga Tertinggi</option>
-                        <option value="terbaru">Terbaru</option>
-                    </select>
                 </div>
             </div>
         </div>
     </div>
-
-
+@if (session('success'))
+    <div
+        x-data="{ show: true }"
+        x-init="setTimeout(() => show = false, 3000)"
+        x-show="show"
+        class="p-4 mb-4 text-green-800 border border-green-300 rounded-lg bg-green-50"
+    >
+        {{ session('success') }}
+    </div>
+@endif
     <div class="w-full m-3 overflow-x-auto bg-white rounded-lg shadow">
 
         <form action="{{route('updateAll')}}" method="POST">

@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained();
             $table->integer('stock_qty');
-            $table->decimal('prices',15,0);
+            $table->decimal('prices',15,2);
             $table->string('satuan');
-            $table->decimal('total_price',15,0);
+            $table->decimal('total_price',15,2);
             $table->timestamps();
         });
     }

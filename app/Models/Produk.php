@@ -22,7 +22,8 @@ class Produk extends Model
         'sku',
         'stock_quantity',
         'description',
-        'satuan'
+        'satuan',
+        'supplier_id'
     ];
 
     public function prices()

@@ -46,10 +46,24 @@
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                        <div>
+                            <label for="kategori_id" class="block mb-1 text-sm font-medium text-gray-700">supplier</label>
+                            <select id="kategori_id" required
+                                name="supplier_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                @foreach($supplier as $supp)
+                                <option value="{{$supp->id}}">{{$supp->name}}</option>
+                                @endforeach
+                            </select>
+                            @error('kategori_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
 
                         <!-- Price -->
 <h3 class="mt-6 mb-2 text-lg font-semibold">Harga jual per Kategori Customer</h3>
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-4 p-5 rounded bg-slate-300">
             @foreach ($customertypes as $type)
                 <div>
                     <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
@@ -140,6 +154,7 @@
                             @enderror
                         </div>
                     </div>
+
 
                     <!-- Right Column - Image Upload -->
                     <div class="space-y-4">

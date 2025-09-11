@@ -46,20 +46,19 @@
                                 <i class="fa-solid fa-trash"></i> hapus semua
                             </button>
                         </form>
-                        <select name="category" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Semua Kategori</option>
-                            <select name="" id=""></select>
-                        </select>
-                        <select name="sort" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="nama">Nama A-Z</option>
-                            <option value="harga_asc">Harga Terendah</option>
-                            <option value="harga_desc">Harga Tertinggi</option>
-                            <option value="terbaru">Terbaru</option>
-                        </select>
                     </div>
                 </div>
             </div>
         </div>
+        @if (session('success'))
+    <div
+        x-data="{ show: true }"
+        x-init="setTimeout(() => show = false, 3000)"
+        x-show="show"
+        class="p-4 mb-4 text-green-800 border border-green-500 rounded-lg bg-green-50">
+        {{ session('success') }}
+    </div>
+@endif
 
         <!-- Products Grid -->
         <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
@@ -184,34 +183,54 @@
                                                 <label class="block mb-1 text-sm font-medium text-gray-700">Deskripsi</label>
                                                 <textarea name="description1" rows="4" class="w-full p-2 border border-gray-300 rounded">{{ $product['description'] }}</textarea>
                                             </div>
+                                             <div>
+                                                <label for="kategori_id" class="block mb-1 text-sm font-medium text-gray-700">supplier</label>
+                                                <select id="kategori_id" required
+                                                    name="supplier_id1"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                    @foreach($supplier as $supp)
+                                                    <option value="{{$supp->id}}" {{ $product->supplier_id == $supp->id ? 'selected' : '' }}>{{$supp->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('supp_id')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
 
                                             <!-- Harga -->
 <h3 class="mt-6 mb-2 text-lg font-semibold">Harga per Kategori Customer</h3>
-        <div class="grid grid-cols-1 gap-4">
-            @foreach ($customertypes as $type)
-                <div>
-                    <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
-                     <div x-data="{ harga: '' }">
-                            <label for="harga" class="block mb-1 text-sm font-medium text-gray-700">
-                            </label>
-                            <div class="relative">
-                                <span class="absolute text-gray-500 left-3 top-2">Rp</span>
-                                <input type="text"
-                                    id="harga"
-                                    name="prices[{{ $type }}]"
-                                    x-model="harga"
-                                    x-on:input="harga = new Intl.NumberFormat('id-ID').format(harga.replace(/[^0-9]/g, ''))"
-
-                                    class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value="">
-                            </div>
-                            @error('harga')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+<div class="grid grid-cols-1 gap-4">
+    @foreach ($customertypes as $type)
+        @php
+            $existing = optional($product->prices->firstWhere('customer_type', $type))->price;
+            $formatted = $existing !== null ? number_format($existing, 0, ',', '.') : '';
+        @endphp
+        <div>
+            <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
+            <div
+                x-data="{
+                    harga: '{{ $formatted }}',
+                    numericVal: '{{ $existing ?? '' }}'
+                }"
+            >
+                <div class="relative">
+                    <span class="absolute text-gray-500 left-3 top-2">Rp</span>
+                    <input type="text"
+                        x-model="harga"
+                        x-on:input="
+                            let clean = $event.target.value.replace(/[^0-9]/g,'');
+                            numericVal = clean;
+                            harga = clean ? new Intl.NumberFormat('id-ID').format(parseInt(clean)) : '';
+                        "
+                        class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <input type="hidden" name="prices[{{ $type }}]" :value="numericVal">
                 </div>
-            @endforeach
+            </div>
         </div>
+    @endforeach
+</div>
                                             <div>
                                                 <label for="kategori_id" class="block mb-1 text-sm font-medium text-gray-700">Kategori</label>
                                                 <select id="kategori_id" required
@@ -248,7 +267,6 @@
                                                 <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded shadow hover:bg-blue-700">
                                                     Simpan Perubahan
                                                 </button>
-
                                         </form>
                                                 <form action="{{ route('products.destroy', $product->id) }}" onsubmit="return confirm('yakin ingin hapus?')" class="" method="POST">
                                                     @csrf
@@ -257,7 +275,8 @@
                                                         hapus
                                                     </button>
                                                 </form>
-                                             </div>
+                                            </div>
+
                                     </div>
                                 </div>
                             </div>

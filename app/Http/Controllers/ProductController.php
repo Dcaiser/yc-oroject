@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\Activity;
+use App\Models\Supplier;
+
 
 class ProductController extends Controller
 {
@@ -24,16 +26,18 @@ class ProductController extends Controller
         })
         ->paginate(10);
 
+        $supplier = Supplier::all();
         $category = Kategori::all();
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.index', compact(['products','category','customertypes']));
+        return view('products.index', compact(['products','category','customertypes','supplier']));
     }
 
     public function create()
     {
+        $supplier = Supplier::all();
         $category = Kategori::paginate(5);
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.create', compact(['category','customertypes']));
+        return view('products.create', compact(['category','customertypes','supplier']));
     }
 
     public function store(Request $request)
@@ -44,6 +48,7 @@ class ProductController extends Controller
             'stok' => 'required|string|max:255',
             'satuan' => 'required|string|max:255',
             'kategori_id' => 'required|int|max:255',
+            'supplier_id' => 'required|int',
             'prices' => 'required|array',
             'prices.*' => 'required|numeric|min:0',
         ]);
@@ -84,6 +89,7 @@ $pro = Produk::create([
     'sku'            => $sku,
     'stock_quantity' => $request->stok,
     'description'    => $request->deskripsi,
+    'supplier_id'    => $request->supplier_id,
     // 'gambar'      => $path, // aktifkan kalau ada upload gambar
 ]);
 
@@ -118,18 +124,21 @@ Activity::create([
         return view('products.edit');
     }
 
-    public function update(request $request, $id)
+ public function update(request $request, $id)
     {
   // validasi input
         $validated = $request->validate([
             'title1' => 'required|string|max:255',
-            'price1' => 'required|numeric',
+            'price1' => 'nullable|numeric',
             'stock1'  => 'required|integer',
             'satuan1' => 'required|string',
             'description1' => 'required|string',
             'sku1' => 'required|string',
             'description1' => 'required|string',
             'kategori_id1' => 'required|string',
+            'supplier_id1' => 'required|int',
+            'prices' => 'sometimes|array',
+            'prices.*' => 'nullable|numeric|min:0',
 
 
         ]);
@@ -146,6 +155,7 @@ Activity::create([
     'sku'            => $request->sku1,
     'stock_quantity' => $request->stock1,
     'description'    => $request->description1,
+    'supplier_id'       => $request->supplier_id1,
     // 'gambar'      => $path, // aktifkan kalau ada upload gambar
 ]
 
@@ -157,12 +167,27 @@ Activity::create([
             'record_id'  => $id,
 ]);
 
+        // Update/insert harga per tipe customer jika dikirim
+        if ($request->filled('prices')) {
+            foreach ($request->input('prices') as $customerType => $price) {
+                if ($price === null || $price === '') { continue; }
+                Price::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'customer_type' => $customerType,
+                    ],
+                    [
+                        'price' => $price,
+                    ]
+                );
+            }
+        }
+
 
         // redirect balik dengan pesan sukses
         return redirect()->route('products.index')
                          ->with('success', 'Produk berhasil diperbarui!');
         }
-
     public function destroy($id)
     {
         // Delete product logic
