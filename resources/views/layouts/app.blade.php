@@ -119,7 +119,12 @@
                     POS
                 </a>
 
+                @if(in_array(Auth::user()->role, ['staff']))
+            <div class="text-sm font-medium text-center pt-7">
+                <a href="" class="p-3 text-[#047857] bg-white rounded"><i class="fas fa-plus"></i>buat laporan</a>
 
+            </div>
+            @endif
             </nav>
 
             <!-- User Profile Section -->

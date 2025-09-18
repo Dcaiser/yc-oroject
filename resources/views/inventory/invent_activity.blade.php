@@ -37,10 +37,11 @@
         <thead class="bg-gray-200">
             <tr>
                 <th class="px-3 py-2">nama produk</th>
+                <th class="px-3 py-2">supplier</th>
                 <th class="px-3 py-2">stok masuk</th>
                 <th class="px-3 py-2">satuan</th>
                 <th class="px-3 py-2">harga satuan</th>
-                <th class="px-3 py-2">harga total</th>
+                <th class="px-3 py-2">harga modal</th>
                 <th class="px-3 py-2">tanggal</th>
 
             </tr>
@@ -49,11 +50,12 @@
 
             @foreach ($stock as $st )
             <tr class="text-center border-t">
-                <td class="px-3 py-2">{{ $st->produk->name}}</td>
+                <td class="px-3 py-2">{{ $st->product_name}}</td>
+                <th class="px-3 py-2">{{ $st->supplier_name }}</th>
                 <td class="px-3 py-2">{{ $st->stock_qty }}</td>
                 <td class="px-3 py-2">{{ $st->satuan }}</td>
-                <td class="px-3 py-2">{{ $st->prices }}</td>
-                <td class="px-3 py-2">{{ $st->total_price}}</td>
+                <td class="px-3 py-2">{{ number_format($st->prices,0,',','.') }}</td>
+                <td class="px-3 py-2">{{ number_format($st->total_price,0,',','.')}}</td>
                 <td class="px-3 py-2">{{ $st->created_at}}</td>
 
             </tr>

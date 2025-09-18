@@ -63,31 +63,35 @@
 
                         <!-- Price -->
 <h3 class="mt-6 mb-2 text-lg font-semibold">Harga jual per Kategori Customer</h3>
-        <div class="grid grid-cols-1 gap-4 p-5 rounded bg-slate-300">
-            @foreach ($customertypes as $type)
-                <div>
-                    <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
-                     <div x-data="{ harga: '' }">
-                            <label for="harga" class="block mb-1 text-sm font-medium text-gray-700">
-                            </label>
-                            <div class="relative">
-                                <span class="absolute text-gray-500 left-3 top-2">Rp</span>
-                                <input type="text"
-                                    id="harga"
-                                    name="prices[{{ $type }}]"
-                                    x-model="harga"
-                                    x-on:input="harga = new Intl.NumberFormat('id-ID').format(harga.replace(/[^0-9]/g, ''))"
+<div class="grid grid-cols-1 gap-4 p-5 rounded bg-slate-300">
+    @foreach ($customertypes as $type)
+        <div>
+            <label class="block mb-1 font-medium">Harga {{ ucfirst($type) }}</label>
+            <div x-data="{ harga: '', hargaRaw: '' }">
+                <div class="relative">
+                    <span class="absolute text-gray-500 left-3 top-2">Rp</span>
 
-                                    class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="0">
-                            </div>
-                            @error('harga')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <!-- Input tampilan (terformat) -->
+                    <input type="text"
+                        x-model="harga"
+                        @input="
+                            let clean = $event.target.value.replace(/[^0-9]/g, '');
+                            hargaRaw = clean;
+                            harga = clean ? new Intl.NumberFormat('id-ID').format(parseInt(clean)) : '';
+                        "
+                        class="w-full py-2 pl-12 pr-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="0">
+
+                    <!-- Hidden input untuk dikirim ke server -->
+                    <input type="hidden" name="prices[{{ $type }}]" :value="hargaRaw">
                 </div>
-            @endforeach
+                @error('harga')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
         </div>
+    @endforeach
+</div>
                         <!-- Stock -->
                         <div x-data="{ qty: {{ old('stok', 0) }} }" class="w-48">
                             <label for="stok" class="block mb-1 text-sm font-medium text-gray-700">

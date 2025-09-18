@@ -7,6 +7,7 @@ use App\Models\Produk;
 use App\Models\Kategori;
 use App\Models\Stockin;
 
+use App\Models\Supplier;
 use App\Models\Price;
 use App\Models\Activity;
 use Illuminate\Support\Facades\Auth;
@@ -61,7 +62,9 @@ class InventController extends Controller
             'harga_t' => 'required|numeric|min:0',
 
         ]);
-                $produk = Produk::findOrFail($request->name_p);
+            $produk = Produk::findOrFail($request->name_p);
+            $supplier = Supplier::findOrFail($produk->supplier_id);
+            $supplierName = $supplier->name;
 
           if ($request->satuan !== $produk->satuan) {
         return redirect()->back()->withErrors([
@@ -69,7 +72,8 @@ class InventController extends Controller
         ])->withInput();
     }
     Stockin::create([
-        'product_id' => $request->name_p,
+        'product_name' => $produk->name,
+        'supplier_name' => $supplierName,
         'stock_qty' => $request->stok,
         'satuan' => $request->satuan,
         'prices' => $request->harga_p,
