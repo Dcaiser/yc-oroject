@@ -4,7 +4,6 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 <i class="fa-solid fa-note-sticky"></i> {{ __('inventory') }}
             </h2>
-
         </div>
     </x-slot>
 
@@ -24,7 +23,7 @@
         @csrf
         @method('DELETE')
         <button type="submit" class="px-3 py-2 text-white bg-red-600 rounded hover:bg-red-700">
-            Hapus Semua Aktivitas
+           <i class="fa-solid fa-trash"></i> Hapus Semua 
         </button>
     </form>
 

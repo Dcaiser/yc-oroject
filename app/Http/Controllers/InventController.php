@@ -81,6 +81,14 @@ class InventController extends Controller
     ]);
         $produk->stock_quantity += $request->stok;
         $produk->save();
+
+            Activity::create([
+            'user'       => Auth::check() ? Auth::user()->name : 'Guest',
+            'action'     => 'Menambah stok',
+            'model'      => 'inventori',
+            'record_id'  => $produk->id,
+]);
+
         return redirect()->route('invent')->with('success','berhasil menambahkan stok');
     }
 
