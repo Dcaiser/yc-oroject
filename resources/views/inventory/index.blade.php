@@ -13,7 +13,7 @@
 
             @if(isset($products) && count($products) > 0)
             <a href="{{ route('stock.create') }}"
-                class="flex items-center px-4 py-2 font-medium text-green-600 transition-colors bg-green-300 rounded-lg hover:bg-green-700">
+                class="flex items-center px-4 py-2 font-medium text-green-900 transition-colors bg-green-300 rounded-lg hover:bg-green-700">
                 <i class="mr-2 fas fa-plus"></i>Tambah stok
             </a>
             @else
