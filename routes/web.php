@@ -6,6 +6,7 @@ use App\Http\Controllers\Categorycontroller;
 use App\Http\Controllers\InventController;
 use App\Http\Controllers\activityController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PosController;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashController;
@@ -60,6 +61,10 @@ Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
 
 
 });
+Route::middleware('auth')->group(function () {
+    Route::get('/pos', [Poscontroller::class, 'index'])->name('pos');
+});
+
 
 // kategori
 Route::middleware('auth')->group(function () {
