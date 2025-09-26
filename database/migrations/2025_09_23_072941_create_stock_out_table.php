@@ -11,8 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('stock_out', function (Blueprint $table) {
-            //
+        Schema::create('stock_out', function (Blueprint $table) {
+            $table ->id();
+            $table ->string('product_name');
+            $table ->string('customer_name');
+            $table ->string('customer_type');
+            $table ->integer('stock_qty');
+            $table ->string('satuan');
+            $table ->decimal('prices');
+            $table ->decimal('shipping_cost')->default(0);
+            $table ->decimal('total_price');
+            $table ->decimal('payment_received')->default(0);
+            $table ->text('note')->nullable(0);
+            $table ->timestamps();
         });
     }
 

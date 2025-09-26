@@ -22,8 +22,8 @@
     <form action="{{ route('activities.clear') }}" method="POST" class="mb-4">
         @csrf
         @method('DELETE')
-        <button type="submit" class="px-3 py-2 text-white bg-red-600 rounded hover:bg-red-700">
-           <i class="fa-solid fa-trash"></i> Hapus Semua 
+        <button type="submit" class="px-3 py-2 text-white font-bold bg-red-600 rounded hover:bg-red-700">
+           <i class="fa-solid fa-trash"></i> Hapus Semua
         </button>
     </form>
 
