@@ -1,0 +1,320 @@
+/* Al-Ruhamaa' Inventory Reports Styles */
+
+/* Responsive container without zoom issues */
+.reports-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* Main container optimized for desktop and laptop */
+.reports-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media screen and (min-width: 1024px) {
+    .reports-main {
+        padding: 0 1.5rem;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .reports-main {
+        padding: 0 2rem;
+    }
+}
+
+/* Improved Card Styling */
+.report-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(229, 231, 235, 0.8);
+    min-height: 280px;
+}
+
+.report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Better responsive behavior without forcing grid */
+
+.report-card-actions {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* Enhanced Button Styling */
+.report-card a {
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.report-card a:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Clean and Simple Card Layout */
+.report-card {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.report-card .bg-emerald-100,
+.report-card .bg-blue-100,
+.report-card .bg-purple-100,
+.report-card .bg-green-100,
+.report-card .bg-indigo-100,
+.report-card .bg-gray-100 {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+/* Ensure consistent icon sizing */
+.report-card i {
+    font-size: 1.125rem;
+}
+
+/* Filter section improvements */
+.filter-section {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Better responsive grid for desktop */
+@media screen and (min-width: 1024px) {
+    .report-card {
+        min-height: 320px;
+    }
+}
+
+/* Table responsive improvements */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    min-width: 800px;
+}
+
+/* Summary cards responsive grid */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 640px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Header improvements for mobile */
+@media (max-width: 640px) {
+    .reports-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .reports-header .btn-group {
+        width: 100%;
+    }
+    
+    .reports-header .btn {
+        flex: 1;
+    }
+}
+
+/* Remove complex CSS rules that are not needed */
+
+/* Loading states */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Focus states for better accessibility */
+.btn:focus,
+.form-input:focus,
+.form-select:focus {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .reports-main {
+        zoom: 1 !important;
+        transform: none !important;
+        width: 100% !important;
+    }
+    
+    .report-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* Stats Cards Improvements */
+.stats-card {
+    transition: all 0.3s ease;
+    border-left-width: 4px;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Welcome Section Improvements */
+.welcome-section {
+    background: linear-gradient(135deg, #1f7c4d 0%, #166534 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+/* Improved hover effects */
+.report-card:hover .card-icon {
+    transform: scale(1.1);
+    transition: transform 0.3s ease;
+}
+
+/* Mobile optimizations */
+@media screen and (max-width: 640px) {
+    .report-card .flex.flex-col.sm\\:flex-row {
+        flex-direction: column;
+    }
+    
+    .report-card .flex.flex-col.sm\\:flex-row > a {
+        width: 100%;
+    }
+}
+
+/* Utility classes for consistent spacing and alignment */
+.space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5rem;
+}
+
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem;
+}
+
+/* Ensure consistent box model */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Smooth transitions for better UX */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Focus states for accessibility */
+.btn:focus-visible,
+a:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Disable text selection on interactive elements */
+.btn, .nav-item {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+/* Consistent shadow depths */
+.shadow-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-card-hover {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support (if needed in future) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode .report-card {
+        background-color: #1f2937;
+        border-color: #374151;
+    }
+    
+    .dark-mode .card-title {
+        color: #f9fafb;
+    }
+    
+    .dark-mode .card-description {
+        color: #d1d5db;
+    }
+}
+
+/* Custom Dark Green Colors (#1f7c4d) */
+.bg-custom-green {
+    background-color: #1f7c4d !important;
+}
+
+.bg-custom-green-light {
+    background-color: #22c55e !important;
+}
+
+.bg-custom-green-dark {
+    background-color: #166534 !important;
+}
+
+.text-custom-green {
+    color: #1f7c4d !important;
+}
+
+.border-custom-green {
+    border-color: #1f7c4d !important;
+}
+
+.hover\:bg-custom-green:hover {
+    background-color: #1f7c4d !important;
+}
+
+.hover\:bg-custom-green-dark:hover {
+    background-color: #166534 !important;
+}
