@@ -30,8 +30,5 @@ class Produk extends Model
 {
     return $this->hasMany(Price::class, 'product_id');
 }
-public function stockin()
-{
-    return $this->hasMany(Stockin::class, 'id');
-}
+
 }

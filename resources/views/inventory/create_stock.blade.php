@@ -1,18 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-extrabold text-green-900 flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-700 rounded-full"><i class="fas fa-plus"></i></span>
+            <h2 class="flex items-center gap-2 text-xl font-extrabold text-green-900">
+                <span class="inline-flex items-center justify-center w-10 h-10 text-green-700 bg-green-100 rounded-full"><i class="fas fa-plus"></i></span>
                 {{ __('Tambah Stok Produk Baru') }}
             </h2>
             <a href="{{ route('invent') }}"
-                class="px-4 py-2 font-medium text-white bg-gradient-to-r from-green-500 to-green-700 rounded-lg shadow hover:scale-105 transition">
+                class="px-4 py-2 font-medium text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                 <i class="mr-2 fas fa-arrow-left"></i>Kembali
             </a>
         </div>
     </x-slot>
 
-    <div class="overflow-hidden bg-white shadow-lg rounded-2xl mt-8">
+    <div class="mt-8 overflow-hidden bg-white shadow-lg rounded-2xl">
         <div class="p-8">
             <form method="POST" action="{{ route('addstock') }}" enctype="multipart/form-data" class="space-y-8" onsubmit="return confirm('Simpan data terbaru?')" x-data="{ hargaRaw: 0, hargaFormatted: '', stok: 0, formatRupiah(value) { return new Intl.NumberFormat('id-ID').format(value); } }" x-init="hargaFormatted = formatRupiah(hargaRaw)">
                 @csrf
@@ -81,17 +81,23 @@
                             <label for="satuan" class="block mb-1 text-sm font-semibold text-green-700">
                                 Satuan <span class="text-red-500">*</span>
                             </label>
-                            <input type="text"
-                                id="satuan"
+                             <select id="satuan"
                                 name="satuan"
-                                value="{{ old('satuan') }}"
                                 required
-                                class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50"
-                                placeholder="Masukkan satuan stok produk (kg/liter/...)">
+                                class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
+                                <option value="">Pilih satuan</option>
+                                @foreach($units as $unit)
+                                    <option value="{{ $unit->id }}" @selected(old('unit_id', $product->unit_id ?? '') == $unit->id)>
+                                        {{ $unit->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('satuan')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                        <!-- Satuan -->
+
 
                         <!-- Harga Total -->
                         <div>
@@ -123,11 +129,11 @@
                 <!-- Submit Buttons -->
                 <div class="flex items-center justify-end pt-8 space-x-4 border-t border-green-200">
                     <a href="{{ route('invent') }}"
-                        class="px-6 py-2 font-medium text-green-900 bg-green-100 rounded-lg hover:bg-green-200 transition">
+                        class="px-6 py-2 font-medium text-green-900 transition bg-green-100 rounded-lg hover:bg-green-200">
                         Batal
                     </a>
                     <button type="submit"
-                        class="px-6 py-2 font-medium text-white bg-gradient-to-r from-green-500 to-green-700 rounded-lg shadow hover:scale-105 transition">
+                        class="px-6 py-2 font-medium text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                         <i class="mr-2 fas fa-save"></i>Simpan
                     </button>
                 </div>

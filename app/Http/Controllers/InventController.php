@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kategori;
 use App\Models\Stockin;
+use App\Models\Units;
 
 use App\Models\Supplier;
 use App\Models\Price;
@@ -40,16 +41,16 @@ class InventController extends Controller
      */
     public function create()
     {
-        $produk = Produk::all();
         $stock = Stockin::all();
-        return view('inventory.invent_activity',compact(['stock','produk']));
+        return view('inventory.invent_activity',compact(['stock']));
 
     }
     public function createStock()
     {
+        $units = Units::all();
         $produk = Produk::all();
         $category = Kategori::all();
-        return view('inventory.create_stock',compact(['produk', 'category']));
+        return view('inventory.create_stock',compact(['produk', 'category', 'units']));
 
     }
     public function updateStock(request $request)
