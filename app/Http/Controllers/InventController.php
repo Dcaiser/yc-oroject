@@ -55,42 +55,44 @@ class InventController extends Controller
     }
     public function updateStock(request $request)
     {
-            $validated = $request->validate([
-            'name_p' => 'required|exists:products,id',
-            'harga_p' => 'required|numeric|min:0',
-            'stok'  => 'required|integer',
-            'satuan' => 'required|string',
-            'harga_t' => 'required|numeric|min:0',
-
-        ]);
-            $produk = Produk::findOrFail($request->name_p);
-            $supplier = Supplier::findOrFail($produk->supplier_id);
-            $supplierName = $supplier->name;
-
-          if ($request->satuan !== $produk->satuan) {
-        return redirect()->back()->withErrors([
-            'satuan' => 'Satuan yang diinput tidak sesuai dengan satuan produk (' . $produk->satuan . ')'
-        ])->withInput();
-    }
-    Stockin::create([
-        'product_name' => $produk->name,
-        'supplier_name' => $supplierName,
-        'stock_qty' => $request->stok,
-        'satuan' => $request->satuan,
-        'prices' => $request->harga_p,
-        'total_price' => $request->harga_t,
+           $validated = $request->validate([
+        'name_p'   => 'required|exists:products,id',
+        'harga_p'  => 'required|numeric|min:0',
+        'stok'     => 'required|integer|min:1',
+        'satuan'   => 'required|exists:units,id',
+        'harga_t'  => 'required|numeric|min:0',
     ]);
-        $produk->stock_quantity += $request->stok;
-        $produk->save();
 
-            Activity::create([
-            'user'       => Auth::check() ? Auth::user()->name : 'Guest',
-            'action'     => 'Menambah stok',
-            'model'      => 'inventori',
-            'record_id'  => $produk->id,
-]);
+    $produk = Produk::findOrFail($request->name_p);
+    $unit = Units::findOrFail($request->satuan);
 
-        return redirect()->route('invent')->with('success','berhasil menambahkan stok');
+    // Pastikan stok yang ditambah = qty * conversion_to_base
+    $stokTambah = $unit->conversion_to_base;
+
+    // Catat stok masuk
+    Stockin::create([
+        'product_name'  => $produk->name,
+        'supplier_name' => optional($produk->supplier)->name,
+        'stock_qty'     => $stokTambah,
+        'satuan'        => $unit->name,
+        'prices'        => $request->harga_p,
+        'total_price'   => $request->harga_t,
+    ]);
+
+    // Update stok produk
+    $produk->stock_quantity += $stokTambah;
+    $produk->satuan = $unit->name;
+    $produk->save();
+
+    // Catat aktivitas
+    Activity::create([
+        'user'       => Auth::check() ? Auth::user()->name : 'Guest',
+        'action'     => 'Menambah stok',
+        'model'      => 'inventori',
+        'record_id'  => $produk->id,
+    ]);
+
+    return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
     }
 
     /**
