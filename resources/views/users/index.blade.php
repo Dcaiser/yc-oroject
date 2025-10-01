@@ -1,12 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Manajemen User</h1>
-                <p class="mt-1 text-sm text-gray-600">Kelola akun pengguna sistem inventory</p>
-            </div>
+            <h2 class="text-xl font-extrabold text-emerald-900 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-700 rounded-full">
+                    <i class="fas fa-users"></i>
+                </span>
+                {{ __('Manajemen User') }}
+            </h2>
             <a href="{{ route('users.create') }}"
-               class="flex items-center px-4 py-2 font-medium text-white transition-all duration-200 rounded-lg shadow-md bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg">
+                class="flex items-center px-4 py-2 font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-lg shadow hover:scale-105 transition">
                 <i class="mr-2 fas fa-plus"></i>Tambah User
             </a>
         </div>
@@ -17,12 +19,12 @@
         <x-breadcrumb :items="[['title' => 'Manajemen User']]" />
 
         <!-- Statistics Cards -->
-        <div class="flex gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <!-- Total Users Card -->
-            <div class="p-6 transition-shadow duration-200 border shadow-sm bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border-emerald-200 hover:shadow-md">
+            <div class="p-6 transition-all duration-300 bg-white border border-emerald-200 shadow-lg rounded-2xl hover:shadow-xl hover:scale-105">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-12 h-12 rounded-lg shadow-sm bg-emerald-500">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg shadow-sm bg-gradient-to-r from-emerald-500 to-emerald-600">
                             <i class="text-xl text-white fas fa-users"></i>
                         </div>
                     </div>
@@ -34,10 +36,10 @@
             </div>
 
             <!-- Admin Card -->
-            <div class="p-6 transition-shadow duration-200 border border-purple-200 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-md">
+            <div class="p-6 transition-all duration-300 bg-white border border-purple-200 shadow-lg rounded-2xl hover:shadow-xl hover:scale-105">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-12 h-12 bg-purple-500 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg shadow-sm bg-gradient-to-r from-purple-500 to-purple-600">
                             <i class="text-xl text-white fas fa-crown"></i>
                         </div>
                     </div>
@@ -49,10 +51,10 @@
             </div>
 
             <!-- Manager Card -->
-            <div class="p-6 transition-shadow duration-200 border border-blue-200 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-md">
+            <div class="p-6 transition-all duration-300 bg-white border border-blue-200 shadow-lg rounded-2xl hover:shadow-xl hover:scale-105">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-12 h-12 bg-blue-500 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg shadow-sm bg-gradient-to-r from-blue-500 to-blue-600">
                             <i class="text-xl text-white fas fa-user-tie"></i>
                         </div>
                     </div>
@@ -64,10 +66,10 @@
             </div>
 
             <!-- Staff Card -->
-            <div class="p-6 transition-shadow duration-200 border border-teal-200 shadow-sm bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl hover:shadow-md">
+            <div class="p-6 transition-all duration-300 bg-white border border-teal-200 shadow-lg rounded-2xl hover:shadow-xl hover:scale-105">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center justify-center w-12 h-12 bg-teal-500 rounded-lg shadow-sm">
+                        <div class="flex items-center justify-center w-12 h-12 rounded-lg shadow-sm bg-gradient-to-r from-teal-500 to-teal-600">
                             <i class="text-xl text-white fas fa-user"></i>
                         </div>
                     </div>
@@ -79,71 +81,85 @@
             </div>
         </div>
 
-        <!-- Users Table -->
-        <div class="overflow-hidden bg-white border border-gray-200 shadow-lg rounded-xl">
-            <div class="p-6 text-white bg-gradient-to-r from-emerald-600 to-emerald-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-semibold">Daftar User</h2>
-                        <p class="mt-1 text-sm text-emerald-100">Kelola semua pengguna sistem</p>
+        <!-- Search and Filter Section -->
+        <div class="overflow-hidden bg-white shadow-lg rounded-2xl">
+            <div class="p-6">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <!-- Search Input -->
+                    <div class="flex-1 max-w-md">
+                        <form method="GET" action="{{ route('users.index') }}" class="flex">
+                            <div class="relative flex-1">
+                                <input type="text"
+                                    name="search"
+                                    value="{{ request('search') }}"
+                                    placeholder="Cari user..."
+                                    class="w-full py-2 pl-10 pr-4 border-2 border-emerald-200 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 bg-emerald-50">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <i class="text-emerald-400 fas fa-search"></i>
+                                </div>
+                            </div>
+                            <button type="submit"
+                                class="px-4 py-2 text-white bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-r-xl hover:scale-105 transition">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
                     </div>
-                    <div class="flex items-center space-x-3">
+
+                    <!-- Filter and Action Options -->
+                    <div class="flex items-center gap-4">
+                        <!-- Role Filter -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-medium text-emerald-700">Filter:</label>
+                            <form method="GET" action="{{ route('users.index') }}">
+                                <input type="hidden" name="search" value="{{ request('search') }}">
+                                <div class="relative">
+                                    <select name="role" onchange="this.form.submit()"
+                                            style="appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: none;"
+                                            class="bg-white border-2 border-emerald-200 rounded-lg px-4 py-2 pr-10 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 min-w-[140px] text-emerald-800 font-medium cursor-pointer transition-colors">
+                                        <option value="all" {{ request('role') === 'all' || !request('role') ? 'selected' : '' }}>Semua Role</option>
+                                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="manager" {{ request('role') === 'manager' ? 'selected' : '' }}>Manager</option>
+                                        <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>Staff</option>
+                                    </select>
+                                    <!-- Single Custom Arrow -->
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fas fa-chevron-down text-emerald-500 text-sm"></i>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Action Buttons -->
                         <button id="bulk-delete-btn"
-                                class="px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-red-500 rounded-lg shadow-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg"
+                                class="p-3 text-white bg-gradient-to-r from-red-500 to-red-700 rounded-lg shadow hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled>
-                            <i class="mr-2 fas fa-trash"></i>Hapus (<span id="selected-count">0</span>)
+                            <i class="fa-solid fa-trash"></i> Hapus (<span id="selected-count">0</span>)
                         </button>
-                        <a href="{{ route('users.export') }}"
-                           class="px-4 py-2 text-sm font-medium transition-all duration-200 bg-white rounded-lg shadow-md text-emerald-700 hover:bg-emerald-50 hover:shadow-lg">
-                            <i class="mr-2 fas fa-download"></i>Export
-                        </a>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Filter Section -->
-            <div class="p-4 border-b border-gray-200 bg-gray-50">
-                <form method="GET" action="{{ route('users.index') }}" class="flex flex-col space-y-2 md:flex-row md:items-center md:space-x-4 md:space-y-0">
-                    <!-- Search Input -->
-                    <div class="flex-1">
-                        <div class="relative">
-                            <input type="text"
-                                   name="search"
-                                   value="{{ request('search') }}"
-                                   placeholder="Cari berdasarkan nama atau email..."
-                                   class="w-full py-2 pl-10 pr-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <i class="text-gray-400 fas fa-search"></i>
-                            </div>
-                        </div>
-                    </div>
+        @if (session('success'))
+        <div
+            x-data="{ show: true }"
+            x-init="setTimeout(() => show = false, 3000)"
+            x-show="show"
+            class="p-4 mb-4 text-emerald-800 border border-emerald-500 rounded-lg bg-emerald-50">
+            {{ session('success') }}
+        </div>
+        @endif
 
-                    <!-- Role Filter -->
-                    <div>
-                        <select name="role"
-                                class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white min-w-[120px]">
-                            <option value="all" {{ request('role') === 'all' ? 'selected' : '' }}>Semua Role</option>
-                            <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="manager" {{ request('role') === 'manager' ? 'selected' : '' }}>Manager</option>
-                            <option value="staff" {{ request('role') === 'staff' ? 'selected' : '' }}>Staff</option>
-                        </select>
-                    </div>
-
-                    <!-- Filter Buttons -->
-                    <div class="flex space-x-2">
-                        <button type="submit"
-                                class="px-4 py-2 text-white transition-colors rounded-lg bg-emerald-600 hover:bg-emerald-700">
-                            <i class="mr-2 fas fa-search"></i>Filter
-                        </button>
-                        <a href="{{ route('users.index') }}"
-                           class="px-4 py-2 text-white transition-colors bg-gray-500 rounded-lg hover:bg-gray-600">
-                            <i class="mr-2 fas fa-times"></i>Reset
-                        </a>
-                    </div>
-                </form>
-            </div>
-
+        <!-- Users Table -->
+        <div class="overflow-hidden bg-white shadow-lg rounded-2xl">
             <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-emerald-900">Daftar User</h3>
+                        <p class="text-sm text-gray-600">Kelola semua pengguna sistem inventory</p>
+                    </div>
+                </div>
+
                 <form id="bulk-delete-form" method="POST" action="{{ route('users.bulk-delete') }}">
                     @csrf
                     @method('DELETE')
@@ -152,7 +168,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full border-collapse">
                             <thead>
-                                <tr class="border-b-2 bg-gradient-to-r from-gray-100 to-gray-200 border-emerald-500">
+                                <tr class="border-b-2 bg-gradient-to-r from-emerald-100 to-emerald-200 border-emerald-500">
                                     <th class="px-3 py-4 text-xs font-semibold tracking-wider text-left text-gray-700 uppercase">
                                         <input type="checkbox" id="select-all" class="border-gray-300 rounded text-emerald-600 focus:ring-emerald-500">
                                     </th>
@@ -247,24 +263,24 @@
                                     <td class="px-4 py-4">
                                         <div class="flex items-center justify-center space-x-2">
                                             <a href="{{ route('users.show', $user) }}"
-                                               class="inline-flex items-center justify-center w-8 h-8 text-gray-500 transition-all duration-200 rounded-lg hover:text-emerald-600 hover:bg-emerald-50"
+                                               class="inline-flex items-center justify-center w-9 h-9 text-emerald-600 bg-emerald-100 transition-all duration-200 rounded-lg hover:bg-emerald-200 hover:scale-105"
                                                title="Detail">
                                                 <i class="text-sm fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('users.edit', $user) }}"
-                                               class="inline-flex items-center justify-center w-8 h-8 text-gray-500 transition-all duration-200 rounded-lg hover:text-blue-600 hover:bg-blue-50"
+                                               class="inline-flex items-center justify-center w-9 h-9 text-blue-600 bg-blue-100 transition-all duration-200 rounded-lg hover:bg-blue-200 hover:scale-105"
                                                title="Edit">
                                                 <i class="text-sm fas fa-edit"></i>
                                             </a>
                                             @if($user->id !== auth()->id())
                                             <button onclick="confirmDelete({{ $user->id }}, '{{ addslashes($user->name) }}')"
                                                     type="button"
-                                                    class="inline-flex items-center justify-center w-8 h-8 text-gray-500 transition-all duration-200 rounded-lg hover:text-red-600 hover:bg-red-50"
+                                                    class="inline-flex items-center justify-center w-9 h-9 text-red-600 bg-red-100 transition-all duration-200 rounded-lg hover:bg-red-200 hover:scale-105"
                                                     title="Hapus">
                                                 <i class="text-sm fas fa-trash"></i>
                                             </button>
                                             @else
-                                            <span class="inline-flex items-center justify-center w-8 h-8 text-gray-300 cursor-not-allowed"
+                                            <span class="inline-flex items-center justify-center w-9 h-9 text-gray-400 bg-gray-100 cursor-not-allowed rounded-lg"
                                                   title="Tidak dapat menghapus akun sendiri">
                                                 <i class="text-sm fas fa-lock"></i>
                                             </span>
@@ -274,14 +290,16 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="py-12 text-center">
+                                    <td colspan="7" class="py-16 text-center">
                                         <div class="flex flex-col items-center">
-                                            <i class="mb-4 text-4xl text-gray-300 fas fa-users"></i>
-                                            <h3 class="mb-2 text-lg font-medium text-gray-900">Belum ada user</h3>
-                                            <p class="mb-4 text-gray-500">Mulai dengan menambahkan user pertama Anda.</p>
+                                            <div class="flex items-center justify-center w-16 h-16 mb-4 bg-gray-100 rounded-full">
+                                                <i class="text-2xl text-gray-400 fas fa-users"></i>
+                                            </div>
+                                            <h3 class="mb-2 text-xl font-semibold text-gray-900">Belum ada user</h3>
+                                            <p class="mb-6 text-gray-500 max-w-sm">Mulai dengan menambahkan user pertama untuk mengelola sistem inventory Anda.</p>
                                             <a href="{{ route('users.create') }}"
-                                               class="inline-flex items-center px-4 py-2 text-white transition-colors rounded-lg bg-emerald-600 hover:bg-emerald-700">
-                                                <i class="mr-2 fas fa-plus"></i>Tambah User
+                                               class="inline-flex items-center px-6 py-3 text-white bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-lg shadow hover:scale-105 transition">
+                                                <i class="mr-2 fas fa-plus"></i>Tambah User Pertama
                                             </a>
                                         </div>
                                     </td>
