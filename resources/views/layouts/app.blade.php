@@ -6,9 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Al-Ruhamaa Inventory') }}</title>
+    <title>Al-Ruhamaa' | Inventory System</title>
 
-    <link rel="icon" href="https://yatimcenter-alruhamaa.org/assets/images/logo/logo-green.png" class="bg-[#047857]">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-white.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-white.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-white.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/logo/icon-white.png') }}">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="theme-color" content="#047857">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Sistem Inventory Management Al-Ruhamaa' - Pengelolaan stok, produk, dan laporan yang efisien">
+    <meta name="keywords" content="inventory, management, al-ruhamaa, sistem, stok, produk">
+    <meta name="author" content="Al-Ruhamaa'">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Al-Ruhamaa' | Inventory System">
+    <meta property="og:description" content="Sistem Inventory Management Al-Ruhamaa'">
+    <meta property="og:image" content="{{ asset('assets/logo/icon-white.png') }}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Al-Ruhamaa' | Inventory System">
+    <meta property="twitter:description" content="Sistem Inventory Management Al-Ruhamaa'">
+    <meta property="twitter:image" content="{{ asset('assets/logo/icon-white.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
