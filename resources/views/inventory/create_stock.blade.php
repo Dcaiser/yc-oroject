@@ -35,112 +35,111 @@
                             @enderror
                         </div>
 
-                        <!-- Harga Distributor -->
 <!-- Harga Distributor -->
-                        <div>
-                            <label class="block mb-1 font-semibold text-green-700">Harga Distributor</label>
-                            <div class="relative">
-                                <span class="absolute text-green-500 left-3 top-2">Rp</span>
-                                <input type="text"
-                                    id="harga_display"
-                                    x-model="hargaFormatted"
-                                    @input="
-                                        let raw = $event.target.value.replace(/\D/g, '');
-                                        hargaRaw = parseInt(raw || 0);
-                                        hargaFormatted = formatRupiah(hargaRaw);
-                                        updateHargaTotal();
-                                    "
-                                    class="w-full py-2 pl-12 pr-3 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50"
-                                    placeholder="0">
-                                <input type="hidden" name="harga_p" :value="hargaRaw">
-                            </div>
-                        </div>
+<div>
+    <label class="block mb-1 font-semibold text-green-700">Harga Distributor</label>
+    <div class="relative">
+        <span class="absolute text-green-500 left-3 top-2">Rp</span>
+        <input type="text"
+            id="harga_display"
+            x-model="hargaFormatted"
+            @input="
+                let raw = $event.target.value.replace(/\D/g, '');
+                hargaRaw = parseInt(raw || 0);
+                hargaFormatted = formatRupiah(hargaRaw);
+                updateHargaTotal();
+            "
+            class="w-full py-2 pl-12 pr-3 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50"
+            placeholder="0">
+        <input type="hidden" name="harga_p" :value="hargaRaw">
+    </div>
+</div>
 
-                        <!-- Satuan & Stok Barang -->
-                        <div
-                            x-data="{
-                                units: {{ Js::from($units->map(fn($u)=>['id'=>$u->id,'name'=>$u->name,'conversion'=>$u->conversion_to_base])) }},
-                                stokUser: 0,
-                                selectedUnit: '',
-                                stokFinal: 0,
-                                hargaRaw: 0,
-                                hargaFormatted: '',
-                                hargaTotal: 0,
-                                formatRupiah(value) { return new Intl.NumberFormat('id-ID').format(value); },
-                                updateFinalQty() {
-                                    let unit = this.units.find(u => u.id == this.selectedUnit);
-                                    if(unit && unit.conversion && this.stokUser > 0){
-                                        this.stokFinal = this.stokUser * unit.conversion;
-                                    } else {
-                                        this.stokFinal = 0;
-                                    }
-                                    this.updateHargaTotal();
-                                },
-                                updateHargaTotal() {
-                                    this.hargaTotal = (this.hargaRaw * this.stokFinal) || 0;
-                                }
-                            }"
-                            x-init="hargaFormatted = formatRupiah(hargaRaw)"
-                        >
-                            <div class="mt-4">
-                                <label for="stok" class="block mb-1 text-sm font-semibold text-green-700">
-                                    Jumlah <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number"
-                                    id="stok"
-                                    name="stok_user"
-                                    x-model.number="stokUser"
-                                    min="1"
-                                    @input="updateFinalQty"
-                                    class="w-full px-3 py-2 border-2 border-green-200 rounded-lg bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
-                                    placeholder="0">
-                            </div>
-                            <label for="satuan" class="block mt-4 mb-1 text-sm font-semibold text-green-700">
-                                Satuan <span class="text-red-500">*</span>
-                            </label>
-                            <select id="satuan"
-                                name="satuan"
-                                x-model="selectedUnit"
-                                @change="updateFinalQty"
-                                required
-                                class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
-                                <option value="">Pilih satuan</option>
-                                <template x-for="unit in units" :key="unit.id">
-                                    <option :value="unit.id" x-text="unit.name"></option>
-                                </template>
-                            </select>
-                            @error('satuan')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+<!-- Satuan & Stok Barang -->
+<div
+    x-data="{
+        units: {{ Js::from($units->map(fn($u)=>['id'=>$u->id,'name'=>$u->name,'conversion'=>$u->conversion_to_base])) }},
+        stokUser: 0,
+        selectedUnit: '',
+        stokFinal: 0,
+        hargaRaw: 0,
+        hargaFormatted: '',
+        hargaTotal: 0,
 
-                            <!-- Hidden input untuk stok final (dalam satuan terkecil/pcs) -->
-                            <input type="hidden" name="stok" :value="stokFinal">
+        formatRupiah(value) {
+            return new Intl.NumberFormat('id-ID').format(value);
+        },
 
-                            <!-- Tampilkan hasil konversi -->
-                            <template x-if="stokFinal > 0 && selectedUnit">
-                                <div class="mt-2 text-sm text-green-700">
-                                    <span x-text="stokUser"></span>
-                                    <span x-text="units.find(u => u.id == selectedUnit)?.name"></span>
-                                    = <span x-text="stokFinal"></span> pcs
-                                </div>
-                            </template>
-                        </div>
+        updateFinalQty() {
+            let unit = this.units.find(u => u.id == this.selectedUnit);
+            this.stokFinal = (unit && unit.conversion && this.stokUser > 0)
+                ? this.stokUser * unit.conversion
+                : 0;
+            this.updateHargaTotal();
+        },
 
-                        <!-- Harga Total -->
-                        <div>
-                            <label class="block mb-1 font-semibold text-green-700">Harga Modal Total</label>
-                            <div class="relative">
-                                <span class="absolute text-green-500 left-3 top-2">Rp</span>
-                                <input type="text"
-                                    id="harga-total"
-                                    x-model="hargaTotal"
-                                    :value="formatRupiah(hargaTotal)"
-                                    readonly
-                                    class="w-full py-2 pl-12 pr-3 bg-green-100 border-2 border-green-200 rounded-lg focus:outline-none"
-                                    placeholder="0">
-                                <input type="hidden" name="harga_t" :value="hargaTotal">
-                            </div>
-                        </div>
+        updateHargaTotal() {
+            this.hargaTotal = (this.hargaRaw * this.stokFinal) || 0;
+        }
+    }"
+    x-init="hargaFormatted = formatRupiah(hargaRaw)"
+>
+    <div class="mt-4">
+        <label for="stok" class="block mb-1 text-sm font-semibold text-green-700">
+            Jumlah <span class="text-red-500">*</span>
+        </label>
+        <input type="number"
+            id="stok"
+            name="stok_user"
+            x-model.number="stokUser"
+            min="1"
+            @input="updateFinalQty"
+            class="w-full px-3 py-2 border-2 border-green-200 rounded-lg bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
+            placeholder="0">
+    </div>
+
+    <label for="satuan" class="block mt-4 mb-1 text-sm font-semibold text-green-700">
+        Satuan <span class="text-red-500">*</span>
+    </label>
+    <select id="satuan"
+        name="satuan"
+        x-model="selectedUnit"
+        @change="updateFinalQty"
+        required
+        class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
+        <option value="">Pilih satuan</option>
+        <template x-for="unit in units" :key="unit.id">
+            <option :value="unit.id" x-text="unit.name"></option>
+        </template>
+    </select>
+
+    <!-- Hidden input untuk stok final (dalam pcs) -->
+    <input type="hidden" name="stok" :value="stokFinal">
+
+    <!-- Tampilkan hasil konversi -->
+    <template x-if="stokFinal > 0 && selectedUnit">
+        <div class="mt-2 text-sm text-green-700">
+            <span x-text="stokUser"></span>
+            <span x-text="units.find(u => u.id == selectedUnit)?.name"></span>
+            = <span x-text="stokFinal"></span> pcs
+        </div>
+    </template>
+</div>
+
+<!-- Harga Total -->
+<div>
+    <label class="block mb-1 font-semibold text-green-700">Harga Modal Total</label>
+    <div class="relative">
+        <span class="absolute text-green-500 left-3 top-2">Rp</span>
+        <input type="text"
+            id="harga-total"
+            :value="formatRupiah(hargaTotal)"
+            readonly
+            class="w-full py-2 pl-12 pr-3 bg-green-100 border-2 border-green-200 rounded-lg focus:outline-none"
+            placeholder="0">
+        <input type="hidden" name="harga_t" :value="hargaTotal">
+    </div>
+</div>
                     </div>
 
                     <!-- Right Column - Image Upload (optional, modern style) -->

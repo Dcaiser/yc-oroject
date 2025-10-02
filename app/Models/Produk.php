@@ -30,5 +30,10 @@ class Produk extends Model
 {
     return $this->hasMany(Price::class, 'product_id');
 }
+    public function units()
+    {
+        return $this->belongsTo(Units::class, 'satuan');
+    }
+
 
 }

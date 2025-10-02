@@ -32,8 +32,10 @@ class InventController extends Controller
                          ->orWhere('description', 'like', "%{$search}%");
         })
         ->paginate(10);
+        $units = Units::all();
+        $supplier = Supplier::all();
         $category = Kategori::all();
-        return view('inventory.index', compact(['products','category']));
+        return view('inventory.index', compact(['products','category','units','supplier']));
     }
 
     /**
@@ -138,6 +140,8 @@ class InventController extends Controller
                 'category_id'    => $data['category_id'] ?? $product->category_id,
                 'description'    => $data['description'] ?? $product->description,
             ]);
+
+
 
             // update harga (agen, reseller, pelanggan)
             if (isset($data['prices'])) {

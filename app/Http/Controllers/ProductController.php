@@ -11,6 +11,7 @@ use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\Activity;
 use App\Models\Supplier;
+use App\Models\Units;
 
 
 class ProductController extends Controller
@@ -26,32 +27,36 @@ class ProductController extends Controller
         })
         ->paginate(10);
 
+        $units = Units::all();
         $supplier = Supplier::all();
         $category = Kategori::all();
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.index', compact(['products','category','customertypes','supplier']));
+        return view('products.index', compact(['products','category','customertypes','supplier','units']))->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
     public function create()
     {
+        $units = Units::all();
         $supplier = Supplier::all();
         $category = Kategori::paginate(5);
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.create', compact(['category','customertypes','supplier']));
+        return view('products.create', compact(['category','customertypes','supplier','units']));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-            'stok' => 'required|string|max:255',
-            'satuan' => 'required|string|max:255',
-            'kategori_id' => 'required|int|max:255',
-            'supplier_id' => 'required|int',
-            'prices' => 'required|array',
-            'prices.*' => 'required|numeric|min:0',
-        ]);
+        'nama'         => 'required|string|max:255',
+        'deskripsi'    => 'nullable|string',
+        'supplier_id'  => 'required|int',
+        'kategori_id'  => 'required|int',
+        'stok_user'    => 'required|integer|min:1',
+        'satuan'       => 'required|exists:units,id',
+        'stok'         => 'required|integer|min:1',
+      //  'gambar'       => 'nullable|image|max:2048',
+        'prices'       => 'required|array',
+        'prices.*'     => 'required|numeric|min:0',
+    ]);
 
                  // Ambil kode kategori (3 huruf pertama)
                 $kodeKategori = strtoupper(Str::limit(preg_replace('/\s+/', '', $request->kategori_id), 3, ''));
@@ -79,27 +84,28 @@ class ProductController extends Controller
                  //}
                  //
                 }
+                $unit = Units::find($request->satuan);
+                $stokBase = $request->stok_user * $unit->conversion_to_base;
 
      // Kalau belum ada → buat produk baru
-$pro = Produk::create([
-    'name'           => $request->nama,        // pastikan field DB kamu pakai "name"
-    ##'price'          => $price,
-    'category_id'    => $request->kategori_id,
-    'satuan'         => $request->satuan,
-    'sku'            => $sku,
-    'stock_quantity' => $request->stok,
-    'description'    => $request->deskripsi,
-    'supplier_id'    => $request->supplier_id,
-    // 'gambar'      => $path, // aktifkan kalau ada upload gambar
-]);
+ $pro = Produk::create([
+        'name'         => $validated['nama'],
+        'description'  => $validated['deskripsi'],
+        'sku'          => $sku,
+        'supplier_id'  => $validated['supplier_id'],
+        'category_id'  => $validated['kategori_id'],
+        'stock_quantity' => $stokBase,
+        'satuan'       => $validated['satuan'],
+       // 'gambar'       => $gambarPath,
+    ]);
 
- foreach ($request->prices as $customerType => $price) {
-            Price::create([
-                'product_id'    => $pro->id,
-                'customer_type' => $customerType,
-                'price'         => $price,
-            ]);
-        }
+ foreach ($validated['prices'] as $type => $price) {
+        Price::create([
+            'product_id'    => $pro->id,
+            'customer_type' => $type,
+            'price'         => $price,
+        ]);
+    }
 // Simpan aktivitas
 Activity::create([
     'user'       => Auth::check() ? Auth::user()->name : 'Guest',
