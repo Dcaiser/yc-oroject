@@ -63,31 +63,37 @@ class InventController extends Controller
         'stok'     => 'required|integer|min:1',
         'satuan'   => 'required|exists:units,id',
         'harga_t'  => 'required|numeric|min:0',
+        'bukti'    => 'nullable|image|max:2048',
     ]);
 
-    $produk = Produk::findOrFail($request->name_p);
-    $unit = Units::findOrFail($request->satuan);
+    // Ambil produk dan satuan
+    $produk = \App\Models\Produk::findOrFail($validated['name_p']);
+    $unit   = \App\Models\Units::findOrFail($validated['satuan']);
 
-    // Pastikan stok yang ditambah = qty * conversion_to_base
-    $stokTambah = $unit->conversion_to_base;
+    // Simpan bukti jika ada
+    $buktiPath = null;
+    if ($request->hasFile('bukti')) {
+        $buktiPath = $request->file('bukti')->store('bukti', 'public');
+    }
 
     // Catat stok masuk
-    Stockin::create([
+    \App\Models\Stockin::create([
         'product_name'  => $produk->name,
         'supplier_name' => optional($produk->supplier)->name,
-        'stock_qty'     => $stokTambah,
+        'stock_qty'     => $validated['stok'],
         'satuan'        => $unit->name,
-        'prices'        => $request->harga_p,
-        'total_price'   => $request->harga_t,
+        'prices'        => $validated['harga_p'],
+        'total_price'   => $validated['harga_t'],
+        'bukti'         => $buktiPath,
     ]);
 
     // Update stok produk
-    $produk->stock_quantity += $stokTambah;
-    $produk->satuan = $unit->name;
+    $produk->stock_quantity += $validated['stok'];
+    $produk->satuan = $unit->id;
     $produk->save();
 
     // Catat aktivitas
-    Activity::create([
+    \App\Models\Activity::create([
         'user'       => Auth::check() ? Auth::user()->name : 'Guest',
         'action'     => 'Menambah stok',
         'model'      => 'inventori',
