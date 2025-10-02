@@ -653,4 +653,52 @@ class ReportController extends Controller
             'filters' => $request->all()
         ];
     }
+
+    /**
+     * Export supplier performance report in specified format
+     */
+    public function supplierPerformanceExport(Request $request)
+    {
+        $format = $request->get('format', 'pdf');
+        
+        if ($format === 'pdf') {
+            return $this->supplierPerformancePDF($request);
+        } elseif ($format === 'excel') {
+            return $this->supplierPerformanceExcel($request);
+        }
+        
+        return redirect()->back()->with('error', 'Invalid export format');
+    }
+
+    /**
+     * Export stock movement report in specified format
+     */
+    public function stockMovementExport(Request $request)
+    {
+        $format = $request->get('format', 'pdf');
+        
+        if ($format === 'pdf') {
+            return $this->stockMovementPDF($request);
+        } elseif ($format === 'excel') {
+            return $this->stockMovementExcel($request);
+        }
+        
+        return redirect()->back()->with('error', 'Invalid export format');
+    }
+
+    /**
+     * Export weekly report in specified format
+     */
+    public function weeklyReportExport(Request $request)
+    {
+        $format = $request->get('format', 'pdf');
+        
+        if ($format === 'pdf') {
+            return $this->weeklyReportPDF($request);
+        } elseif ($format === 'excel') {
+            return $this->weeklyReportExcel($request);
+        }
+        
+        return redirect()->back()->with('error', 'Invalid export format');
+    }
 }

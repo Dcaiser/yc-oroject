@@ -7,6 +7,7 @@ use App\Http\Controllers\InventController;
 use App\Http\Controllers\activityController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\ReportController;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashController;
@@ -105,9 +106,45 @@ Route::middleware('auth')->group(function () {
     Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 });
 
+// Reports - untuk Manager dan Admin
+Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
+    // Dashboard Laporan
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    
+    // Generic Export Routes (untuk dashboard reports)
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
+    Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export-excel');
+    
+    // Supplier Performance Report
+    Route::get('/reports/supplier-performance', [ReportController::class, 'supplierPerformance'])->name('reports.supplier-performance');
+    Route::get('/reports/supplier-performance/export-pdf', [ReportController::class, 'supplierPerformancePDF'])->name('reports.supplier-performance.pdf');
+    Route::get('/reports/supplier-performance/export-excel', [ReportController::class, 'supplierPerformanceExcel'])->name('reports.supplier-performance.excel');
+    Route::get('/reports/supplier-performance/export', [ReportController::class, 'supplierPerformanceExport'])->name('reports.supplier-performance.export');
+    
+    // Stock Value Report
+    Route::get('/reports/stock-value', [ReportController::class, 'stockValue'])->name('reports.stock-value');
+    Route::get('/reports/stock-value/export-pdf', [ReportController::class, 'stockValuePDF'])->name('reports.stock-value.pdf');
+    Route::get('/reports/stock-value/export-excel', [ReportController::class, 'stockValueExcel'])->name('reports.stock-value.excel');
+    
+    // Stock Movement Report
+    Route::get('/reports/movement', [ReportController::class, 'stockMovement'])->name('reports.movement');
+    Route::get('/reports/movement/export-pdf', [ReportController::class, 'stockMovementPDF'])->name('reports.movement.pdf');
+    Route::get('/reports/movement/export-excel', [ReportController::class, 'stockMovementExcel'])->name('reports.movement.excel');
+    Route::get('/reports/movement/export', [ReportController::class, 'stockMovementExport'])->name('reports.movement.export');
+    
+    // Weekly Report
+    Route::get('/reports/weekly', [ReportController::class, 'weeklyReport'])->name('reports.weekly');
+    Route::get('/reports/weekly/export-pdf', [ReportController::class, 'weeklyReportPDF'])->name('reports.weekly.pdf');
+    Route::get('/reports/weekly/export-excel', [ReportController::class, 'weeklyReportExcel'])->name('reports.weekly.excel');
+    Route::get('/reports/weekly/export', [ReportController::class, 'weeklyReportExport'])->name('reports.weekly.export');
+    
+    // Monthly Report
+    Route::get('/reports/monthly', [ReportController::class, 'monthlyReport'])->name('reports.monthly');
+    Route::get('/reports/monthly/export-pdf', [ReportController::class, 'monthlyReportPDF'])->name('reports.monthly.pdf');
+    Route::get('/reports/monthly/export-excel', [ReportController::class, 'monthlyReportExcel'])->name('reports.monthly.excel');
+});
+
 // Hanya include login dan logout, tanpa register
 require __DIR__.'/auth.php';
-
-use App\Http\Controllers\ReportController;
 
 

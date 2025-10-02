@@ -5,7 +5,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name') }}</title>
+        <title>Al-Ruhamaa' | Inventory System</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-white.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-white.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-white.png') }}">
+        <link rel="shortcut icon" href="{{ asset('assets/logo/icon-white.png') }}">
+        
+        <!-- Web App Manifest -->
+        <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+        <meta name="theme-color" content="#047857">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
