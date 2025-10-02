@@ -1,0 +1,180 @@
+/* Al-Ruhamaa' Inventory Reports Styles - Enhanced Responsive Version */
+
+/* Main container with better laptop responsiveness */
+.reports-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+@media screen and (min-width: 768px) {
+    .reports-main {
+        padding: 0 1.25rem;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .reports-main {
+        padding: 0 1.5rem;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .reports-main {
+        padding: 0 2rem;
+    }
+}
+
+/* Enhanced Card Styling with consistent heights */
+.report-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(229, 231, 235, 0.6);
+    background: #ffffff;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.report-card > div {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.report-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: rgba(59, 130, 246, 0.15);
+}
+
+/* Icon containers with perfect sizing */
+.report-card .bg-emerald-100,
+.report-card .bg-blue-100,
+.report-card .bg-purple-100,
+.report-card .bg-green-100,
+.report-card .bg-indigo-100,
+.report-card .bg-gray-100 {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Ensure consistent icon sizing */
+.report-card i {
+    font-size: 1.25rem;
+}
+
+/* Button hover effects */
+.report-card a:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Stats Cards Improvements */
+.stats-card {
+    transition: all 0.3s ease;
+    border-left-width: 4px;
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Welcome Section Improvements */
+.welcome-section {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Responsive Grid Improvements */
+@media screen and (max-width: 640px) {
+    .reports-main {
+        padding: 0 0.75rem;
+    }
+}
+
+/* Tablet and Small Laptop */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Large Laptop and Desktop */
+@media screen and (min-width: 1025px) and (max-width: 1440px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Large Desktop */
+@media screen and (min-width: 1441px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* Equal height cards with consistent padding */
+.grid > .report-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.report-card > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.report-card .flex-1 {
+    flex: 1;
+}
+
+.report-card .mt-auto {
+    margin-top: auto;
+}
+
+/* Consistent minimum heights for different screen sizes */
+@media screen and (min-width: 640px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 > .report-card {
+        min-height: 320px;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 > .report-card {
+        min-height: 340px;
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .grid.grid-cols-1.sm\\:grid-cols-2.xl\\:grid-cols-3 > .report-card {
+        min-height: 360px;
+    }
+}
+
+/* Focus states for accessibility */
+.report-card a:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .report-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+}

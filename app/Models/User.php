@@ -16,6 +16,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'last_login_at',
+        'last_login_ip',
+        'failed_login_attempts',
+        'locked_until',
     ];
 
     protected $hidden = [
@@ -25,6 +29,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'locked_until' => 'datetime',
     ];
 
     // Helper methods untuk role checking
@@ -52,5 +58,41 @@ class User extends Authenticatable
     public function canAccessStaff()
     {
         return in_array($this->role, ['staff', 'manager', 'admin']);
+    }
+
+    // Security helper methods
+    public function isLocked()
+    {
+        return $this->locked_until && $this->locked_until->isFuture();
+    }
+
+    public function lockAccount($minutes = 30)
+    {
+        $this->update([
+            'locked_until' => now()->addMinutes($minutes)
+        ]);
+    }
+
+    public function unlockAccount()
+    {
+        $this->update([
+            'locked_until' => null,
+            'failed_login_attempts' => 0
+        ]);
+    }
+
+    public function incrementFailedAttempts()
+    {
+        $this->increment('failed_login_attempts');
+        
+        // Auto lock after 5 failed attempts
+        if ($this->failed_login_attempts >= 5) {
+            $this->lockAccount(30); // Lock for 30 minutes
+        }
+    }
+
+    public function resetFailedAttempts()
+    {
+        $this->update(['failed_login_attempts' => 0]);
     }
 }
