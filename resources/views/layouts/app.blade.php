@@ -183,6 +183,20 @@
             background: linear-gradient(135deg, #10b981 0%, #047857 100%);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+
+        /* Dropdown positioning fix */
+        .dropdown-container {
+            position: relative;
+            z-index: 9999;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 8px;
+            transform-origin: bottom right;
+        }
     </style>
 </head>
 
@@ -375,23 +389,21 @@
 
             <!-- User Profile Section -->
             <div class="absolute bottom-0 left-0 right-0">
-                <div class="mx-4 mb-4 user-profile-card p-3">
-                    <div x-data="{ userMenuOpen: false }" class="relative">
+                <div class="mx-4 mb-4">
+                    <div x-data="{ userMenuOpen: false }" class="dropdown-container bg-emerald-700/30 backdrop-blur-sm rounded-xl border border-white/10 p-2">
                         <button @click="userMenuOpen = !userMenuOpen"
-                                class="flex items-center justify-between w-full space-x-3 transition-all duration-200 hover:bg-white/5 rounded-lg p-1 -m-1">
-                            <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                <div class="flex items-center justify-center w-8 h-8 user-avatar rounded-full">
-                                    <i class="text-white fas fa-user text-sm"></i>
+                                class="flex items-center justify-between w-full p-2 hover:bg-white/10 rounded-lg transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-emerald-700 rounded-lg flex items-center justify-center">
+                                    <span class="text-white text-sm font-medium">{{ substr(Auth::user()->name, 0, 1) }}</span>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-emerald-200 capitalize">{{ Auth::user()->role }}</p>
+                                <div>
+                                    <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-emerald-200">{{ ucfirst(Auth::user()->role) }}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-center w-8 h-8 text-white/70 hover:text-white transition-colors">
-                                <i class="text-sm fas fa-chevron-up transition-transform duration-300" 
-                                   :class="{ 'rotate-180': userMenuOpen }"></i>
-                            </div>
+                            <i class="fas fa-chevron-up text-white/70 text-sm transition-transform duration-200" 
+                               :class="{ 'rotate-180': userMenuOpen }"></i>
                         </button>
                         
                         <!-- User Dropdown Menu -->
@@ -402,28 +414,41 @@
                              x-transition:leave="transition ease-in duration-150"
                              x-transition:leave-start="transform scale-100 opacity-100"
                              x-transition:leave-end="transform scale-95 opacity-0"
-                            class="absolute right-0 bottom-full mb-4 w-56 py-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50">
+                             class="dropdown-menu w-72 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
+                             style="display: none;">
                             
-                            <a href="{{ route('profile.edit') }}"
-                                class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors rounded-xl mx-2">
-                                <div class="w-10 h-10 flex items-center justify-center bg-emerald-100 rounded-xl mr-3">
-                                    <i class="fas fa-user-cog text-sm text-emerald-600"></i>
-                                </div>
-                                <span class="font-medium">Edit Profile</span>
-                            </a>
-                            
-                            <div class="border-t border-gray-100 my-2 mx-4"></div>
-                            
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit"
-                                    class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-xl mx-2">
-                                    <div class="w-10 h-10 flex items-center justify-center bg-red-100 rounded-xl mr-3">
-                                        <i class="fas fa-sign-out-alt text-sm text-red-600"></i>
+                            <!-- Profile Header -->
+                            <div class="bg-emerald-600 p-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-emerald-700 rounded-lg flex items-center justify-center">
+                                        <span class="text-white font-semibold">{{ substr(Auth::user()->name, 0, 1) }}</span>
                                     </div>
-                                    <span class="font-medium">Logout</span>
-                                </button>
-                            </form>
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="font-semibold text-white text-sm">{{ Auth::user()->name }}</h3>
+                                        <p class="text-emerald-200 text-xs truncate">{{ Auth::user()->email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Menu Items -->
+                            <div class="p-1">
+                                <a href="{{ route('profile.edit') }}"
+                                    class="flex items-center px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <i class="fas fa-user-edit text-emerald-600 w-4 mr-3"></i>
+                                    <span class="font-medium">Edit Profil</span>
+                                </a>
+                                
+                                <div class="h-px bg-gray-200 my-1 mx-3"></div>
+                                
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="flex items-center w-full px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                                        <i class="fas fa-sign-out-alt text-red-600 w-4 mr-3"></i>
+                                        <span class="font-medium">Keluar</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
