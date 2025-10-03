@@ -79,7 +79,7 @@ class InventController extends Controller
     // Catat stok masuk
     Stockin::create([
         'product_name'  => $produk->name,
-        'supplier_name' => optional($produk->supplier)->name,
+        'supplier_name' => $produk->supplier_id,
         'stock_qty'     => $validated['stok'],
         'satuan'        => $unit->name,
         'prices'        => $validated['harga_p'],
