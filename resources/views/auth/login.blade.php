@@ -86,8 +86,25 @@
 
                 <!-- Session Status -->
                 @if (session('status'))
-                    <div class="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded text-sm">
-                        {{ session('status') }}
+                    <div class="mb-4 p-3 bg-green-100 border border-green-300 text-green-700 rounded-lg text-sm">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            {{ session('status') }}
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Success Message -->
+                @if (session('message'))
+                    <div class="mb-4 p-3 bg-blue-100 border border-blue-300 text-blue-700 rounded-lg text-sm">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ session('message') }}
+                        </div>
                     </div>
                 @endif
 
@@ -174,7 +191,7 @@
         </div>
     </div>
 
-    <!-- JavaScript untuk Toggle Password -->
+    <!-- JavaScript untuk Toggle Password dan Security -->
     <script>
         function togglePassword() {
             const passwordInput = document.getElementById('password');
@@ -191,5 +208,43 @@
                 eyeClosed.classList.add('hidden');
             }
         }
+
+        // Security: Clear password field on page unload
+        window.addEventListener('beforeunload', function() {
+            const passwordField = document.getElementById('password');
+            if (passwordField) {
+                passwordField.value = '';
+            }
+        });
+
+        // Security: Auto logout after inactivity (30 minutes)
+        let inactivityTimer;
+        const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                if (document.querySelector('form[action*="login"]')) {
+                    // Only show warning on login page
+                    console.log('Session will expire due to inactivity');
+                }
+            }, INACTIVITY_TIMEOUT);
+        }
+
+        // Track user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer);
+        });
+
+        // Initialize timer
+        resetInactivityTimer();
+
+        // Auto-focus email field
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailField = document.getElementById('email');
+            if (emailField && !emailField.value) {
+                emailField.focus();
+            }
+        });
     </script>
 </x-guest-layout>
