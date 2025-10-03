@@ -5,7 +5,7 @@
                 <!-- Header -->
                 <div class="text-center mb-6">
                     <div class="flex items-center justify-center space-x-3 mb-4">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png" 
+                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png" 
                              alt="Al-Ruhamaa Logo" 
                              class="w-10 h-10 object-contain">
                         <h3 class="text-xl font-bold text-gray-900">Al-Ruhamaa' Inventory</h3>
