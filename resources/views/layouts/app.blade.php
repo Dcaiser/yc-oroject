@@ -193,7 +193,7 @@
             <div class="p-4 border-b border-emerald-400/20">
                 <div class="flex items-center gap-3">
                     <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
+                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                             alt="Al-Ruhamaa Logo"
                             class="object-contain w-7 h-7">
                     </div>
@@ -436,7 +436,7 @@
                 <div class="flex items-center justify-between px-4 py-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                            <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
+                            <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                                 alt="Al-Ruhamaa Logo"
                                 class="object-contain w-6 h-6">
                         </div>
@@ -475,7 +475,7 @@
                     <div class="p-4 border-b border-emerald-400/20">
                         <div class="flex items-center gap-3">
                             <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
-                                <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
+                                <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                                     alt="Al-Ruhamaa Logo"
                                     class="object-contain w-7 h-7">
                             </div>

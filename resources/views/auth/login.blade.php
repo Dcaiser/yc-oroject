@@ -17,7 +17,7 @@
                 <div class="relative z-20 flex flex-col justify-between p-8 text-white w-full">
                     <!-- Branding dengan Logo -->
                     <div class="flex items-center space-x-3">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png" 
+                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png" 
                              alt="Al-Ruhamaa Logo" 
                              class="w-10 h-10 object-contain">
                         <div>
@@ -68,7 +68,7 @@
                 <!-- Mobile Branding dengan Logo -->
                 <div class="lg:hidden mb-6 text-center">
                     <div class="flex items-center justify-center space-x-3 mb-2">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png" 
+                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png" 
                              alt="Al-Ruhamaa Logo" 
                              class="w-8 h-8 object-contain">
                         <h3 class="text-lg font-bold text-green-700">Al-Ruhamaa' Inventory</h3>
