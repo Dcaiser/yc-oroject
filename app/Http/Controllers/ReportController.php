@@ -7,11 +7,11 @@ use App\Models\Produk;
 use App\Models\Activity;
 use App\Models\Supplier;
 use App\Models\Kategori;
-use App\Exports\ReportExport;
+// use App\Exports\ReportExport;  // Disabled to prevent PhpSpreadsheet error
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Maatwebsite\Excel\Facades\Excel;
+// use Maatwebsite\Excel\Facades\Excel;  // Disabled to prevent PhpSpreadsheet error
 
 class ReportController extends Controller
 {
@@ -424,10 +424,12 @@ class ReportController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        $type = $request->get('type', 'stock-value');
+        // TEMPORARILY DISABLED - PhpSpreadsheet dependency issue
+        return response()->json(['error' => 'Export Excel feature is temporarily disabled'], 503);
         
-        return Excel::download(new ReportExport($type, $request->all()), 
-            'laporan-' . $type . '-' . date('Y-m-d') . '.xlsx');
+        // $type = $request->get('type', 'stock-value');
+        // return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport($type, $request->all()), 
+        //     'laporan-' . $type . '-' . date('Y-m-d') . '.xlsx');
     }
 
     /**
@@ -438,7 +440,7 @@ class ReportController extends Controller
         $format = $request->get('format', 'pdf');
         
         if ($format === 'excel') {
-            return Excel::download(new ReportExport('stock-value', $request->all()), 
+            return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport('stock-value', $request->all()), 
                 'laporan-nilai-stok-' . date('Y-m-d') . '.xlsx');
         }
         
@@ -456,7 +458,7 @@ class ReportController extends Controller
         $format = $request->get('format', 'pdf');
         
         if ($format === 'excel') {
-            return Excel::download(new ReportExport('movement', $request->all()), 
+            return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport('movement', $request->all()), 
                 'laporan-pergerakan-stok-' . date('Y-m-d') . '.xlsx');
         }
         
@@ -474,7 +476,7 @@ class ReportController extends Controller
         $format = $request->get('format', 'pdf');
         
         if ($format === 'excel') {
-            return Excel::download(new ReportExport('supplier-performance', $request->all()), 
+            return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport('supplier-performance', $request->all()), 
                 'laporan-performa-supplier-' . date('Y-m-d') . '.xlsx');
         }
         
@@ -492,7 +494,7 @@ class ReportController extends Controller
         $format = $request->get('format', 'pdf');
         
         if ($format === 'excel') {
-            return Excel::download(new ReportExport('weekly', $request->all()), 
+            return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport('weekly', $request->all()), 
                 'laporan-mingguan-' . date('Y-m-d') . '.xlsx');
         }
         
@@ -510,7 +512,7 @@ class ReportController extends Controller
         $format = $request->get('format', 'pdf');
         
         if ($format === 'excel') {
-            return Excel::download(new ReportExport('monthly', $request->all()), 
+            return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport('monthly', $request->all()), 
                 'laporan-bulanan-' . date('Y-m-d') . '.xlsx');
         }
         
