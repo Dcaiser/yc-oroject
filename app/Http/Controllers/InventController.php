@@ -77,7 +77,7 @@ class InventController extends Controller
     }
 
     // Catat stok masuk
-    \App\Models\Stockin::create([
+    Stockin::create([
         'product_name'  => $produk->name,
         'supplier_name' => optional($produk->supplier)->name,
         'stock_qty'     => $validated['stok'],
@@ -93,7 +93,7 @@ class InventController extends Controller
     $produk->save();
 
     // Catat aktivitas
-    \App\Models\Activity::create([
+    Activity::create([
         'user'       => Auth::check() ? Auth::user()->name : 'Guest',
         'action'     => 'Menambah stok',
         'model'      => 'inventori',
