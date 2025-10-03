@@ -374,85 +374,55 @@
 
             <!-- User Profile Section -->
             <div class="absolute bottom-0 left-0 right-0">
-                <div class="mx-4 mb-4 user-profile-card p-3 border border-white/10 rounded-xl">
+                <div class="mx-4 mb-4 user-profile-card p-2.5">
                     <div x-data="{ userMenuOpen: false }" class="relative">
                         <button @click="userMenuOpen = !userMenuOpen"
-                                class="flex items-center justify-between w-full space-x-3 transition-all duration-300 hover:bg-white/10 rounded-xl p-2 group">
+                                class="flex items-center justify-between w-full transition-all duration-200 hover:bg-white/10 rounded-lg p-2 group">
                             <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                <div class="relative">
-                                    <div class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl shadow-sm group-hover:bg-white/25 transition-all">
-                                        <i class="text-white fas fa-user text-sm"></i>
-                                    </div>
-                                    <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-emerald-800"></div>
+                                <div class="flex items-center justify-center w-9 h-9 bg-white/20 rounded-lg group-hover:bg-white/25 transition-all">
+                                    <i class="text-white fas fa-user text-sm"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-semibold text-white truncate group-hover:text-emerald-100 transition-colors">{{ Auth::user()->name }}</p>
-                                    <div class="flex items-center space-x-1">
-                                        <div class="w-2 h-2 bg-emerald-300 rounded-full"></div>
-                                        <p class="text-xs text-emerald-200 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
-                                    </div>
+                                    <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-emerald-200/80 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-center w-8 h-8 text-white/60 group-hover:text-white/90 transition-all duration-300">
-                                <i class="text-sm fas fa-chevron-up transition-transform duration-300 group-hover:scale-110" 
+                            <div class="flex items-center justify-center w-6 h-6 text-white/70 group-hover:text-white transition-colors">
+                                <i class="text-xs fas fa-chevron-up transition-transform duration-200" 
                                    :class="{ 'rotate-180': userMenuOpen }"></i>
                             </div>
                         </button>
                         
                         <!-- User Dropdown Menu -->
                         <div x-show="userMenuOpen"
-                             x-transition:enter="transition ease-out duration-300"
-                             x-transition:enter-start="transform scale-95 opacity-0 translate-y-1"
-                             x-transition:enter-end="transform scale-100 opacity-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-200"
-                             x-transition:leave-start="transform scale-100 opacity-100 translate-y-0"
-                             x-transition:leave-end="transform scale-95 opacity-0 translate-y-1"
-                            class="absolute right-0 bottom-full mb-3 w-60 bg-white rounded-xl shadow-xl border border-gray-200 z-[9999] overflow-hidden backdrop-blur-sm">
-                            
-                            <!-- User Info Header -->
-                            <div class="px-4 py-3 bg-gradient-to-r from-emerald-50 to-emerald-100/50 border-b border-emerald-100">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
-                                        <i class="fas fa-user text-white text-sm"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
-                                        <p class="text-xs text-emerald-600 truncate">{{ Auth::user()->email }}</p>
-                                    </div>
-                                </div>
-                            </div>
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="transform scale-95 opacity-0"
+                             x-transition:enter-end="transform scale-100 opacity-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="transform scale-100 opacity-100"
+                             x-transition:leave-end="transform scale-95 opacity-0"
+                            class="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200/50 z-[9999] overflow-hidden">
                             
                             <!-- Menu Items -->
                             <div class="py-2">
                                 <!-- Edit Profile -->
                                 <a href="{{ route('profile.edit') }}"
-                                    class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200">
-                                    <div class="w-8 h-8 flex items-center justify-center bg-emerald-100 group-hover:bg-emerald-200 rounded-lg mr-3 transition-colors">
-                                        <i class="fas fa-user-edit text-sm text-emerald-600 group-hover:text-emerald-700"></i>
+                                    class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-lg mr-3 shrink-0">
+                                        <i class="fas fa-user-edit text-xs text-emerald-600"></i>
                                     </div>
-                                    <div class="flex-1">
-                                        <span class="font-medium">Edit Profil</span>
-                                        <p class="text-xs text-gray-500 group-hover:text-emerald-600">Kelola informasi akun</p>
-                                    </div>
-                                    <i class="fas fa-chevron-right text-xs text-gray-400 group-hover:text-emerald-500"></i>
+                                    <span class="font-medium flex-1 text-left">Edit Profil</span>
                                 </a>
-                                
-                                <!-- Divider -->
-                                <div class="border-t border-gray-100 my-1 mx-4"></div>
                                 
                                 <!-- Logout -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                        class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
-                                        <div class="w-8 h-8 flex items-center justify-center bg-red-100 group-hover:bg-red-200 rounded-lg mr-3 transition-colors">
-                                            <i class="fas fa-sign-out-alt text-sm text-red-600 group-hover:text-red-700"></i>
+                                        class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <div class="w-8 h-8 flex items-center justify-center bg-red-100 rounded-lg mr-3 shrink-0">
+                                            <i class="fas fa-sign-out-alt text-xs text-red-600"></i>
                                         </div>
-                                        <div class="flex-1 text-left">
-                                            <span class="font-medium">Keluar</span>
-                                            <p class="text-xs text-red-500 group-hover:text-red-600">Logout dari sistem</p>
-                                        </div>
-                                        <i class="fas fa-chevron-right text-xs text-red-400 group-hover:text-red-500"></i>
+                                        <span class="font-medium flex-1 text-left">Keluar</span>
                                     </button>
                                 </form>
                             </div>
@@ -676,68 +646,56 @@
                     </nav>
 
                     <!-- Mobile User Profile Section -->
-                    <div class="absolute bottom-0 left-0 right-0 border-t border-emerald-400/20 bg-gradient-to-t from-emerald-900/50 to-transparent backdrop-blur-sm">
-                        <div class="p-4">
+                    <div class="absolute bottom-0 left-0 right-0 border-t border-emerald-400/20">
+                        <div class="p-3">
                             <div x-data="{ mobileUserMenuOpen: false }" class="relative">
                                 <button @click="mobileUserMenuOpen = !mobileUserMenuOpen"
-                                        class="flex items-center justify-between w-full space-x-3 transition-all duration-300 hover:bg-white/10 rounded-xl p-2 group">
+                                        class="flex items-center justify-between w-full transition-all duration-200 hover:bg-white/10 rounded-lg p-2 group">
                                     <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                        <div class="relative">
-                                            <div class="flex items-center justify-center w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg shadow-sm group-hover:bg-white/25 transition-all">
-                                                <i class="text-white fas fa-user text-xs"></i>
-                                            </div>
-                                            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border border-emerald-800"></div>
+                                        <div class="flex items-center justify-center w-8 h-8 bg-white/20 rounded-lg group-hover:bg-white/25 transition-all">
+                                            <i class="text-white fas fa-user text-xs"></i>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-semibold text-white truncate group-hover:text-emerald-100 transition-colors">{{ Auth::user()->name }}</p>
-                                            <p class="text-xs text-emerald-200 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
+                                            <p class="text-xs font-medium text-white truncate">{{ Auth::user()->name }}</p>
+                                            <p class="text-xs text-emerald-200/80 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-center w-6 h-6 text-white/60 group-hover:text-white/90 transition-all duration-300">
-                                        <i class="text-xs fas fa-chevron-up transition-transform duration-300 group-hover:scale-110" 
+                                    <div class="flex items-center justify-center w-5 h-5 text-white/70 group-hover:text-white transition-colors">
+                                        <i class="text-xs fas fa-chevron-up transition-transform duration-200" 
                                            :class="{ 'rotate-180': mobileUserMenuOpen }"></i>
                                     </div>
                                 </button>
                                 
                                 <!-- Mobile User Dropdown Menu -->
                                 <div x-show="mobileUserMenuOpen"
-                                     x-transition:enter="transition ease-out duration-300"
-                                     x-transition:enter-start="transform scale-95 opacity-0 translate-y-1"
-                                     x-transition:enter-end="transform scale-100 opacity-100 translate-y-0"
-                                     x-transition:leave="transition ease-in duration-200"
-                                     x-transition:leave-start="transform scale-100 opacity-100 translate-y-0"
-                                     x-transition:leave-end="transform scale-95 opacity-0 translate-y-1"
-                                    class="absolute left-0 right-0 bottom-full mb-2 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="transform scale-95 opacity-0"
+                                     x-transition:enter-end="transform scale-100 opacity-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="transform scale-100 opacity-100"
+                                     x-transition:leave-end="transform scale-95 opacity-0"
+                                    class="absolute left-2 right-2 bottom-full mb-2 bg-white rounded-lg shadow-lg border border-gray-200/50 z-50 overflow-hidden">
                                     
                                     <!-- Menu Items -->
-                                    <div class="py-1">
+                                    <div class="py-2">
                                         <!-- Edit Profile -->
                                         <a href="{{ route('profile.edit') }}" @click="sidebarOpen = false; mobileUserMenuOpen = false"
-                                            class="group flex items-center px-3 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-all duration-200">
-                                            <div class="w-7 h-7 flex items-center justify-center bg-emerald-100 group-hover:bg-emerald-200 rounded-lg mr-3 transition-colors">
-                                                <i class="fas fa-user-edit text-xs text-emerald-600 group-hover:text-emerald-700"></i>
+                                            class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors">
+                                            <div class="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-lg mr-3 shrink-0">
+                                                <i class="fas fa-user-edit text-xs text-emerald-600"></i>
                                             </div>
-                                            <div class="flex-1">
-                                                <span class="font-medium">Edit Profil</span>
-                                                <p class="text-xs text-gray-500 group-hover:text-emerald-600">Kelola informasi akun</p>
-                                            </div>
+                                            <span class="font-medium flex-1 text-left">Edit Profil</span>
                                         </a>
-                                        
-                                        <!-- Divider -->
-                                        <div class="border-t border-gray-100 my-1 mx-3"></div>
                                         
                                         <!-- Logout -->
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
                                             <button type="submit"
-                                                class="group flex items-center w-full px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
-                                                <div class="w-7 h-7 flex items-center justify-center bg-red-100 group-hover:bg-red-200 rounded-lg mr-3 transition-colors">
-                                                    <i class="fas fa-sign-out-alt text-xs text-red-600 group-hover:text-red-700"></i>
+                                                class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                                <div class="w-8 h-8 flex items-center justify-center bg-red-100 rounded-lg mr-3 shrink-0">
+                                                    <i class="fas fa-sign-out-alt text-xs text-red-600"></i>
                                                 </div>
-                                                <div class="flex-1 text-left">
-                                                    <span class="font-medium">Keluar</span>
-                                                    <p class="text-xs text-red-500 group-hover:text-red-600">Logout dari sistem</p>
-                                                </div>
+                                                <span class="font-medium flex-1 text-left">Keluar</span>
                                             </button>
                                         </form>
                                     </div>
