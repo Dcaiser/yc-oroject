@@ -9,10 +9,10 @@
     <title>Al-Ruhamaa' | Inventory System</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-white.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-white.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-white.png') }}">
-    <link rel="shortcut icon" href="{{ asset('assets/logo/icon-white.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-green.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-green.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-green.png') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/logo/icon-green.png') }}">
     
     <!-- Web App Manifest -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
@@ -27,13 +27,13 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Al-Ruhamaa' | Inventory System">
     <meta property="og:description" content="Sistem Inventory Management Al-Ruhamaa'">
-    <meta property="og:image" content="{{ asset('assets/logo/icon-white.png') }}">
+    <meta property="og:image" content="{{ asset('assets/logo/icon-green.png') }}">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Al-Ruhamaa' | Inventory System">
     <meta property="twitter:description" content="Sistem Inventory Management Al-Ruhamaa'">
-    <meta property="twitter:image" content="{{ asset('assets/logo/icon-white.png') }}">
+    <meta property="twitter:image" content="{{ asset('assets/logo/icon-green.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -193,7 +193,7 @@
             <div class="p-4 border-b border-emerald-400/20">
                 <div class="flex items-center gap-3">
                     <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
+                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
                             alt="Al-Ruhamaa Logo"
                             class="object-contain w-7 h-7">
                     </div>
@@ -436,7 +436,7 @@
                 <div class="flex items-center justify-between px-4 py-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
-                            <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
+                            <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
                                 alt="Al-Ruhamaa Logo"
                                 class="object-contain w-6 h-6">
                         </div>
@@ -475,7 +475,7 @@
                     <div class="p-4 border-b border-emerald-400/20">
                         <div class="flex items-center gap-3">
                             <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
-                                <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
+                                <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png"
                                     alt="Al-Ruhamaa Logo"
                                     class="object-contain w-7 h-7">
                             </div>

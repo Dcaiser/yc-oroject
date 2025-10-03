@@ -8,10 +8,10 @@
         <title>Al-Ruhamaa' | Inventory System</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-white.png') }}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-white.png') }}">
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-white.png') }}">
-        <link rel="shortcut icon" href="{{ asset('assets/logo/icon-white.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-green.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-green.png') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-green.png') }}">
+        <link rel="shortcut icon" href="{{ asset('assets/logo/icon-green.png') }}">
         
         <!-- Web App Manifest -->
         <link rel="manifest" href="{{ asset('site.webmanifest') }}">
