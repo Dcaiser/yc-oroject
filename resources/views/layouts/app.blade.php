@@ -53,48 +53,18 @@
 
         /* Navigation Item Styles */
         .nav-item {
-            border-radius: 16px;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
-            opacity: 0;
-            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border-radius: 16px;
-        }
-
-        .nav-item:hover::before {
-            opacity: 1;
+            border-radius: 12px;
+            transition: background 0.25s ease, box-shadow 0.25s ease;
         }
 
         .nav-item:hover {
-            transform: translateX(12px) scale(1.02);
-            box-shadow: 
-                0 10px 30px rgba(16, 185, 129, 0.2),
-                0 6px 20px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         }
 
         .nav-item.active-nav-link {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
-            transform: translateX(8px);
-            box-shadow: 
-                0 8px 25px rgba(16, 185, 129, 0.25),
-                0 4px 15px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        .nav-item.active-nav-link .icon-wrapper {
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
         }
 
         /* Icon Wrapper */
@@ -108,7 +78,70 @@
         }
 
         .nav-item:hover .icon-wrapper {
-            transform: scale(1.15) rotate(5deg);
+            transform: scale(1.04);
+        }
+
+        /* Collapsed Sidebar Helpers */
+        .sidebar-collapsed .sidebar-label,
+        .sidebar-collapsed .collapse-chevron,
+        .sidebar-collapsed .user-meta,
+        .sidebar-collapsed .user-profile-extra {
+            display: none !important;
+        }
+
+        .sidebar-collapsed .icon-wrapper,
+        .sidebar-collapsed .user-avatar-wrapper {
+            margin-right: 0 !important;
+        }
+
+        .sidebar-collapsed .nav-item,
+        .sidebar-collapsed .dropdown-item,
+        .sidebar-collapsed .user-profile-trigger {
+            justify-content: center;
+        }
+
+        .sidebar-collapsed .nav-item span,
+        .sidebar-collapsed .dropdown-item span {
+            text-align: center;
+        }
+
+        .sidebar-collapsed .nav-item {
+            width: 3.5rem;
+            height: 3.5rem;
+            padding: 0;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 1.25rem;
+        }
+
+        .sidebar-collapsed .nav-item .icon-wrapper {
+            width: 1.75rem;
+            height: 1.75rem;
+        }
+
+        .sidebar-collapsed .nav-item:hover,
+        .sidebar-collapsed .nav-item.active-nav-link {
+            transform: none;
+        }
+
+        .sidebar-collapsed .user-profile-card {
+            width: 3.75rem;
+            height: 3.75rem;
+            padding: 0.4rem;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 1.4rem;
+        }
+
+        .sidebar-collapsed .user-profile-trigger {
+            padding: 0 !important;
+            min-height: 0;
+            justify-content: center;
+        }
+
+        .sidebar-collapsed .user-avatar-wrapper {
+            width: 2.75rem !important;
+            height: 2.75rem !important;
         }
 
         /* Dropdown Styles */
@@ -122,37 +155,14 @@
         }
 
         .dropdown-item {
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border-radius: 12px;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 10px;
             margin: 2px 4px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .dropdown-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
-            opacity: 0;
-            transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border-radius: 12px;
-        }
-
-        .dropdown-item:hover::before {
-            opacity: 1;
         }
 
         .dropdown-item:hover {
-            transform: translateX(6px) scale(1.01);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
-        }
-
-        .dropdown-item:hover i {
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
         }
 
         /* Hide Scrollbars */
@@ -182,37 +192,70 @@
             background: linear-gradient(135deg, #10b981 0%, #047857 100%);
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
+
+        .collapsed-user-dropdown {
+            left: calc(100% + 1rem) !important;
+            right: auto !important;
+            transform: none !important;
+            width: 15rem;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
-    <div class="flex min-h-screen">
+    <div x-data="{ sidebarCollapsed: false }" class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="fixed z-30 hidden w-64 h-screen shadow-2xl sidebar-gradient lg:block">
+     <aside class="fixed z-30 hidden h-screen shadow-2xl sidebar-gradient lg:block"
+         :class="sidebarCollapsed ? 'sidebar-collapsed w-24 pt-6' : 'w-64 pt-6'">
+            @php
+                $authUser = Auth::user();
+                $rawAvatarPath = $authUser->avatar ?? null;
+                if ($rawAvatarPath && !\Illuminate\Support\Str::startsWith($rawAvatarPath, ['http://', 'https://'])) {
+                    $sidebarAvatarUrl = \Illuminate\Support\Facades\Storage::url($rawAvatarPath);
+                } else {
+                    $sidebarAvatarUrl = $rawAvatarPath;
+                }
+                $userInitials = collect(explode(' ', $authUser->name))
+                    ->filter()
+                    ->map(fn ($segment) => mb_substr($segment, 0, 1))
+                    ->join('');
+                if (empty($userInitials)) {
+                    $userInitials = 'A';
+                }
+            @endphp
             <!-- Logo & Brand -->
-            <div class="p-4 border-b border-emerald-400/20">
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
-                            alt="Al-Ruhamaa Logo"
-                            class="object-contain w-7 h-7">
+            <div class="px-4 pb-4 border-b border-emerald-400/20" :class="sidebarCollapsed ? 'px-3' : 'px-4'">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'gap-2 justify-center' : 'gap-3'">
+                        <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
+                            <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
+                                alt="Al-Ruhamaa Logo"
+                                class="object-contain w-7 h-7">
+                        </div>
+                        <div class="sidebar-label">
+                            <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
+                            <p class="text-xs text-emerald-100/80">Inventory System</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
-                        <p class="text-xs text-emerald-100/80">Inventory System</p>
-                    </div>
+            <button type="button"
+                class="hidden lg:flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition"
+                            @click="sidebarCollapsed = !sidebarCollapsed"
+                            :title="sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'">
+                        <i class="text-base fas" :class="sidebarCollapsed ? 'fa-caret-right' : 'fa-caret-left'"></i>
+                    </button>
                 </div>
             </div>
 
             <!-- Navigation -->
-            <nav class="px-4 py-4 space-y-1 overflow-y-auto hide-scrollbar h-[calc(100vh-180px)] pb-20">
+            <nav class="py-4 space-y-1 overflow-y-auto hide-scrollbar"
+                 :class="sidebarCollapsed ? 'px-2 h-[calc(100vh-150px)] pb-16' : 'px-4 h-[calc(100vh-180px)] pb-20'">
                 <!-- Dashboard - Semua user yang login -->
                 <a href="{{ route('dashboard') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-tachometer-alt text-sm"></i>
                     </div>
-                    <span>Dashboard</span>
+                    <span class="sidebar-label">Dashboard</span>
                 </a>
 
                 <!-- User Management - Hanya Admin -->
@@ -222,7 +265,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-users text-sm"></i>
                     </div>
-                    <span>Manajemen User</span>
+                    <span class="sidebar-label">Manajemen User</span>
                 </a>
                 @endif
 
@@ -233,7 +276,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-box text-sm"></i>
                     </div>
-                    <span>Produk</span>
+                    <span class="sidebar-label">Produk</span>
                 </a>
                 @endif
 
@@ -244,7 +287,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-tags text-sm"></i>
                     </div>
-                    <span>Kategori Produk</span>
+                    <span class="sidebar-label">Kategori Produk</span>
                 </a>
                 @endif
 
@@ -254,7 +297,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-warehouse text-sm"></i>
                     </div>
-                    <span>Inventory</span>
+                    <span class="sidebar-label">Inventory</span>
                 </a>
 
                 <!-- Supplier -->
@@ -263,7 +306,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-truck text-sm"></i>
                     </div>
-                    <span>Supplier</span>
+                    <span class="sidebar-label">Supplier</span>
                 </a>
 
                 <!-- Reports - Manager & Admin -->
@@ -274,8 +317,8 @@
                         <div class="icon-wrapper mr-3">
                             <i class="fas fa-chart-line text-sm"></i>
                         </div>
-                        <span class="flex-1 text-left">Laporan</span>
-                        <i class="fas fa-chevron-down text-sm transition-transform duration-300" 
+                        <span class="flex-1 text-left sidebar-label">Laporan</span>
+                        <i class="fas fa-chevron-down text-sm transition-transform duration-300 collapse-chevron" 
                            :class="{ 'rotate-180': reportsOpen }"></i>
                     </button>
                     
@@ -294,7 +337,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-chart-pie text-xs"></i>
                             </div>
-                            <span>Dashboard Laporan</span>
+                            <span class="sidebar-label">Dashboard Laporan</span>
                         </a>
                         
                         <a href="{{ route('reports.supplier-performance') }}" 
@@ -302,7 +345,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-truck text-xs"></i>
                             </div>
-                            <span>Performa Supplier</span>
+                            <span class="sidebar-label">Performa Supplier</span>
                         </a>
                         
                         <a href="{{ route('reports.stock-value') }}" 
@@ -310,7 +353,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-dollar-sign text-xs"></i>
                             </div>
-                            <span>Nilai Stok</span>
+                            <span class="sidebar-label">Nilai Stok</span>
                         </a>
                         
                         <a href="{{ route('reports.movement') }}" 
@@ -318,7 +361,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-arrows-alt text-xs"></i>
                             </div>
-                            <span>Pergerakan Stok</span>
+                            <span class="sidebar-label">Pergerakan Stok</span>
                         </a>
                         
                         <a href="{{ route('reports.weekly') }}" 
@@ -326,7 +369,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-calendar-week text-xs"></i>
                             </div>
-                            <span>Laporan Mingguan</span>
+                            <span class="sidebar-label">Laporan Mingguan</span>
                         </a>
                         
                         <a href="{{ route('reports.monthly') }}" 
@@ -334,7 +377,7 @@
                             <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                 <i class="fas fa-calendar-alt text-xs"></i>
                             </div>
-                            <span>Laporan Bulanan</span>
+                            <span class="sidebar-label">Laporan Bulanan</span>
                         </a>
                     </div>
                 </div>
@@ -347,7 +390,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fa-solid fa-note-sticky text-sm"></i>
                     </div>
-                    <span>Aktivitas</span>
+                    <span class="sidebar-label">Aktivitas</span>
                 </a>
                 @endif
 
@@ -357,7 +400,7 @@
                     <div class="icon-wrapper mr-3">
                         <i class="fa-solid fa-cart-shopping text-sm"></i>
                     </div>
-                    <span>Point of Sale</span>
+                    <span class="sidebar-label">Point of Sale</span>
                 </a>
 
                 <!-- Staff Create Report Button -->
@@ -366,7 +409,7 @@
                     <a href="#" 
                        class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-all duration-200 shadow text-sm">
                         <i class="fas fa-plus"></i>
-                        <span>Buat Laporan</span>
+                        <span class="sidebar-label">Buat Laporan</span>
                     </a>
                 </div>
             @endif
@@ -374,55 +417,86 @@
 
             <!-- User Profile Section -->
             <div class="absolute bottom-0 left-0 right-0">
-                <div class="mx-4 mb-4 user-profile-card p-2.5">
-                    <div x-data="{ userMenuOpen: false }" class="relative">
-                        <button @click="userMenuOpen = !userMenuOpen"
-                                class="flex items-center justify-between w-full transition-all duration-200 hover:bg-white/10 rounded-lg p-2 group">
-                            <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                <div class="flex items-center justify-center w-9 h-9 bg-white/20 rounded-lg group-hover:bg-white/25 transition-all">
-                                    <i class="text-white fas fa-user text-sm"></i>
+                <div class="mb-4 user-profile-card px-3 py-2" :class="sidebarCollapsed ? 'mx-2' : 'mx-4'">
+                    <div x-data="{ userMenuOpen: false }" class="relative" @click.away="userMenuOpen = false">
+            <button @click="userMenuOpen = !userMenuOpen"
+                class="flex items-center w-full transition-all duration-200 hover:bg-white/10 rounded-xl px-3 py-2 group user-profile-trigger"
+                :class="sidebarCollapsed ? 'justify-center' : 'justify-between'">
+                       <div class="flex items-center flex-1 min-w-0"
+                           :class="sidebarCollapsed ? '' : 'space-x-3'">
+                                <div class="relative w-11 h-11 user-avatar-wrapper">
+                                    <div class="flex items-center justify-center w-full h-full overflow-hidden bg-white/15 rounded-full ring-2 ring-white/20 shadow-inner">
+                                        @if ($sidebarAvatarUrl)
+                                            <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                        @else
+                                            <span class="text-sm font-semibold text-white">{{ $userInitials }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="absolute -bottom-0.5 -right-0.5 block w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full shadow-lg"></span>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-emerald-200/80 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
+                                <div class="flex-1 min-w-0 text-left user-profile-extra">
+                                    <p class="text-sm font-semibold text-white truncate sidebar-label">{{ $authUser->name }}</p>
+                                    <div class="mt-0.5 space-y-0.5 user-meta">
+                                        <span class="block text-[11px] font-semibold text-emerald-200/90 uppercase tracking-[0.18em] sidebar-label">{{ strtoupper($authUser->role) }}</span>
+                                        <div class="text-[11px] text-emerald-100/80 tracking-normal normal-case truncate sidebar-label">{{ $authUser->email }}</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-center w-6 h-6 text-white/70 group-hover:text-white transition-colors">
-                                <i class="text-xs fas fa-chevron-up transition-transform duration-200" 
+                            <div class="flex items-center justify-center w-7 h-7 text-white/70 group-hover:text-white transition-colors collapse-chevron">
+                                <i class="text-xs fas fa-chevron-up transition-transform duration-200"
                                    :class="{ 'rotate-180': userMenuOpen }"></i>
                             </div>
                         </button>
-                        
+
                         <!-- User Dropdown Menu -->
-                        <div x-show="userMenuOpen"
+                    <div x-cloak x-show="userMenuOpen"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="transform scale-95 opacity-0"
                              x-transition:enter-end="transform scale-100 opacity-100"
                              x-transition:leave="transition ease-in duration-150"
                              x-transition:leave-start="transform scale-100 opacity-100"
                              x-transition:leave-end="transform scale-95 opacity-0"
-                            class="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200/50 z-[9999] overflow-hidden">
-                            
-                            <!-- Menu Items -->
-                            <div class="py-2">
-                                <!-- Edit Profile -->
-                                <a href="{{ route('profile.edit') }}"
-                                    class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors">
-                                    <div class="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-lg mr-3 shrink-0">
-                                        <i class="fas fa-user-edit text-xs text-emerald-600"></i>
+                        class="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-3 w-60 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 z-[9999] overflow-hidden"
+                        :class="sidebarCollapsed ? 'collapsed-user-dropdown' : ''">
+                            <div class="px-4 pt-4 pb-3 border-b border-emerald-100/60 bg-gradient-to-br from-emerald-50/80 via-white to-white/80">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative flex items-center justify-center w-12 h-12 overflow-hidden rounded-full bg-emerald-100">
+                                        @if ($sidebarAvatarUrl)
+                                            <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                        @else
+                                            <span class="text-base font-semibold text-emerald-700">{{ $userInitials }}</span>
+                                        @endif
                                     </div>
-                                    <span class="font-medium flex-1 text-left">Edit Profil</span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-emerald-900">{{ $authUser->name }}</p>
+                                        <p class="text-xs text-emerald-600/80">{{ $authUser->email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-2 bg-white/70">
+                                <a href="{{ route('profile.edit') }}"
+                                   class="group flex items-center px-4 py-3 text-sm text-emerald-700 hover:bg-emerald-50/80 transition-all">
+                                    <div class="w-9 h-9 flex items-center justify-center bg-emerald-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
+                                        <i class="fas fa-user-edit text-sm text-emerald-600"></i>
+                                    </div>
+                                    <div class="flex-1 text-left">
+                                        <p class="font-semibold leading-none">Edit Profil</p>
+                                        <p class="text-[11px] text-emerald-500 mt-1">Perbarui informasi akun Anda</p>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-xs text-emerald-400 group-hover:translate-x-1 transition-transform"></i>
                                 </a>
-                                
-                                <!-- Logout -->
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                        class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                        <div class="w-8 h-8 flex items-center justify-center bg-red-100 rounded-lg mr-3 shrink-0">
-                                            <i class="fas fa-sign-out-alt text-xs text-red-600"></i>
+                                            class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-all">
+                                        <div class="w-9 h-9 flex items-center justify-center bg-red-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
+                                            <i class="fas fa-sign-out-alt text-sm text-red-600"></i>
                                         </div>
-                                        <span class="font-medium flex-1 text-left">Keluar</span>
+                                        <div class="flex-1 text-left">
+                                            <p class="font-semibold leading-none">Keluar</p>
+                                            <p class="text-[11px] text-red-500 mt-1">Akhiri sesi aplikasi</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-xs text-red-400 group-hover:translate-x-1 transition-transform"></i>
                                     </button>
                                 </form>
                             </div>
@@ -454,6 +528,20 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Mobile External Controls -->
+            <button type="button"
+                    class="fixed z-50 flex items-center justify-center w-12 h-12 text-white bg-emerald-600 rounded-full shadow-xl right-5 bottom-6 lg:hidden hover:bg-emerald-500 transition"
+                    x-show="sidebarOpen"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-75"
+                    x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100"
+                    x-transition:leave-end="opacity-0 scale-75"
+                    @click="sidebarOpen = false">
+                <i class="fas fa-arrow-left"></i>
+            </button>
 
             <!-- Mobile Sidebar Overlay -->
             <div x-show="sidebarOpen" @click.away="sidebarOpen = false"
@@ -490,14 +578,14 @@
                     </div>
 
                     <!-- Mobile Navigation -->
-                    <nav class="px-4 py-4 space-y-1 overflow-y-auto hide-scrollbar h-[calc(100vh-180px)] pb-20">
+                    <nav class="px-4 py-4 space-y-1 overflow-y-auto hide-scrollbar h-[calc(100vh-170px)] pb-6">
                         <!-- Dashboard -->
                         <a href="{{ route('dashboard') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-tachometer-alt text-sm"></i>
                             </div>
-                            <span>Dashboard</span>
+                            <span class="sidebar-label">Dashboard</span>
                         </a>
 
                         <!-- User Management - Admin only -->
@@ -507,7 +595,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-users text-sm"></i>
                             </div>
-                            <span>Manajemen User</span>
+                            <span class="sidebar-label">Manajemen User</span>
                         </a>
                         @endif
 
@@ -518,7 +606,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-box text-sm"></i>
                             </div>
-                            <span>Produk</span>
+                            <span class="sidebar-label">Produk</span>
                         </a>
                         @endif
 
@@ -529,7 +617,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-tags text-sm"></i>
                             </div>
-                            <span>Kategori Produk</span>
+                            <span class="sidebar-label">Kategori Produk</span>
                         </a>
                         @endif
 
@@ -539,7 +627,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-warehouse text-sm"></i>
                             </div>
-                            <span>Inventory</span>
+                            <span class="sidebar-label">Inventory</span>
                         </a>
 
                         <!-- Supplier -->
@@ -548,7 +636,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fas fa-truck text-sm"></i>
                             </div>
-                            <span>Supplier</span>
+                            <span class="sidebar-label">Supplier</span>
                         </a>
 
                         <!-- Reports - Manager & Admin -->
@@ -559,7 +647,7 @@
                                 <div class="icon-wrapper mr-3">
                                     <i class="fas fa-chart-line text-sm"></i>
                                 </div>
-                                <span class="flex-1 text-left">Laporan</span>
+                                <span class="flex-1 text-left sidebar-label">Laporan</span>
                                 <i class="fas fa-chevron-down text-sm transition-transform duration-300" 
                                    :class="{ 'rotate-180': reportsOpen }"></i>
                             </button>
@@ -578,7 +666,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-chart-pie text-xs"></i>
                                     </div>
-                                    <span>Dashboard Laporan</span>
+                                    <span class="sidebar-label">Dashboard Laporan</span>
                                 </a>
                                 
                                 <a href="{{ route('reports.supplier-performance') }}" @click="sidebarOpen = false"
@@ -586,7 +674,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-truck text-xs"></i>
                                     </div>
-                                    <span>Performa Supplier</span>
+                                    <span class="sidebar-label">Performa Supplier</span>
                                 </a>
                                 
                                 <a href="{{ route('reports.stock-value') }}" @click="sidebarOpen = false"
@@ -594,7 +682,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-dollar-sign text-xs"></i>
                                     </div>
-                                    <span>Nilai Stok</span>
+                                    <span class="sidebar-label">Nilai Stok</span>
                                 </a>
                                 
                                 <a href="{{ route('reports.movement') }}" @click="sidebarOpen = false"
@@ -602,7 +690,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-arrows-alt text-xs"></i>
                                     </div>
-                                    <span>Pergerakan Stok</span>
+                                    <span class="sidebar-label">Pergerakan Stok</span>
                                 </a>
                                 
                                 <a href="{{ route('reports.weekly') }}" @click="sidebarOpen = false"
@@ -610,7 +698,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-calendar-week text-xs"></i>
                                     </div>
-                                    <span>Laporan Mingguan</span>
+                                    <span class="sidebar-label">Laporan Mingguan</span>
                                 </a>
                                 
                                 <a href="{{ route('reports.monthly') }}" @click="sidebarOpen = false"
@@ -618,7 +706,7 @@
                                     <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
                                         <i class="fas fa-calendar-alt text-xs"></i>
                                     </div>
-                                    <span>Laporan Bulanan</span>
+                                    <span class="sidebar-label">Laporan Bulanan</span>
                                 </a>
                             </div>
                         </div>
@@ -631,7 +719,7 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fa-solid fa-note-sticky text-sm"></i>
                             </div>
-                            <span>Aktivitas</span>
+                            <span class="sidebar-label">Aktivitas</span>
                         </a>
                         @endif
 
@@ -641,74 +729,100 @@
                             <div class="icon-wrapper mr-3">
                                 <i class="fa-solid fa-cart-shopping text-sm"></i>
                             </div>
-                            <span>Point of Sale</span>
+                            <span class="sidebar-label">Point of Sale</span>
                         </a>
-                    </nav>
 
-                    <!-- Mobile User Profile Section -->
-                    <div class="absolute bottom-0 left-0 right-0 border-t border-emerald-400/20">
-                        <div class="p-3">
+                        <!-- Mobile User Profile Trigger -->
+                        <div class="pt-6 mt-6 border-t border-white/10">
                             <div x-data="{ mobileUserMenuOpen: false }" class="relative">
                                 <button @click="mobileUserMenuOpen = !mobileUserMenuOpen"
-                                        class="flex items-center justify-between w-full transition-all duration-200 hover:bg-white/10 rounded-lg p-2 group">
-                                    <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                        <div class="flex items-center justify-center w-8 h-8 bg-white/20 rounded-lg group-hover:bg-white/25 transition-all">
-                                            <i class="text-white fas fa-user text-xs"></i>
+                                        class="user-profile-card w-full flex items-center justify-between transition-all duration-200 hover:bg-white/10 rounded-xl px-3 py-2 group user-profile-trigger">
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <div class="relative w-10 h-10 user-avatar-wrapper">
+                                            <div class="flex items-center justify-center w-full h-full overflow-hidden bg-white/15 rounded-full ring-2 ring-white/20 shadow-inner">
+                                                @if ($sidebarAvatarUrl)
+                                                    <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                                @else
+                                                    <span class="text-xs font-semibold text-white">{{ $userInitials }}</span>
+                                                @endif
+                                            </div>
+                                            <span class="absolute -bottom-0.5 -right-0.5 block w-3 h-3 bg-emerald-400 border-2 border-white rounded-full shadow-lg"></span>
                                         </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-medium text-white truncate">{{ Auth::user()->name }}</p>
-                                            <p class="text-xs text-emerald-200/80 capitalize">{{ ucfirst(Auth::user()->role) }}</p>
+                                        <div class="flex-1 min-w-0 text-left user-profile-extra">
+                                            <p class="text-xs font-semibold text-white truncate sidebar-label">{{ $authUser->name }}</p>
+                                            <div class="mt-0.5 space-y-0.5 user-meta">
+                                                <span class="block text-[10px] font-semibold text-emerald-200/90 uppercase tracking-[0.18em] sidebar-label">{{ strtoupper($authUser->role) }}</span>
+                                                <div class="text-[10px] text-emerald-100/80 tracking-normal normal-case truncate sidebar-label">{{ $authUser->email }}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-center w-5 h-5 text-white/70 group-hover:text-white transition-colors">
-                                        <i class="text-xs fas fa-chevron-up transition-transform duration-200" 
+                                    <div class="flex items-center justify-center w-6 h-6 text-white/70 group-hover:text-white transition-colors collapse-chevron">
+                                        <i class="text-xs fas fa-chevron-up transition-transform duration-200"
                                            :class="{ 'rotate-180': mobileUserMenuOpen }"></i>
                                     </div>
                                 </button>
-                                
+
                                 <!-- Mobile User Dropdown Menu -->
-                                <div x-show="mobileUserMenuOpen"
+                                <div x-cloak x-show="mobileUserMenuOpen"
                                      x-transition:enter="transition ease-out duration-200"
                                      x-transition:enter-start="transform scale-95 opacity-0"
                                      x-transition:enter-end="transform scale-100 opacity-100"
                                      x-transition:leave="transition ease-in duration-150"
                                      x-transition:leave-start="transform scale-100 opacity-100"
                                      x-transition:leave-end="transform scale-95 opacity-0"
-                                    class="absolute left-2 right-2 bottom-full mb-2 bg-white rounded-lg shadow-lg border border-gray-200/50 z-50 overflow-hidden">
-                                    
-                                    <!-- Menu Items -->
-                                    <div class="py-2">
-                                        <!-- Edit Profile -->
-                                        <a href="{{ route('profile.edit') }}" @click="sidebarOpen = false; mobileUserMenuOpen = false"
-                                            class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors">
-                                            <div class="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded-lg mr-3 shrink-0">
-                                                <i class="fas fa-user-edit text-xs text-emerald-600"></i>
+                                    class="absolute left-0 right-0 bottom-full mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 z-50 overflow-hidden">
+                                    <div class="px-4 pt-4 pb-3 border-b border-emerald-100/60 bg-gradient-to-br from-emerald-50/80 via-white to-white/80">
+                                        <div class="flex items-center gap-3">
+                                            <div class="relative flex items-center justify-center w-11 h-11 overflow-hidden rounded-full bg-emerald-100">
+                                                @if ($sidebarAvatarUrl)
+                                                    <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                                @else
+                                                    <span class="text-sm font-semibold text-emerald-700">{{ $userInitials }}</span>
+                                                @endif
                                             </div>
-                                            <span class="font-medium flex-1 text-left">Edit Profil</span>
+                                            <div>
+                                                <p class="text-sm font-semibold text-emerald-900">{{ $authUser->name }}</p>
+                                                <p class="text-[11px] text-emerald-600/80">{{ $authUser->email }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="py-2 bg-white/70">
+                                        <a href="{{ route('profile.edit') }}" @click="sidebarOpen = false; mobileUserMenuOpen = false"
+                                           class="group flex items-center px-4 py-3 text-sm text-emerald-700 hover:bg-emerald-50/80 transition-all">
+                                            <div class="w-9 h-9 flex items-center justify-center bg-emerald-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
+                                                <i class="fas fa-user-edit text-sm text-emerald-600"></i>
+                                            </div>
+                                            <div class="flex-1 text-left">
+                                                <p class="font-semibold leading-none">Edit Profil</p>
+                                                <p class="text-[10px] text-emerald-500 mt-1">Ubah informasi akun</p>
+                                            </div>
+                                            <i class="fas fa-chevron-right text-xs text-emerald-400 group-hover:translate-x-1 transition-transform"></i>
                                         </a>
-                                        
-                                        <!-- Logout -->
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
                                             <button type="submit"
-                                                class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                                                <div class="w-8 h-8 flex items-center justify-center bg-red-100 rounded-lg mr-3 shrink-0">
-                                                    <i class="fas fa-sign-out-alt text-xs text-red-600"></i>
+                                                    class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-all">
+                                                <div class="w-9 h-9 flex items-center justify-center bg-red-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
+                                                    <i class="fas fa-sign-out-alt text-sm text-red-600"></i>
                                                 </div>
-                                                <span class="font-medium flex-1 text-left">Keluar</span>
+                                                <div class="flex-1 text-left">
+                                                    <p class="font-semibold leading-none">Keluar</p>
+                                                    <p class="text-[10px] text-red-500 mt-1">Akhiri sesi aplikasi</p>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-xs text-red-400 group-hover:translate-x-1 transition-transform"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </nav>
                 </aside>
             </div>
         </div>
 
         <!-- Main Content Area -->
-        <main class="flex-1 lg:ml-64">
+        <main class="flex-1" :class="sidebarCollapsed ? 'lg:ml-24' : 'lg:ml-64'">
             <div class="h-16 lg:hidden"></div>
 
             @isset($header)
