@@ -52,7 +52,7 @@
             <tr class="text-center border-t">
                 <td class="px-3 py-2">{{ $st->product_name}}</td>
                 <th class="px-3 py-2">{{ $st->supplier_name }}</th>
-                <td class="px-3 py-2">{{ $st->stock_qty }}</td>
+                <td class="px-3 py-2 font-bold text-green-900">{{ $st->stock_qty }}</td>
                 <td class="px-3 py-2">{{ $st->satuan }}</td>
                 <td class="px-3 py-2">{{ number_format($st->prices,0,',','.') }}</td>
                 <td class="px-3 py-2">{{ number_format($st->total_price,0,',','.')}}</td>

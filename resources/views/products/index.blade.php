@@ -83,19 +83,28 @@
                             <!-- Price and Stock -->
                             <div class="flex items-center justify-between mb-3">
                                 <span class="flex text-sm text-green-700">
-                                    @php
-                                        $unit = $product->units; // relasi units di model Produk
-                                        $stok = $product['stock_quantity'] ?? 0;
-                                        $conversion = $unit ? $unit->conversion_to_base : 1;
-                                        $isDus = $unit && $unit->name == 'dus' && $stok % $conversion === 0 && $stok > 0;
-                                    @endphp
-                                    Stok:
-                                    @if($isDus)
-                                        {{ $stok / $conversion }} dus
-                                    @else
-                                        {{ $stok }} {{ $unit ? $unit->name : '' }}
-                                    @endif
-                                </span>
+                                 @php
+                                $unit = $product->units; // relasi units di model Produk
+                                $stok = $product['stock_quantity'] ?? 0;
+                                $conversion = $unit ? $unit->conversion_to_base : 1;
+                                $selectedUnitId = old("produk.{$product->id}.satuan", $product->satuan);
+                                $selectedUnit = $units->firstWhere('id', $selectedUnitId);
+                                $isDus = $selectedUnit && $selectedUnit->name == 'dus';
+                                $isPcs = $selectedUnit && $selectedUnit->name == 'pcs';
+                                if ($isDus) {
+                                    $displayStok = $conversion > 0 ? floor($stok / $conversion) : $stok;
+                                    $displaySatuan = 'dus';
+                                } elseif ($isPcs) {
+                                    $displayStok = $stok;
+                                    $displaySatuan = 'pcs';
+                                } else {
+                                    $displayStok = $stok;
+                                    $displaySatuan = $selectedUnit ? $selectedUnit->name : '';
+                                }
+                            @endphp
+                            <span class="font-semibold text-green-700">
+                                {{ $displayStok }} {{ $displaySatuan }}
+                            </span>
                             </div>
 
                             <!-- Action Buttons -->
@@ -261,10 +270,42 @@
                                             </div>
 
                                             <!-- Stok -->
-                                            <div>
+                                           <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Jumlah Stok</label>
-                                                <input type="number" name="stock1" value="{{ $product['stock_quantity'] ?? '' }}" class="w-full p-2 border border-green-200 rounded">
+                                                @php
+                                                    // Ambil relasi satuan dari produk
+                                                    $unit = $product->units;
+                                                    $stok = $product->stock_quantity ?? 0;
+                                                    $conversion = $unit?->conversion_to_base ?? 1;
+
+                                                    // Ambil satuan yang sedang dipilih (dari input lama atau default produk)
+                                                    $selectedUnitId = old("produk.{$product->id}.satuan", $product->satuan);
+                                                    $selectedUnit = $units->firstWhere('id', $selectedUnitId);
+
+                                                    // Hitung stok yang akan ditampilkan berdasarkan satuan terpilih
+                                                    if ($selectedUnit) {
+                                                        $displaySatuan = $selectedUnit->name;
+                                                        $displayStok = $conversion > 0 ? floor($stok / $conversion) : $stok;
+                                                    } else {
+                                                        // fallback jika tidak ada satuan
+                                                        $displaySatuan = $unit?->name ?? '';
+                                                        $displayStok = $stok;
+                                                    }
+                                                @endphp
+
+                                                <div class="flex items-center gap-2">
+                                                    <input
+                                                        type="number"
+                                                        name="stock1"
+                                                        value="{{ $displayStok }}"
+                                                        class="w-full p-2 border border-green-200 rounded focus:ring-2 focus:ring-green-400 focus:outline-none"
+                                                    >
+                                                    <span class="px-3 py-2 text-sm font-semibold text-green-800 bg-green-100 rounded">
+                                                        {{ $displaySatuan }}
+                                                    </span>
+                                                </div>
                                             </div>
+
                                             <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Satuan</label>
                                                 <input type="text" name="satuan1" value="{{ $product->units->name }}" class="w-full p-2 border border-green-200 rounded">

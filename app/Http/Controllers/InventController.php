@@ -55,9 +55,9 @@ class InventController extends Controller
         return view('inventory.create_stock',compact(['produk', 'category', 'units']));
 
     }
-    public function updateStock(request $request)
-    {
-           $validated = $request->validate([
+public function updateStock(Request $request)
+{
+    $validated = $request->validate([
         'name_p'   => 'required|exists:products,id',
         'harga_p'  => 'required|numeric|min:0',
         'stok'     => 'required|integer|min:1',
@@ -67,8 +67,9 @@ class InventController extends Controller
     ]);
 
     // Ambil produk dan satuan
-    $produk = \App\Models\Produk::findOrFail($validated['name_p']);
-    $unit   = \App\Models\Units::findOrFail($validated['satuan']);
+    $produk   = Produk::findOrFail($validated['name_p']);
+    $unit     = Units::findOrFail($validated['satuan']);
+    $supplier = Supplier::find($produk->supplier_id)?->name ?? 'Unknown';
 
     // Simpan bukti jika ada
     $buktiPath = null;
@@ -76,32 +77,36 @@ class InventController extends Controller
         $buktiPath = $request->file('bukti')->store('bukti', 'public');
     }
 
-    // Catat stok masuk
+    // ✅ Hitung jumlah stok dalam satuan dasar (pcs)
+    // Misalnya: 5 dus × 12 = 60 pcs
+    $stokDalamPcs = $validated['stok'] * ($unit->conversion_to_base ?? 1);
+
+    // Catat stok masuk (tetap tampilkan satuan asli yg dimasukkan user)
     Stockin::create([
         'product_name'  => $produk->name,
-        'supplier_name' => $produk->supplier_id,
-        'stock_qty'     => $validated['stok'],
-        'satuan'        => $unit->name,
+        'supplier_name' => $supplier,
+        'stock_qty'     => $validated['stok'],     // jumlah asli yg diinput user (mis. 5 dus)
+        'satuan'        => $unit->name,            // nama satuan (mis. dus)
         'prices'        => $validated['harga_p'],
         'total_price'   => $validated['harga_t'],
         'bukti'         => $buktiPath,
     ]);
 
-    // Update stok produk
-    $produk->stock_quantity += $validated['stok'];
+    // ✅ Update stok produk berdasarkan satuan dasar
+    $produk->stock_quantity += $stokDalamPcs;
     $produk->satuan = $unit->id;
     $produk->save();
 
     // Catat aktivitas
     Activity::create([
-        'user'       => Auth::check() ? Auth::user()->name : 'Guest',
-        'action'     => 'Menambah stok',
-        'model'      => 'inventori',
-        'record_id'  => $produk->id,
+        'user'      => Auth::check() ? Auth::user()->name : 'Guest',
+        'action'    => 'Menambah stok',
+        'model'     => 'inventori',
+        'record_id' => $produk->id,
     ]);
 
     return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
-    }
+}
 
     /**
      * Store a newly created resource in storage.
@@ -160,6 +165,13 @@ class InventController extends Controller
             }
         }
     }
+        Activity::create([
+        'user'      => Auth::check() ? Auth::user()->name : 'Guest',
+        'action'    => 'Menyesuaikan stok',
+        'model'     => 'inventori',
+        'record_id' => $product->id,
+    ]);
+
 
     return redirect()->back()->with('success', 'Semua produk berhasil diperbarui!');    }
 
