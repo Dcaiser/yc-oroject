@@ -25,7 +25,7 @@
     @endif
             @if ($stock->isNotEmpty())
 
-    <form action="" method="POST" class="mb-4">
+    <form action="" method="POST" class="mb-4" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data stok masuk?');">
         @csrf
         @method('DELETE')
         <button type="submit" class="px-3 py-2 text-white bg-red-600 rounded hover:bg-red-700">
