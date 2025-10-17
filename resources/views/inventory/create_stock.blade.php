@@ -17,17 +17,36 @@
             <form method="POST" action="{{ route('addstock') }}" enctype="multipart/form-data"
       class="space-y-8"
       onsubmit="return confirm('Simpan data terbaru?')"
-      x-data="{
-        stokUser: 0,
-        hargaRaw: 0,
+            x-data="{
+                stokUser: Number(@json(old('stok', 0))) || 0,
+                hargaRaw: Number(@json(old('harga_p', 0))) || 0,
         hargaFormatted: '',
         hargaTotal: 0,
-        formatRupiah(value) { return new Intl.NumberFormat('id-ID').format(value); },
+        products: {{ Js::from($produk->mapWithKeys(fn($item) => [
+            (string) $item->id => [
+                'unit_id' => $item->satuan,
+                'unit_name' => $item->units->name ?? null,
+            ]
+        ])) }},
+    selectedProduct: String(@json(old('name_p', $produk->first()->id ?? ''))),
+        selectedUnitId: null,
+        selectedUnitName: '',
+        formatRupiah(value) { return new Intl.NumberFormat('id-ID').format(value || 0); },
         updateHargaTotal() {
             this.hargaTotal = (this.hargaRaw * this.stokUser) || 0;
+        },
+        syncUnit() {
+            const productData = this.products[this.selectedProduct] || null;
+            if (productData) {
+                this.selectedUnitId = productData.unit_id || '';
+                this.selectedUnitName = productData.unit_name || 'Belum diatur';
+            } else {
+                this.selectedUnitId = '';
+                this.selectedUnitName = 'Belum diatur';
+            }
         }
       }"
-      x-init="hargaFormatted = formatRupiah(hargaRaw)">
+      x-init="hargaFormatted = formatRupiah(hargaRaw); updateHargaTotal(); syncUnit();">
     @csrf
 
     <!-- Pilih Produk -->
@@ -35,9 +54,11 @@
         <label for="name-p" class="block mb-1 text-sm font-semibold text-green-700">Pilih Produk</label>
         <select id="name-p" required
             name="name_p"
+            x-model="selectedProduct"
+            @change="syncUnit()"
             class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
             @foreach($produk as $cat)
-            <option value="{{$cat->id}}">{{$cat->name}}</option>
+            <option value="{{$cat->id}}" {{ (string) old('name_p', $produk->first()->id ?? '') === (string) $cat->id ? 'selected' : '' }}>{{$cat->name}}</option>
             @endforeach
         </select>
         @error('name-p')
@@ -82,18 +103,16 @@
 
     <!-- Satuan -->
     <div class="mt-4">
-        <label for="satuan" class="block mb-1 text-sm font-semibold text-green-700">
+        <label class="block mb-1 text-sm font-semibold text-green-700">
             Satuan <span class="text-red-500">*</span>
         </label>
-        <select id="satuan"
-            name="satuan"
-            required
-            class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
-            <option value="">Pilih satuan</option>
-            @foreach($units as $unit)
-                <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-            @endforeach
-        </select>
+        <div class="w-full px-3 py-2 text-green-800 bg-green-100 border-2 border-green-200 rounded-lg">
+            <span x-text="selectedUnitName"></span>
+        </div>
+        <input type="hidden" name="satuan" :value="selectedUnitId">
+        <template x-if="!selectedUnitId">
+            <p class="mt-1 text-sm text-red-600">Satuan produk belum diatur. Silakan perbarui data produk terlebih dahulu.</p>
+        </template>
         @error('satuan')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror

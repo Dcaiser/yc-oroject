@@ -50,7 +50,7 @@ class InventController extends Controller
     public function createStock()
     {
         $units = Units::all();
-        $produk = Produk::all();
+        $produk = Produk::with('units')->get();
         $category = Kategori::all();
         return view('inventory.create_stock',compact(['produk', 'category', 'units']));
 
@@ -77,9 +77,15 @@ public function updateStock(Request $request)
         $buktiPath = $request->file('bukti')->store('bukti', 'public');
     }
 
-    // ✅ Hitung jumlah stok dalam satuan dasar (pcs)
-    // Misalnya: 5 dus × 12 = 60 pcs
-    $stokDalamPcs = $validated['stok'] * ($unit->conversion_to_base ?? 1);
+    // Hitung stok tambahan dalam satuan produk saat ini
+    $produkUnit = $produk->units;
+    $produkConversion = $produkUnit?->conversion_to_base ?: ($unit->conversion_to_base ?: 1);
+    $inputConversion = $unit->conversion_to_base ?: 1;
+
+    // Konversi stok masuk ke satuan produk
+    $stokDalamSatuanProduk = $produkConversion > 0
+        ? ($validated['stok'] * $inputConversion) / $produkConversion
+        : $validated['stok'];
 
     // Catat stok masuk (tetap tampilkan satuan asli yg dimasukkan user)
     Stockin::create([
@@ -92,9 +98,11 @@ public function updateStock(Request $request)
         'bukti'         => $buktiPath,
     ]);
 
-    // ✅ Update stok produk berdasarkan satuan dasar
-    $produk->stock_quantity += $stokDalamPcs;
-    $produk->satuan = $unit->id;
+    // Update stok produk dalam satuan produk
+    $produk->stock_quantity += $stokDalamSatuanProduk;
+    if (!$produk->satuan) {
+        $produk->satuan = $unit->id;
+    }
     $produk->save();
 
     // Catat aktivitas

@@ -82,29 +82,17 @@
 
                             <!-- Price and Stock -->
                             <div class="flex items-center justify-between mb-3">
-                                <span class="flex text-sm text-green-700">
-                                 @php
-                                $unit = $product->units; // relasi units di model Produk
-                                $stok = $product['stock_quantity'] ?? 0;
-                                $conversion = $unit ? $unit->conversion_to_base : 1;
-                                $selectedUnitId = old("produk.{$product->id}.satuan", $product->satuan);
-                                $selectedUnit = $units->firstWhere('id', $selectedUnitId);
-                                $isDus = $selectedUnit && $selectedUnit->name == 'dus';
-                                $isPcs = $selectedUnit && $selectedUnit->name == 'pcs';
-                                if ($isDus) {
-                                    $displayStok = $conversion > 0 ? floor($stok / $conversion) : $stok;
-                                    $displaySatuan = 'dus';
-                                } elseif ($isPcs) {
-                                    $displayStok = $stok;
-                                    $displaySatuan = 'pcs';
-                                } else {
-                                    $displayStok = $stok;
-                                    $displaySatuan = $selectedUnit ? $selectedUnit->name : '';
-                                }
-                            @endphp
-                            <span class="font-semibold text-green-700">
-                                {{ $displayStok }} {{ $displaySatuan }}
-                            </span>
+                                @php
+                                    $unit = $product->units;
+                                    $stok = $product->stock_quantity ?? 0;
+                                    $formattedStock = fmod($stok, 1) === 0.0
+                                        ? number_format($stok, 0, ',', '.')
+                                        : rtrim(rtrim(number_format($stok, 4, ',', '.'), '0'), ',');
+                                    $displayUnit = $unit?->name ?? '-';
+                                @endphp
+                                <span class="text-sm font-semibold text-green-700">
+                                    {{ $formattedStock }} {{ $displayUnit }}
+                                </span>
                             </div>
 
                             <!-- Action Buttons -->
@@ -272,43 +260,28 @@
                                             <!-- Stok -->
                                            <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Jumlah Stok</label>
-                                                @php
-                                                    // Ambil relasi satuan dari produk
-                                                    $unit = $product->units;
-                                                    $stok = $product->stock_quantity ?? 0;
-                                                    $conversion = $unit?->conversion_to_base ?? 1;
-
-                                                    // Ambil satuan yang sedang dipilih (dari input lama atau default produk)
-                                                    $selectedUnitId = old("produk.{$product->id}.satuan", $product->satuan);
-                                                    $selectedUnit = $units->firstWhere('id', $selectedUnitId);
-
-                                                    // Hitung stok yang akan ditampilkan berdasarkan satuan terpilih
-                                                    if ($selectedUnit) {
-                                                        $displaySatuan = $selectedUnit->name;
-                                                        $displayStok = $conversion > 0 ? floor($stok / $conversion) : $stok;
-                                                    } else {
-                                                        // fallback jika tidak ada satuan
-                                                        $displaySatuan = $unit?->name ?? '';
-                                                        $displayStok = $stok;
-                                                    }
-                                                @endphp
-
                                                 <div class="flex items-center gap-2">
                                                     <input
                                                         type="number"
                                                         name="stock1"
-                                                        value="{{ $displayStok }}"
+                                                            value="{{ old('stock1', $product->stock_quantity) }}"
                                                         class="w-full p-2 border border-green-200 rounded focus:ring-2 focus:ring-green-400 focus:outline-none"
                                                     >
                                                     <span class="px-3 py-2 text-sm font-semibold text-green-800 bg-green-100 rounded">
-                                                        {{ $displaySatuan }}
+                                                            {{ $product->units?->name ?? '-' }}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Satuan</label>
-                                                <input type="text" name="satuan1" value="{{ $product->units->name }}" class="w-full p-2 border border-green-200 rounded">
+                                                    <select name="satuan1" class="w-full p-2 border border-green-200 rounded">
+                                                        @foreach($units as $unitOption)
+                                                            <option value="{{ $unitOption->id }}" {{ $product->satuan == $unitOption->id ? 'selected' : '' }}>
+                                                                {{ $unitOption->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                             </div>
 
                                             <!-- Tombol Submit -->

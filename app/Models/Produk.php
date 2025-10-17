@@ -22,9 +22,12 @@ class Produk extends Model
         'sku',
         'stock_quantity',
         'description',
+        'image_path',
         'satuan',
         'supplier_id'
     ];
+
+    protected $appends = ['image_url'];
 
     public function prices()
 {
@@ -33,6 +36,11 @@ class Produk extends Model
     public function units()
     {
         return $this->belongsTo(Units::class, 'satuan');
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
     }
 
 

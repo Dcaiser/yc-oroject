@@ -89,47 +89,28 @@
                             @endforeach
                         </div>
                         <!-- Stock -->
-                        
+
                         <div
                             x-data="{
                                 units: {{ Js::from($units->map(fn($u)=>['id'=>$u->id,'name'=>$u->name,'conversion'=>$u->conversion_to_base])) }},
-                                stokUser: 0,
-                                selectedUnit: '',
-                                stokFinal: 0,
-                                hargaRaw: 0,
-                                hargaFormatted: '',
-                                hargaTotal: 0,
-
-                                formatRupiah(value) {
-                                    return new Intl.NumberFormat('id-ID').format(value);
-                                },
-
-                                updateFinalQty() {
-                                    let unit = this.units.find(u => u.id == this.selectedUnit);
-                                    this.stokFinal = (unit && unit.conversion && this.stokUser > 0)
-                                        ? this.stokUser * unit.conversion
-                                        : 0;
-                                    this.updateHargaTotal();
-                                },
-
-                                updateHargaTotal() {
-                                    this.hargaTotal = (this.hargaRaw * this.stokFinal) || 0;
-                                }
+                                stokUser: {{ old('stok_user', 0) }},
+                                selectedUnit: '{{ old('satuan') }}'
                             }"
-                            x-init="hargaFormatted = formatRupiah(hargaRaw)"
                         >
                             <div class="mt-4">
                                 <label for="stok" class="block mb-1 text-sm font-semibold text-green-700">
-                                    stok barang <span class="text-red-500">*</span>
+                                    Stok Barang <span class="text-red-500">*</span>
                                 </label>
                                 <input type="number"
                                     id="stok"
                                     name="stok_user"
                                     x-model.number="stokUser"
                                     min="1"
-                                    @input="updateFinalQty"
                                     class="w-full px-3 py-2 border-2 border-green-200 rounded-lg bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400"
                                     placeholder="0">
+                                @error('stok_user')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <label for="satuan" class="block mt-4 mb-1 text-sm font-semibold text-green-700">
@@ -138,7 +119,6 @@
                             <select id="satuan"
                                 name="satuan"
                                 x-model="selectedUnit"
-                                @change="updateFinalQty"
                                 required
                                 class="w-full px-3 py-2 border-2 border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 bg-green-50">
                                 <option value="">Pilih satuan</option>
@@ -147,17 +127,7 @@
                                 </template>
                             </select>
 
-                            <!-- Hidden input untuk stok final (dalam pcs) -->
-                            <input type="hidden" name="stok" :value="stokFinal">
-
-                            <!-- Tampilkan hasil konversi -->
-                            <template x-if="stokFinal > 0 && selectedUnit">
-                                <div class="mt-2 text-sm text-green-700">
-                                    <span x-text="stokUser"></span>
-                                    <span x-text="units.find(u => u.id == selectedUnit)?.name"></span>
-                                    = <span x-text="stokFinal"></span> pcs
-                                </div>
-                            </template>
+                            <p class="mt-2 text-xs text-green-600">Jumlah stok akan disimpan sesuai satuan yang dipilih. Konversi ke PCS hanya dilakukan saat diperlukan di halaman inventori.</p>
                         </div>
                         <!-- Category -->
                         <div>
@@ -181,8 +151,9 @@
                         <div x-data="imageUploader()" class="space-y-4">
                             <div class="p-6 text-center border-2 border-green-200 border-dashed rounded-lg"
                                 :class="{ 'border-green-500 bg-green-50': dragging }"
-                                @dragover.prevent="dragging = true"
-                                @dragleave.prevent="dragging = false"
+                                @dragover.prevent="onDragOver"
+                                @dragenter.prevent="onDragOver"
+                                @dragleave.prevent="onDragLeave"
                                 @drop.prevent="handleDrop($event)">
                                 <template x-if="!preview">
                                     <div>
@@ -190,7 +161,7 @@
                                         <p class="mb-2 text-green-600">Drag & drop gambar di sini</p>
                                         <p class="mb-4 text-sm text-green-500">atau</p>
                                         <button type="button"
-                                            @click="$refs.fileInput.click()"
+                                            @click="triggerFileDialog"
                                             class="px-4 py-2 text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                                             Pilih File
                                         </button>
@@ -200,7 +171,7 @@
                                     <div class="relative">
                                         <img :src="preview" alt="Preview" class="object-cover h-48 max-w-full mx-auto rounded-lg">
                                         <button type="button"
-                                            @click="preview = null; $refs.fileInput.value = ''"
+                                            @click="removeImage"
                                             class="absolute flex items-center justify-center w-8 h-8 text-white bg-red-500 rounded-full top-2 right-2 hover:bg-red-600">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -213,6 +184,12 @@
                                 accept="image/*"
                                 @change="updatePreview($event.target.files[0])"
                                 class="hidden">
+                            <template x-if="fileName">
+                                <p class="text-sm text-green-700" x-text="fileName"></p>
+                            </template>
+                            <template x-if="errorMessage">
+                                <p class="text-sm text-red-500" x-text="errorMessage"></p>
+                            </template>
                             <p class="text-xs text-green-500">
                                 Format yang didukung: JPG, PNG, GIF. Maksimal 2MB.
                             </p>
@@ -238,3 +215,85 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        window.imageUploader = function (config = {}) {
+            return {
+                preview: config.initialUrl ?? null,
+                dragging: false,
+                fileName: config.initialName ?? '',
+                errorMessage: '',
+                init() {
+                    if (this.preview && this.fileName === '' && config.initialName) {
+                        this.fileName = config.initialName;
+                    }
+                },
+                onDragOver() {
+                    this.dragging = true;
+                },
+                onDragLeave() {
+                    this.dragging = false;
+                },
+                handleDrop(event) {
+                    this.dragging = false;
+                    const file = event?.dataTransfer?.files?.[0];
+                    if (file) {
+                        this.setFile(file);
+                    }
+                },
+                triggerFileDialog() {
+                    this.$refs.fileInput?.click();
+                },
+                updatePreview(file) {
+                    if (!file) {
+                        this.reset();
+                        return;
+                    }
+                    this.setFile(file);
+                },
+                setFile(file) {
+                    if (!file.type.startsWith('image/')) {
+                        this.errorMessage = 'File harus berupa gambar (JPG, PNG, GIF).';
+                        this.reset(true);
+                        return;
+                    }
+
+                    this.errorMessage = '';
+
+                    if (this.preview) {
+                        URL.revokeObjectURL(this.preview);
+                    }
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    if (this.$refs.fileInput) {
+                        this.$refs.fileInput.files = dataTransfer.files;
+                    }
+
+                    this.preview = URL.createObjectURL(file);
+                    this.fileName = file.name;
+                },
+                removeImage() {
+                    if (this.preview) {
+                        URL.revokeObjectURL(this.preview);
+                    }
+                    this.reset();
+                },
+                reset(keepError = false) {
+                    if (!keepError) {
+                        this.errorMessage = '';
+                    }
+                    this.preview = null;
+                    this.dragging = false;
+                    this.fileName = '';
+                    if (this.$refs.fileInput) {
+                        this.$refs.fileInput.value = '';
+                        const emptyTransfer = new DataTransfer();
+                        this.$refs.fileInput.files = emptyTransfer.files;
+                    }
+                }
+            };
+        };
+    });
+</script>

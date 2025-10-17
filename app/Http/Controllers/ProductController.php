@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\Price;
 use Illuminate\Http\Request;
@@ -46,66 +47,82 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-        'nama'         => 'required|string|max:255',
-        'deskripsi'    => 'nullable|string',
-        'supplier_id'  => 'required|int',
-        'kategori_id'  => 'required|int',
-        'stok_user'    => 'required|integer|min:1',
-        'satuan'       => 'required|exists:units,id',
-        'stok'         => 'required|integer|min:1',
-      //  'gambar'       => 'nullable|image|max:2048',
-        'prices'       => 'required|array',
-        'prices.*'     => 'required|numeric|min:0',
-    ]);
-
-                 // Ambil kode kategori (3 huruf pertama)
-                $kodeKategori = strtoupper(Str::limit(preg_replace('/\s+/', '', $request->kategori_id), 3, ''));
-
-                 // Ambil kode nama (3 huruf pertama)
-                $kodeNama = strtoupper(Str::limit(preg_replace('/\s+/', '', $request->nama), 3, ''));
-
-                // SKU Final
-                $sku = $kodeKategori . '-' . $kodeNama;
-
-                // Cek apakah SKU ini sudah ada
-                $produk = Produk::where('sku', $sku)->first();
-
-                 if ($produk) {
-                    // Kalau sudah ada → tambahkan stok
-                   $produk->stock_quantity += $request->stok;
-                    $produk->save();
-                 } else {
-                // Simpan gambar jika ada
-                   $path = null;
-                   //
-                //  if ($request->hasFile('gambar')) {
-                //    $path = $request->file('gambar')->store('foto_produk', 'public');
-
-                 //}
-                 //
-                }
-                $unit = Units::find($request->satuan);
-                $stokBase = $request->stok_user * $unit->conversion_to_base;
-
-     // Kalau belum ada → buat produk baru
- $pro = Produk::create([
-        'name'         => $validated['nama'],
-        'description'  => $validated['deskripsi'],
-        'sku'          => $sku,
-        'supplier_id'  => $validated['supplier_id'],
-        'category_id'  => $validated['kategori_id'],
-        'stock_quantity' => $stokBase,
-        'satuan'       => $validated['satuan'],
-       // 'gambar'       => $gambarPath,
-    ]);
-
- foreach ($validated['prices'] as $type => $price) {
-        Price::create([
-            'product_id'    => $pro->id,
-            'customer_type' => $type,
-            'price'         => $price,
+            'nama'         => 'required|string|max:255',
+            'deskripsi'    => 'nullable|string',
+            'supplier_id'  => 'required|int',
+            'kategori_id'  => 'required|int',
+            'stok_user'    => 'required|numeric|min:0.0001',
+            'satuan'       => 'required|exists:units,id',
+            'gambar'       => 'nullable|image|max:2048',
+            'prices'       => 'required|array',
+            'prices.*'     => 'required|numeric|min:0',
         ]);
-    }
+
+        $category = Kategori::findOrFail($validated['kategori_id']);
+        $supplier = Supplier::findOrFail($validated['supplier_id']);
+        $unit     = Units::findOrFail($validated['satuan']);
+        $stokDisimpan = $validated['stok_user'];
+
+        // Cek apakah produk ini sudah ada berdasarkan kombinasi nama, kategori, dan supplier
+        $produk = Produk::whereRaw('LOWER(name) = ?', [Str::lower($validated['nama'])])
+            ->where('category_id', $category->id)
+            ->where('supplier_id', $supplier->id)
+            ->first();
+
+        $path = null;
+        if ($request->hasFile('gambar')) {
+            $path = $request->file('gambar')->store('foto_produk', 'public');
+        }
+
+        if ($produk) {
+            // Jika produk sudah ada, pastikan stok disimpan pada satuan dasar produk
+            $existingUnit = $produk->units;
+            $existingConversion = $existingUnit?->conversion_to_base ?: 1;
+            $incomingConversion = $unit->conversion_to_base ?: 1;
+
+            $stokDalamSatuanProduk = $incomingConversion > 0
+                ? ($stokDisimpan * $incomingConversion) / ($existingConversion ?: 1)
+                : $stokDisimpan;
+
+            $produk->stock_quantity += $stokDalamSatuanProduk;
+
+            if ($path) {
+                if ($produk->image_path && Storage::disk('public')->exists($produk->image_path)) {
+                    Storage::disk('public')->delete($produk->image_path);
+                }
+                $produk->image_path = $path;
+            }
+
+            if (!$produk->satuan) {
+                $produk->satuan = $unit->id;
+            }
+
+            $produk->save();
+            $pro = $produk;
+        } else {
+            $pro = Produk::create([
+                'name'            => $validated['nama'],
+                'description'     => $validated['deskripsi'],
+                'sku'             => $this->generateComplexSku($category, $supplier),
+                'supplier_id'     => $validated['supplier_id'],
+                'category_id'     => $validated['kategori_id'],
+                'stock_quantity'  => $stokDisimpan,
+                'satuan'          => $unit->id,
+                'image_path'      => $path,
+            ]);
+        }
+
+        foreach ($validated['prices'] as $type => $price) {
+            Price::updateOrCreate(
+                [
+                    'product_id'    => $pro->id,
+                    'customer_type' => $type,
+                ],
+                [
+                    'price' => $price,
+                ]
+            );
+        }
 // Simpan aktivitas
 Activity::create([
     'user'       => Auth::check() ? Auth::user()->name : 'Guest',
@@ -136,8 +153,8 @@ Activity::create([
         $validated = $request->validate([
             'title1' => 'required|string|max:255',
             'price1' => 'nullable|numeric',
-            'stock1'  => 'required|integer',
-            'satuan1' => 'required|string',
+            'stock1'  => 'required|numeric|min:0',
+            'satuan1' => 'required|exists:units,id',
             'description1' => 'required|string',
             'sku1' => 'required|string',
             'description1' => 'required|string',
@@ -145,6 +162,7 @@ Activity::create([
             'supplier_id1' => 'required|int',
             'prices' => 'sometimes|array',
             'prices.*' => 'nullable|numeric|min:0',
+            'gambar_edit' => 'nullable|image|max:2048',
 
 
         ]);
@@ -153,19 +171,31 @@ Activity::create([
         $product = Produk::findOrFail($id);
 
         // update data
-        $product->update(
-            [
-    'name'           => $request->title1,        // pastikan field DB kamu pakai "name"
-    'category_id'    => $request->kategori_id1,
-    'satuan'         => $request->satuan1,
-    'sku'            => $request->sku1,
-    'stock_quantity' => $request->stock1,
-    'description'    => $request->description1,
-    'supplier_id'       => $request->supplier_id1,
-    // 'gambar'      => $path, // aktifkan kalau ada upload gambar
-]
+        $oldImagePath = $product->image_path;
+        $newImagePath = null;
+        if ($request->hasFile('gambar_edit')) {
+            $newImagePath = $request->file('gambar_edit')->store('foto_produk', 'public');
+        }
 
-        );
+        $updateData = [
+            'name'           => $request->title1,
+            'category_id'    => $request->kategori_id1,
+            'satuan'         => $request->satuan1,
+            'sku'            => $request->sku1,
+            'stock_quantity' => $request->stock1,
+            'description'    => $request->description1,
+            'supplier_id'    => $request->supplier_id1,
+        ];
+
+        if ($newImagePath) {
+            $updateData['image_path'] = $newImagePath;
+        }
+
+        $product->update($updateData);
+
+        if ($newImagePath && $oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
         Activity::create([
             'user'       => Auth::check() ? Auth::user()->name : 'Guest',
             'action'     => 'Mengedit produk',
@@ -194,6 +224,38 @@ Activity::create([
         return redirect()->route('products.index')
                          ->with('success', 'Produk berhasil diperbarui!');
         }
+
+    protected function generateComplexSku(Kategori $category, Supplier $supplier): string
+    {
+        $categoryCode = $this->buildCodeFragment($category->name ?? 'CAT');
+        $supplierCode = $this->buildCodeFragment($supplier->name ?? 'SUP');
+        $dateCode     = now()->format('ymd');
+
+        $baseSequence = Produk::whereDate('created_at', now()->toDateString())->count() + 1;
+        $attempt      = 0;
+
+        do {
+            $sequence = str_pad($baseSequence + $attempt, 3, '0', STR_PAD_LEFT);
+            $random   = strtoupper(Str::random(2));
+            $sku      = sprintf('%s%s-%s-%s%s', $categoryCode, $supplierCode, $dateCode, $sequence, $random);
+            $attempt++;
+        } while (Produk::where('sku', $sku)->exists());
+
+        return $sku;
+    }
+
+    protected function buildCodeFragment(string $source): string
+    {
+        $sanitized = preg_replace('/[^A-Za-z0-9]/', '', $source);
+        $code      = strtoupper(Str::limit($sanitized, 3, ''));
+
+        if (strlen($code) < 3) {
+            $code = strtoupper(str_pad($code, 3, 'X'));
+        }
+
+        return $code;
+    }
+
     public function destroy($id)
     {
         // Delete product logic

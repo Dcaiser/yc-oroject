@@ -121,36 +121,21 @@
                             </td>
                             <td class="px-2 py-1 border">
                                 @php
-                                    $unit = $p->units;
-                                    $stok = $p['stock_quantity'] ?? 0;
-                                    $conversion = $unit ? $unit->conversion_to_base : 1;
-                                    $selectedUnitId = old("produk.{$p->id}.satuan", $p->satuan);
-                                    $selectedUnit = $units->firstWhere('id', $selectedUnitId);
-                                    $isDus = $selectedUnit && $selectedUnit->name == 'dus';
-                                    $isPcs = $selectedUnit && $selectedUnit->name == 'pcs';
-                                    if ($isDus) {
-                                        $displayStok = $conversion > 0 ? floor($stok / $conversion) : $stok;
-                                        $displaySatuan = 'dus';
-                                    } elseif ($isPcs) {
-                                        $displayStok = $stok;
-                                        $displaySatuan = 'pcs';
-                                    } else {
-                                        $displayStok = $stok;
-                                        $displaySatuan = $selectedUnit ? $selectedUnit->name : '';
-                                    }
+                                    $storedQty = $p->stock_quantity ?? 0;
+                                    $displayStockRaw = $storedQty;
+                                    $displayStockFormatted = fmod($displayStockRaw, 1) === 0.0
+                                        ? number_format($displayStockRaw, 0, ',', '.')
+                                        : rtrim(rtrim(number_format($displayStockRaw, 4, ',', '.'), '0'), ',');
                                 @endphp
                                 <span class="font-semibold text-green-700">
-                                    {{ $displayStok }}
+                                    {{ $displayStockFormatted }}
                                 </span>
                             </td>
-                            <td class="px-4 py-2 border-none">
-                                <select name="produk[{{ $p->id }}][satuan]" class="w-full border-none rounded bg-green-50">
-                                    @foreach($units as $unit)
-                                        <option value="{{ $unit->id }}" {{ $p->satuan == $unit->id ? 'selected' : '' }}>
-                                            {{ $unit->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <td class="px-4 py-2 border">
+                                <span class="inline-flex items-center justify-center w-full px-3 py-1 text-sm font-semibold text-green-800 bg-green-100 rounded">
+                                    {{ $p->units?->name ?? '-' }}
+                                </span>
+                                <input type="hidden" name="produk[{{ $p->id }}][satuan]" value="{{ $p->satuan }}">
                             </td>
                             <td class="px-4 py-2 border">
                                 <select name="produk[{{ $p->id }}][category_id]" class="w-full rounded bg-green-50">
@@ -178,4 +163,5 @@
         <h1>Inventori kosong</h1>
     </div>
     @endif
+
 </x-app-layout>

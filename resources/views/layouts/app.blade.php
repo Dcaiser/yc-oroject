@@ -13,22 +13,22 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-white.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-white.png') }}">
     <link rel="shortcut icon" href="{{ asset('assets/logo/icon-white.png') }}">
-    
+
     <!-- Web App Manifest -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#047857">
-    
+
     <!-- SEO Meta Tags -->
     <meta name="description" content="Sistem Inventory Management Al-Ruhamaa' - Pengelolaan stok, produk, dan laporan yang efisien">
     <meta name="keywords" content="inventory, management, al-ruhamaa, sistem, stok, produk">
     <meta name="author" content="Al-Ruhamaa'">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Al-Ruhamaa' | Inventory System">
     <meta property="og:description" content="Sistem Inventory Management Al-Ruhamaa'">
     <meta property="og:image" content="{{ asset('assets/logo/icon-white.png') }}">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Al-Ruhamaa' | Inventory System">
@@ -78,7 +78,7 @@
 
         .nav-item:hover {
             transform: translateX(12px) scale(1.02);
-            box-shadow: 
+            box-shadow:
                 0 10px 30px rgba(16, 185, 129, 0.2),
                 0 6px 20px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -87,7 +87,7 @@
         .nav-item.active-nav-link {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
             transform: translateX(8px);
-            box-shadow: 
+            box-shadow:
                 0 8px 25px rgba(16, 185, 129, 0.25),
                 0 4px 15px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -192,7 +192,7 @@
             <!-- Logo & Brand -->
             <div class="p-4 border-b border-emerald-400/20">
                 <div class="flex items-center gap-3">
-                    <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg shadow-lg bg-white/10 backdrop-blur-sm">
                         <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                             alt="Al-Ruhamaa Logo"
                             class="object-contain w-7 h-7">
@@ -209,8 +209,8 @@
                 <!-- Dashboard - Semua user yang login -->
                 <a href="{{ route('dashboard') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-tachometer-alt text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-tachometer-alt"></i>
                     </div>
                     <span>Dashboard</span>
                 </a>
@@ -219,8 +219,8 @@
                 @if(Auth::user()->role === 'admin')
                 <a href="{{ route('users.index') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-users text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-users"></i>
                     </div>
                     <span>Manajemen User</span>
                 </a>
@@ -230,8 +230,8 @@
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('products.index') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('products.*') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-box text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-box"></i>
                     </div>
                     <span>Produk</span>
                 </a>
@@ -241,8 +241,8 @@
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('category') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-tags text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-tags"></i>
                     </div>
                     <span>Kategori Produk</span>
                 </a>
@@ -251,8 +251,8 @@
                 <!-- Inventory -->
                 <a href="{{ route('invent') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-warehouse text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-warehouse"></i>
                     </div>
                     <span>Inventory</span>
                 </a>
@@ -260,8 +260,8 @@
                 <!-- Supplier -->
                 <a href="{{ route('suppliers.index') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-truck text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fas fa-truck"></i>
                     </div>
                     <span>Supplier</span>
                 </a>
@@ -271,16 +271,16 @@
                 <div x-data="{ reportsOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
                     <button @click="reportsOpen = !reportsOpen"
                         class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.*') ? 'active-nav-link' : '' }}">
-                        <div class="icon-wrapper mr-3">
-                            <i class="fas fa-chart-line text-sm"></i>
+                        <div class="mr-3 icon-wrapper">
+                            <i class="text-sm fas fa-chart-line"></i>
                         </div>
                         <span class="flex-1 text-left">Laporan</span>
-                        <i class="fas fa-chevron-down text-sm transition-transform duration-300" 
+                        <i class="text-sm transition-transform duration-300 fas fa-chevron-down"
                            :class="{ 'rotate-180': reportsOpen }"></i>
                     </button>
-                    
+
                     <!-- Dropdown Menu -->
-                    <div x-show="reportsOpen" 
+                    <div x-show="reportsOpen"
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 transform -translate-y-2"
                          x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -288,51 +288,51 @@
                          x-transition:leave-start="opacity-100 transform translate-y-0"
                          x-transition:leave-end="opacity-0 transform -translate-y-2"
                          class="dropdown-menu p-2 space-y-0.5 ml-3">
-                        
-                        <a href="{{ route('reports.index') }}" 
+
+                        <a href="{{ route('reports.index') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.index') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-chart-pie text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-chart-pie"></i>
                             </div>
                             <span>Dashboard Laporan</span>
                         </a>
-                        
-                        <a href="{{ route('reports.supplier-performance') }}" 
+
+                        <a href="{{ route('reports.supplier-performance') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.supplier-performance') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-truck text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-truck"></i>
                             </div>
                             <span>Performa Supplier</span>
                         </a>
-                        
-                        <a href="{{ route('reports.stock-value') }}" 
+
+                        <a href="{{ route('reports.stock-value') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.stock-value') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-dollar-sign text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-dollar-sign"></i>
                             </div>
                             <span>Nilai Stok</span>
                         </a>
-                        
-                        <a href="{{ route('reports.movement') }}" 
+
+                        <a href="{{ route('reports.movement') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.movement') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-arrows-alt text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-arrows-alt"></i>
                             </div>
                             <span>Pergerakan Stok</span>
                         </a>
-                        
-                        <a href="{{ route('reports.weekly') }}" 
+
+                        <a href="{{ route('reports.weekly') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.weekly') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-calendar-week text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-calendar-week"></i>
                             </div>
                             <span>Laporan Mingguan</span>
                         </a>
-                        
-                        <a href="{{ route('reports.monthly') }}" 
+
+                        <a href="{{ route('reports.monthly') }}"
                            class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.monthly') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-calendar-alt text-xs"></i>
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-calendar-alt"></i>
                             </div>
                             <span>Laporan Bulanan</span>
                         </a>
@@ -344,8 +344,8 @@
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('activities.index') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fa-solid fa-note-sticky text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fa-solid fa-note-sticky"></i>
                     </div>
                     <span>Aktivitas</span>
                 </a>
@@ -354,16 +354,16 @@
                 <!-- Point of Sale -->
                 <a href="{{ route('pos') }}"
                     class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fa-solid fa-cart-shopping text-sm"></i>
+                    <div class="mr-3 icon-wrapper">
+                        <i class="text-sm fa-solid fa-cart-shopping"></i>
                     </div>
                     <span>Point of Sale</span>
                 </a>
 
                 <!-- Staff Create Report Button -->
                 @if(in_array(Auth::user()->role, ['staff']))
-                <div class="mt-4 px-4">
-                    <a href="#" 
+                <div class="px-4 mt-4">
+                    <a href="#"
                        class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-all duration-200 shadow text-sm">
                         <i class="fas fa-plus"></i>
                         <span>Buat Laporan</span>
@@ -374,25 +374,25 @@
 
             <!-- User Profile Section -->
             <div class="absolute bottom-0 left-0 right-0">
-                <div class="mx-4 mb-4 user-profile-card p-3">
+                <div class="p-3 mx-4 mb-4 user-profile-card">
                     <div x-data="{ userMenuOpen: false }" class="relative">
                         <button @click="userMenuOpen = !userMenuOpen"
-                                class="flex items-center justify-between w-full space-x-3 transition-all duration-200 hover:bg-white/5 rounded-lg p-1 -m-1">
-                            <div class="flex items-center space-x-3 flex-1 min-w-0">
-                                <div class="flex items-center justify-center w-8 h-8 user-avatar rounded-full">
-                                    <i class="text-white fas fa-user text-sm"></i>
+                                class="flex items-center justify-between w-full p-1 -m-1 space-x-3 transition-all duration-200 rounded-lg hover:bg-white/5">
+                            <div class="flex items-center flex-1 min-w-0 space-x-3">
+                                <div class="flex items-center justify-center w-8 h-8 rounded-full user-avatar">
+                                    <i class="text-sm text-white fas fa-user"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-emerald-200 capitalize">{{ Auth::user()->role }}</p>
+                                    <p class="text-xs capitalize text-emerald-200">{{ Auth::user()->role }}</p>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-center w-8 h-8 text-white/70 hover:text-white transition-colors">
-                                <i class="text-sm fas fa-chevron-up transition-transform duration-300" 
+                            <div class="flex items-center justify-center w-8 h-8 transition-colors text-white/70 hover:text-white">
+                                <i class="text-sm transition-transform duration-300 fas fa-chevron-up"
                                    :class="{ 'rotate-180': userMenuOpen }"></i>
                             </div>
                         </button>
-                        
+
                         <!-- User Dropdown Menu -->
                         <div x-show="userMenuOpen"
                              x-transition:enter="transition ease-out duration-200"
@@ -401,24 +401,24 @@
                              x-transition:leave="transition ease-in duration-150"
                              x-transition:leave-start="transform scale-100 opacity-100"
                              x-transition:leave-end="transform scale-95 opacity-0"
-                            class="absolute right-0 bottom-full mb-4 w-56 py-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50">
-                            
+                            class="absolute right-0 z-50 w-56 py-2 mb-4 bg-white border border-gray-100 shadow-2xl bottom-full rounded-2xl">
+
                             <a href="{{ route('profile.edit') }}"
-                                class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-emerald-50 transition-colors rounded-xl mx-2">
-                                <div class="w-10 h-10 flex items-center justify-center bg-emerald-100 rounded-xl mr-3">
-                                    <i class="fas fa-user-cog text-sm text-emerald-600"></i>
+                                class="flex items-center px-4 py-3 mx-2 text-sm text-gray-700 transition-colors hover:bg-emerald-50 rounded-xl">
+                                <div class="flex items-center justify-center w-10 h-10 mr-3 bg-emerald-100 rounded-xl">
+                                    <i class="text-sm fas fa-user-cog text-emerald-600"></i>
                                 </div>
                                 <span class="font-medium">Edit Profile</span>
                             </a>
-                            
-                            <div class="border-t border-gray-100 my-2 mx-4"></div>
-                            
+
+                            <div class="mx-4 my-2 border-t border-gray-100"></div>
+
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-xl mx-2">
-                                    <div class="w-10 h-10 flex items-center justify-center bg-red-100 rounded-xl mr-3">
-                                        <i class="fas fa-sign-out-alt text-sm text-red-600"></i>
+                                    class="flex items-center w-full px-4 py-3 mx-2 text-sm text-red-600 transition-colors hover:bg-red-50 rounded-xl">
+                                    <div class="flex items-center justify-center w-10 h-10 mr-3 bg-red-100 rounded-xl">
+                                        <i class="text-sm text-red-600 fas fa-sign-out-alt"></i>
                                     </div>
                                     <span class="font-medium">Logout</span>
                                 </button>
@@ -435,7 +435,7 @@
             <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-lg lg:hidden">
                 <div class="flex items-center justify-between px-4 py-4">
                     <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+                        <div class="flex items-center justify-center w-10 h-10 shadow-lg bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl">
                             <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                                 alt="Al-Ruhamaa Logo"
                                 class="object-contain w-6 h-6">
@@ -445,8 +445,8 @@
                             <p class="text-xs text-gray-500">Inventory System</p>
                         </div>
                     </div>
-                    <button @click="sidebarOpen = !sidebarOpen" 
-                            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
+                    <button @click="sidebarOpen = !sidebarOpen"
+                            class="p-2 text-gray-600 transition-all duration-200 rounded-lg hover:text-gray-900 hover:bg-gray-100">
                         <i class="text-xl fas fa-bars"></i>
                     </button>
                 </div>
@@ -461,7 +461,7 @@
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
                 class="fixed inset-0 z-40 bg-black bg-opacity-50">
-                
+
                 <aside x-show="sidebarOpen"
                     x-transition:enter="transition ease-in-out duration-300 transform"
                     x-transition:enter-start="-translate-x-full"
@@ -470,11 +470,11 @@
                     x-transition:leave-start="translate-x-0"
                     x-transition:leave-end="-translate-x-full"
                     class="w-64 h-full shadow-2xl sidebar-gradient">
-                    
+
                     <!-- Mobile Logo & Brand -->
                     <div class="p-4 border-b border-emerald-400/20">
                         <div class="flex items-center gap-3">
-                            <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-lg shadow-lg bg-white/10 backdrop-blur-sm">
                                 <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png"
                                     alt="Al-Ruhamaa Logo"
                                     class="object-contain w-7 h-7">
@@ -491,8 +491,8 @@
                         <!-- Dashboard -->
                         <a href="{{ route('dashboard') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-tachometer-alt text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-tachometer-alt"></i>
                             </div>
                             <span>Dashboard</span>
                         </a>
@@ -501,8 +501,8 @@
                         @if(Auth::user()->role === 'admin')
                         <a href="{{ route('users.index') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-users text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-users"></i>
                             </div>
                             <span>Manajemen User</span>
                         </a>
@@ -512,8 +512,8 @@
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
                         <a href="{{ route('products.index') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('products.*') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-box text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-box"></i>
                             </div>
                             <span>Produk</span>
                         </a>
@@ -523,18 +523,18 @@
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
                         <a href="{{ route('category') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-tags text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-tags"></i>
                             </div>
-                            <span>Kategori Produk</span>
+                            <span>Kategori & satuan</span>
                         </a>
                         @endif
 
                         <!-- Inventory -->
                         <a href="{{ route('invent') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-warehouse text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-warehouse"></i>
                             </div>
                             <span>Inventory</span>
                         </a>
@@ -542,8 +542,8 @@
                         <!-- Supplier -->
                         <a href="{{ route('suppliers.index') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-truck text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fas fa-truck"></i>
                             </div>
                             <span>Supplier</span>
                         </a>
@@ -553,15 +553,15 @@
                         <div x-data="{ reportsOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
                             <button @click="reportsOpen = !reportsOpen"
                                 class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.*') ? 'active-nav-link' : '' }}">
-                                <div class="icon-wrapper mr-3">
-                                    <i class="fas fa-chart-line text-sm"></i>
+                                <div class="mr-3 icon-wrapper">
+                                    <i class="text-sm fas fa-chart-line"></i>
                                 </div>
                                 <span class="flex-1 text-left">Laporan</span>
-                                <i class="fas fa-chevron-down text-sm transition-transform duration-300" 
+                                <i class="text-sm transition-transform duration-300 fas fa-chevron-down"
                                    :class="{ 'rotate-180': reportsOpen }"></i>
                             </button>
-                            
-                            <div x-show="reportsOpen" 
+
+                            <div x-show="reportsOpen"
                                  x-transition:enter="transition ease-out duration-200"
                                  x-transition:enter-start="opacity-0 transform -translate-y-2"
                                  x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -569,51 +569,51 @@
                                  x-transition:leave-start="opacity-100 transform translate-y-0"
                                  x-transition:leave-end="opacity-0 transform -translate-y-2"
                                  class="dropdown-menu p-2 space-y-0.5 ml-3">
-                                
+
                                 <a href="{{ route('reports.index') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.index') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-chart-pie text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-chart-pie"></i>
                                     </div>
                                     <span>Dashboard Laporan</span>
                                 </a>
-                                
+
                                 <a href="{{ route('reports.supplier-performance') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.supplier-performance') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-truck text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-truck"></i>
                                     </div>
                                     <span>Performa Supplier</span>
                                 </a>
-                                
+
                                 <a href="{{ route('reports.stock-value') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.stock-value') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-dollar-sign text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-dollar-sign"></i>
                                     </div>
                                     <span>Nilai Stok</span>
                                 </a>
-                                
+
                                 <a href="{{ route('reports.movement') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.movement') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-arrows-alt text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-arrows-alt"></i>
                                     </div>
                                     <span>Pergerakan Stok</span>
                                 </a>
-                                
+
                                 <a href="{{ route('reports.weekly') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.weekly') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-calendar-week text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-calendar-week"></i>
                                     </div>
                                     <span>Laporan Mingguan</span>
                                 </a>
-                                
+
                                 <a href="{{ route('reports.monthly') }}" @click="sidebarOpen = false"
                                    class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.monthly') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-calendar-alt text-xs"></i>
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-calendar-alt"></i>
                                     </div>
                                     <span>Laporan Bulanan</span>
                                 </a>
@@ -625,8 +625,8 @@
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
                         <a href="{{ route('activities.index') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fa-solid fa-note-sticky text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fa-solid fa-note-sticky"></i>
                             </div>
                             <span>Aktivitas</span>
                         </a>
@@ -635,8 +635,8 @@
                         <!-- Point of Sale -->
                         <a href="{{ route('pos') }}" @click="sidebarOpen = false"
                             class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fa-solid fa-cart-shopping text-sm"></i>
+                            <div class="mr-3 icon-wrapper">
+                                <i class="text-sm fa-solid fa-cart-shopping"></i>
                             </div>
                             <span>Point of Sale</span>
                         </a>
