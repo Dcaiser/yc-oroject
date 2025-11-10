@@ -186,6 +186,20 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
+    @php
+        $authUser = Auth::user();
+        $avatarUrl = $authUser && $authUser->avatar ? asset('storage/' . $authUser->avatar) : null;
+        $userInitials = 'U';
+        if ($authUser && ! empty($authUser->name)) {
+            $words = preg_split('/\s+/', trim($authUser->name), -1, PREG_SPLIT_NO_EMPTY);
+            if ($words) {
+                $userInitials = '';
+                foreach (array_slice($words, 0, 2) as $word) {
+                    $userInitials .= strtoupper(mb_substr($word, 0, 1));
+                }
+            }
+        }
+    @endphp
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside class="fixed z-30 hidden w-64 h-screen shadow-2xl sidebar-gradient lg:block">
@@ -409,8 +423,12 @@
                         <button @click="userMenuOpen = !userMenuOpen"
                                 class="flex items-center justify-between w-full p-1 -m-1 space-x-3 transition-all duration-200 rounded-lg hover:bg-white/5">
                             <div class="flex items-center flex-1 min-w-0 space-x-3">
-                                <div class="flex items-center justify-center w-8 h-8 rounded-full user-avatar">
-                                    <i class="text-sm text-white fas fa-user"></i>
+                                <div class="flex items-center justify-center w-8 h-8 overflow-hidden rounded-full user-avatar">
+                                    @if($avatarUrl)
+                                        <img src="{{ $avatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                    @else
+                                        <span class="text-xs font-semibold tracking-wide text-white">{{ $userInitials }}</span>
+                                    @endif
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-white truncate">{{ Auth::user()->name }}</p>
@@ -701,6 +719,39 @@
                             </div>
                         </div>
                     </nav>
+
+                    <div class="px-4 pb-6 mt-6">
+                        <div class="p-3 user-profile-card">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center justify-center w-10 h-10 overflow-hidden rounded-full user-avatar">
+                                    @if($avatarUrl)
+                                        <img src="{{ $avatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
+                                    @else
+                                        <span class="text-sm font-semibold tracking-wide text-white">{{ $userInitials }}</span>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-white">{{ $authUser->name }}</p>
+                                    <p class="text-xs capitalize text-emerald-200/90">{{ $authUser->role }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-3">
+                                <a href="{{ route('profile.edit') }}" @click="sidebarOpen = false"
+                                   class="flex items-center justify-center flex-1 gap-2 py-2 text-xs font-semibold text-white transition bg-white/10 rounded-xl hover:bg-white/20">
+                                    <i class="text-xs fas fa-user-cog"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                                    @csrf
+                                    <button type="submit"
+                                            class="flex items-center justify-center w-full gap-2 py-2 text-xs font-semibold text-red-100 transition bg-red-500/20 rounded-xl hover:bg-red-500/30">
+                                        <i class="text-xs fas fa-sign-out-alt"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </aside>
             </div>
         </div>

@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use App\Models\Produk;
+use App\Models\PosTransaction;
+use App\Models\PosTransactionItem;
 use Illuminate\Support\Str;
 
 class Poscontroller extends Controller
@@ -18,34 +23,26 @@ class Poscontroller extends Controller
 
     public function status()
     {
-        $payments = collect(session('pos_payments', []))->map(function ($payment) {
-            if (is_array($payment)) {
-                if (isset($payment['items']) && is_array($payment['items'])) {
-                    $payment['items'] = collect($payment['items'])->map(function ($item) {
-                        return (object) $item;
-                    })->all();
-                }
+        $payments = PosTransaction::with('items')->latest()->get();
 
-                return (object) $payment;
-            }
-
-            if (is_object($payment) && isset($payment->items) && is_array($payment->items)) {
-                $payment->items = collect($payment->items)->map(function ($item) {
-                    return (object) $item;
-                })->all();
-            }
-
-            return $payment;
-        });
+        $summary = [
+            'total_transactions' => $payments->count(),
+            'paid_transactions' => $payments->where('status', 'paid')->count(),
+            'pending_transactions' => $payments->where('status', 'pending')->count(),
+            'total_grand' => $payments->sum('grand_total'),
+            'total_revenue' => $payments->sum('payment_received'),
+        ];
 
         return view('pos.status', [
             'payments' => $payments,
+            'summary' => $summary,
         ]);
     }
 
     public function checkout(Request $request)
     {
         $request->validate([
+            'order_id' => ['required', 'string', 'max:191', Rule::unique('pos_transactions', 'order_id')],
             'customer_type' => ['required', 'string'],
             'customer_name' => ['nullable', 'string'],
             'cart.id' => ['required', 'array', 'min:1'],
@@ -64,6 +61,7 @@ class Poscontroller extends Controller
             'note' => ['nullable', 'string'],
         ], [
             'cart.id.min' => 'Keranjang tidak boleh kosong.',
+            'order_id.unique' => 'ID pesanan sudah digunakan. Silakan gunakan ID lain.',
         ]);
 
         $items = $this->extractCartItems($request);
@@ -79,29 +77,106 @@ class Poscontroller extends Controller
         $paymentReceived = $this->normalizeCurrency($request->input('payment_received'));
         $status = $paymentReceived >= $grandTotal && $grandTotal > 0 ? 'paid' : 'pending';
 
-        $payment = [
-            'reference' => (string) Str::uuid(),
-            'customer_name' => $request->filled('customer_name') ? $request->input('customer_name') : 'Tanpa Nama',
-            'customer_type' => $request->input('customer_type'),
-            'items' => $items,
-            'total_items' => count($items),
-            'subtotal' => $subtotal,
-            'shipping_cost' => $shipping,
-            'tip' => $tip,
-            'grand_total' => $grandTotal,
-            'payment_received' => $paymentReceived,
-            'balance_due' => max($grandTotal - $paymentReceived, 0),
-            'change_due' => max($paymentReceived - $grandTotal, 0),
-            'status' => $status,
-            'note' => $request->input('note'),
-            'created_at' => now()->toIso8601String(),
-        ];
+        $orderId = $request->input('order_id');
+        $customerType = $request->input('customer_type');
+        $customerName = $request->filled('customer_name') ? $request->input('customer_name') : 'Tanpa Nama';
+        $note = $request->input('note');
 
-        $payments = collect(session('pos_payments', []));
-        $payments->prepend($payment);
-        session()->put('pos_payments', $payments->values()->all());
+        try {
+            DB::transaction(function () use ($items, $orderId, $customerType, $customerName, $note, $subtotal, $shipping, $tip, $grandTotal, $paymentReceived, $status) {
+                $productIds = collect($items)->pluck('id');
+
+                $products = Produk::whereIn('id', $productIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                if ($products->count() !== $productIds->unique()->count()) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Beberapa produk tidak ditemukan. Silakan muat ulang halaman POS.',
+                    ]);
+                }
+
+                foreach ($items as $item) {
+                    $product = $products->get($item['id']);
+                    $currentStock = $product->stock_quantity ?? 0;
+
+                    if ($currentStock < $item['qty']) {
+                        throw ValidationException::withMessages([
+                            'cart' => "Stok {$product->name} tidak mencukupi (tersedia {$currentStock}).",
+                        ]);
+                    }
+                }
+
+                $transaction = PosTransaction::create([
+                    'order_id' => $orderId,
+                    'reference' => (string) Str::uuid(),
+                    'customer_name' => $customerName,
+                    'customer_type' => $customerType,
+                    'subtotal' => $subtotal,
+                    'shipping_cost' => $shipping,
+                    'tip' => $tip,
+                    'grand_total' => $grandTotal,
+                    'payment_received' => $paymentReceived,
+                    'balance_due' => max($grandTotal - $paymentReceived, 0),
+                    'change_due' => max($paymentReceived - $grandTotal, 0),
+                    'status' => $status,
+                    'note' => $note,
+                ]);
+
+                foreach ($items as $item) {
+                    $product = $products->get($item['id']);
+
+                    $product->decrement('stock_quantity', $item['qty']);
+
+                    PosTransactionItem::create([
+                        'pos_transaction_id' => $transaction->id,
+                        'product_id' => $product->id,
+                        'product_name' => $item['name'],
+                        'qty' => $item['qty'],
+                        'unit' => $item['unit'],
+                        'price' => $item['price'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
+                }
+            }, 3);
+        } catch (ValidationException $exception) {
+            return back()->withErrors($exception->errors())->withInput();
+        }
 
         return redirect()->route('pos.payments')->with('success', 'Transaksi POS berhasil diproses.');
+    }
+
+    public function updatePaymentStatus(Request $request)
+    {
+        $data = $request->validate([
+            'reference' => ['required', 'uuid', 'exists:pos_transactions,reference'],
+            'status' => ['required', Rule::in(['paid', 'pending'])],
+        ]);
+
+        $transaction = PosTransaction::where('reference', $data['reference'])->firstOrFail();
+
+        if ($transaction->status === $data['status']) {
+            return redirect()->route('pos.payments')->with('success', 'Status transaksi tidak berubah.');
+        }
+
+        if ($data['status'] === 'paid') {
+            $transaction->status = 'paid';
+            $transaction->balance_due = 0;
+            $transaction->change_due = max($transaction->payment_received - $transaction->grand_total, 0);
+        } else {
+            $transaction->status = 'pending';
+            $transaction->balance_due = max($transaction->grand_total - $transaction->payment_received, 0);
+            $transaction->change_due = 0;
+        }
+
+        $transaction->save();
+
+        $message = $transaction->status === 'paid'
+            ? 'Transaksi berhasil ditandai sudah dibayar.'
+            : 'Transaksi berhasil ditandai belum dibayar.';
+
+        return redirect()->route('pos.payments')->with('success', $message);
     }
 
     protected function normalizeCurrency($value): int
