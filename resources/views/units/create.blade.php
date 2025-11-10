@@ -4,12 +4,13 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 <i class="mr-2 fas fa-weight"></i>{{ __('Tambah Satuan') }}
             </h2>
-            <a href="{{ route('category') }}" class="px-4 py-2 text-white bg-gray-600 rounded">Kembali</a>
+            <a href="{{ route('category') }}" class="px-4 py-2 text-white bg-gray-600 rounded">
+                <i class="mr-2 fas fa-arrow-left"></i>Kembali</a>
         </div>
     </x-slot>
 
     <div class="max-w-4xl px-4 py-8 mx-auto">
-        <div class="bg-white p-6 rounded shadow">
+        <div class="p-6 bg-white rounded shadow">
             <form action="{{ route('units.store') }}" method="POST">
                 @csrf
 

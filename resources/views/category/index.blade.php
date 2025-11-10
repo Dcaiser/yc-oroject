@@ -73,7 +73,7 @@
             <div class="p-4 bg-white rounded-lg shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-800">Daftar Satuan</h2>
-                    <a href="{{ route('addunit') ?? '#' }}" class="inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
+                    <a href="{{ route('addunit') ?? '#' }}" class="inline-flex items-center p-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700">
                         <i class="mr-2 fas fa-plus"></i>Tambah Satuan
                     </a>
                 </div>

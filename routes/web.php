@@ -65,6 +65,8 @@ Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
 });
 Route::middleware('auth')->group(function () {
     Route::get('/pos', [Poscontroller::class, 'index'])->name('pos');
+    Route::get('/pos/status-pembayaran', [Poscontroller::class, 'status'])->name('pos.payments');
+    Route::post('/pos/checkout', [Poscontroller::class, 'checkout'])->name('pos.checkout');
 });
 
 

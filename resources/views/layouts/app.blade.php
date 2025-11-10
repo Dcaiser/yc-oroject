@@ -352,13 +352,43 @@
                 @endif
 
                 <!-- Point of Sale -->
-                <a href="{{ route('pos') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
-                    <div class="mr-3 icon-wrapper">
-                        <i class="text-sm fa-solid fa-cart-shopping"></i>
+                <div x-data="{ posOpen: {{ request()->routeIs('pos') || request()->routeIs('pos.payments') ? 'true' : 'false' }} }">
+                    <button @click="posOpen = !posOpen"
+                        class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') || request()->routeIs('pos.payments') ? 'active-nav-link' : '' }}">
+                        <div class="mr-3 icon-wrapper">
+                            <i class="text-sm fa-solid fa-cart-shopping"></i>
+                        </div>
+                        <span class="flex-1 text-left">Point of Sale</span>
+                        <i class="text-sm transition-transform duration-300 fas fa-chevron-down"
+                           :class="{ 'rotate-180': posOpen }"></i>
+                    </button>
+
+                    <div x-show="posOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 transform -translate-y-2"
+                         x-transition:enter-end="opacity-100 transform translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 transform translate-y-0"
+                         x-transition:leave-end="opacity-0 transform -translate-y-2"
+                         class="dropdown-menu p-2 space-y-0.5 ml-3">
+
+                        <a href="{{ route('pos') }}"
+                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('pos') ? 'bg-white/15' : '' }}">
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-cash-register"></i>
+                            </div>
+                            <span>Kasir POS</span>
+                        </a>
+
+                        <a href="{{ route('pos.payments') }}"
+                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('pos.payments') ? 'bg-white/15' : '' }}">
+                            <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                <i class="text-xs fas fa-receipt"></i>
+                            </div>
+                            <span>Status Pembayaran</span>
+                        </a>
                     </div>
-                    <span>Point of Sale</span>
-                </a>
+                </div>
 
                 <!-- Staff Create Report Button -->
                 @if(in_array(Auth::user()->role, ['staff']))
@@ -633,13 +663,43 @@
                         @endif
 
                         <!-- Point of Sale -->
-                        <a href="{{ route('pos') }}" @click="sidebarOpen = false"
-                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
-                            <div class="mr-3 icon-wrapper">
-                                <i class="text-sm fa-solid fa-cart-shopping"></i>
+                        <div x-data="{ posOpenMobile: {{ request()->routeIs('pos') || request()->routeIs('pos.payments') ? 'true' : 'false' }} }">
+                            <button @click="posOpenMobile = !posOpenMobile"
+                                class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') || request()->routeIs('pos.payments') ? 'active-nav-link' : '' }}">
+                                <div class="mr-3 icon-wrapper">
+                                    <i class="text-sm fa-solid fa-cart-shopping"></i>
+                                </div>
+                                <span class="flex-1 text-left">Point of Sale</span>
+                                <i class="text-sm transition-transform duration-300 fas fa-chevron-down"
+                                   :class="{ 'rotate-180': posOpenMobile }"></i>
+                            </button>
+
+                            <div x-show="posOpenMobile"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                                 x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                 class="dropdown-menu p-2 space-y-0.5 ml-3">
+
+                                <a href="{{ route('pos') }}" @click="sidebarOpen = false"
+                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('pos') ? 'bg-white/15' : '' }}">
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-cash-register"></i>
+                                    </div>
+                                    <span>Kasir POS</span>
+                                </a>
+
+                                <a href="{{ route('pos.payments') }}" @click="sidebarOpen = false"
+                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('pos.payments') ? 'bg-white/15' : '' }}">
+                                    <div class="flex items-center justify-center w-5 h-5 mr-2 rounded bg-white/10">
+                                        <i class="text-xs fas fa-receipt"></i>
+                                    </div>
+                                    <span>Status Pembayaran</span>
+                                </a>
                             </div>
-                            <span>Point of Sale</span>
-                        </a>
+                        </div>
                     </nav>
                 </aside>
             </div>

@@ -194,24 +194,6 @@
                     <input type="hidden" name="grand_total" :value="total + shippingCost + tip">
                 </div>
                 <!-- Input Pembayaran Diterima -->
-                <div class="mt-6">
-                    <label class="block mb-2 text-lg font-semibold text-green-700">Pembayaran Diterima</label>
-                    <div class="relative">
-                        <span class="absolute font-bold text-green-700 -translate-y-1/2 left-4 top-1/2">Rp</span>
-                        <input type="text"
-                               x-model="paymentReceivedFormatted"
-                               @input="formatPaymentReceived"
-                               name="paymentReceived"
-                               placeholder="Masukkan jumlah pembayaran"
-                               class="w-full p-3 pl-12 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
-                    </div>
-                    <template x-if="paymentReceived > 0">
-                        <div class="mt-2 font-semibold text-green-700">
-                            Kembalian: <span x-text="formatCurrency(paymentReceived - (total + shippingCost + tip))"></span>
-                            <input type="hidden" name="change" :value="paymentReceived - (total + shippingCost + tip)">
-                        </div>
-                    </template>
-                </div>
                 <button type="submit"
                         class="w-full px-8 py-4 mt-6 font-bold text-white transition shadow-lg bg-gradient-to-r from-green-500 to-green-700 rounded-xl hover:scale-105">
                     💳 Proses Checkout
