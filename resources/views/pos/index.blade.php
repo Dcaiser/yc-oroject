@@ -10,9 +10,10 @@
             </span>
         </div>
     </x-slot>
-<form action="{{ route('pos.checkout') }}" method="POST" onsubmit="return confirm('Yakin ingin checkout?')">
+<form action="" method="POST" class="" onsubmit="alert('yakin ingin checkout?')">
     @csrf
-    <div x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }})" x-init="init()"
+    @method('POST')
+    <div x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }})"
          class="min-h-screen p-8 bg-gradient-to-br from-green-50 via-white to-green-100">
 
         <!-- Tipe Pembeli -->
@@ -23,7 +24,7 @@
                     <button required
                         type="button"
                         name="customer_type"
-                        class="px-6 py-2 text-base font-semibold transition shadow rounded-xl focus:outline-none"
+                        class="px-6 py-2 text-base font-semibold shadow transiztion rounded-xl focus:outline-none"
                         :class="customerType === type
                             ? 'bg-gradient-to-r from-green-600 to-green-400 text-white shadow-lg scale-105'
                             : 'bg-white text-green-700 border-2 border-green-200 hover:bg-green-50'"
@@ -35,13 +36,6 @@
                 </template>
                 <input type="hidden" name="customer_type" :value="customerType">
             </div>
-        </div>
-
-        <!-- ID Pesanan -->
-        <div class="mb-8">
-            <label class="block mb-2 text-lg font-semibold text-green-700">ID Pesanan</label>
-            <input type="text" name="order_id" x-model="orderId" placeholder="Masukkan ID pesanan" required
-                   class="w-full p-3 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
         </div>
 
         <!-- Nama Pembeli -->
@@ -102,10 +96,8 @@
                         <tbody>
                             <template x-for="(item, index) in cart" :key="index">
                                 <tr class="transition hover:bg-green-50">
-                                    <td class="px-5 py-3 font-medium text-green-900 border-b">
-                                        <span x-text="item.name"></span>
+                                    <td class="px-5 py-3 font-medium text-green-900 border-b" x-text="item.name">
                                         <input type="hidden" :name="'cart[id]['+index+']'" :value="item.id" required>
-                                        <input type="hidden" :name="'cart[name]['+index+']'" :value="item.name" required>
                                     </td>
                                     <td class="px-5 py-3 font-bold text-green-700 border-b" x-text="formatCurrency(item.price)">
                                         <input type="hidden" :name="'cart[price]['+index+']'" :value="item.price" required>
@@ -146,7 +138,7 @@
                             <span class="absolute font-bold text-green-700 -translate-y-1/2 left-4 top-1/2">Rp</span>
                             <input type="text"
                                    x-model="shippingCostFormatted"
-                    @input="formatShippingCost()"
+                                   @input="formatShippingCost"
                                    name="shippingCost"
                                    placeholder="Masukkan ongkir"
                                    class="w-full p-3 pl-12 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400" >
@@ -159,7 +151,7 @@
                             <span class="absolute font-bold text-green-700 -translate-y-1/2 left-4 top-1/2">Rp</span>
                             <input type="text"
                                    x-model="tipFormatted"
-                    @input="formatTip()"
+                                   @input="formatTip"
                                    name="tip"
                                    placeholder="Masukkan tip"
                                    class="w-full p-3 pl-12 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
@@ -194,46 +186,14 @@
                         <span>Tip</span>
                         <span class="font-bold text-green-700" x-text="formatCurrency(tip)"></span>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Pembayaran Diterima</span>
-                        <span class="font-bold text-green-700" x-text="formatCurrency(paymentReceived)"></span>
-                    </div>
                 </div>
-                <template x-if="balanceDue() > 0">
-                    <div class="flex justify-between px-3 py-2 mt-3 text-sm font-semibold text-yellow-700 bg-yellow-50 rounded-xl">
-                        <span>Sisa Pembayaran</span>
-                        <span x-text="'Rp ' + formatCurrency(balanceDue())"></span>
-                    </div>
-                </template>
-                <template x-if="changeDue() > 0">
-                    <div class="flex justify-between px-3 py-2 mt-3 text-sm font-semibold text-green-700 bg-green-50 rounded-xl">
-                        <span>Kembalian</span>
-                        <span x-text="'Rp ' + formatCurrency(changeDue())"></span>
-                    </div>
-                </template>
                 <hr class="my-4">
                 <div class="flex justify-between text-xl font-extrabold text-green-900">
                     <span>Grand Total</span>
-                    <span x-text="formatCurrency(grandTotal())"></span>
-                    <input type="hidden" name="grand_total" :value="grandTotal()">
+                    <span x-text="formatCurrency(total + shippingCost + tip)"></span>
+                    <input type="hidden" name="grand_total" :value="total + shippingCost + tip">
                 </div>
-                <div class="mt-6">
-                    <label class="block mb-2 text-sm font-semibold text-green-700 uppercase">Pembayaran Diterima</label>
-                    <div class="relative">
-                        <span class="absolute font-bold text-green-700 -translate-y-1/2 left-4 top-1/2">Rp</span>
-                        <input type="text"
-                               name="payment_received"
-                               x-model="paymentReceivedFormatted"
-                               @input="formatPaymentReceived()"
-                               placeholder="Masukkan nominal pembayaran"
-                               class="w-full p-3 pl-12 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
-                    </div>
-                </div>
-                <div class="flex justify-between mt-4 text-sm font-semibold" x-show="paymentReceived > 0">
-                    <span>Status</span>
-                    <span :class="balanceDue() === 0 ? 'text-green-700' : 'text-yellow-700'"
-                          x-text="balanceDue() === 0 ? 'Sudah Dibayar' : 'Belum Dibayar'"></span>
-                </div>
+                <!-- Input Pembayaran Diterima -->
                 <button type="submit"
                         class="w-full px-8 py-4 mt-6 font-bold text-white transition shadow-lg bg-gradient-to-r from-green-500 to-green-700 rounded-xl hover:scale-105">
                      Checkout
@@ -245,49 +205,28 @@
     <script>
     function posApp(productsData, customertypesData, regularCustomersData) {
         return {
-            customerType: customertypesData.length ? customertypesData[0] : '',
+            customerType: customertypesData[0],
             customertypes: customertypesData,
             products: productsData,
             cart: [],
             total: 0,
             shippingCost: 0,
             shippingCostFormatted: '',
-            tip: 0,
-            tipFormatted: '',
-            paymentReceived: 0,
-            paymentReceivedFormatted: '',
-            orderId: '',
             regularCustomers: regularCustomersData,
             selectedRegularCustomer: '',
             buyerName: '',
 
-            init() {
-                if (!this.orderId) {
-                    this.orderId = this.generateOrderId();
-                }
-            },
-
-            generateOrderId() {
-                const now = new Date();
-                const pad = (value) => String(value).padStart(2, '0');
-                return `ORD-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-            },
-
             getPrice(product) {
-                if (!product?.prices?.length) {
-                    return 0;
-                }
-
-                const matched = product.prices.find((pr) => pr.customer_type === this.customerType);
-                return matched ? parseFloat(matched.price) : 0;
+                if (!product.prices) return 0;
+                let p = product.prices.find(pr => pr.customer_type === this.customerType);
+                return p ? parseFloat(p.price) : 0;
             },
 
             addToCart(product) {
-                const price = this.getPrice(product);
-                const existing = this.cart.find((item) => item.id === product.id);
-
+                let price = this.getPrice(product);
+                let existing = this.cart.find(i => i.id === product.id);
                 if (existing) {
-                    existing.qty += 1;
+                    existing.qty++;
                     existing.subtotal = existing.qty * existing.price;
                 } else {
                     this.cart.push({
@@ -295,25 +234,14 @@
                         name: product.name,
                         price: price,
                         qty: 1,
-                        satuan: 'pcs',
-                        subtotal: price,
+                        subtotal: price
                     });
                 }
-
                 this.calculateTotal();
             },
 
             updateSubtotal(index) {
-                const item = this.cart[index];
-
-                if (!item) {
-                    return;
-                }
-
-                if (!item.qty || item.qty < 1) {
-                    item.qty = 1;
-                }
-
+                let item = this.cart[index];
                 item.subtotal = item.price * item.qty;
                 this.calculateTotal();
             },
@@ -324,48 +252,58 @@
             },
 
             calculateTotal() {
-                this.total = this.cart.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+                this.total = this.cart.reduce((sum, item) => sum + item.subtotal, 0);
             },
 
             formatCurrency(value) {
-                const numeric = Number(value) || 0;
-                return new Intl.NumberFormat('id-ID').format(numeric);
+                return new Intl.NumberFormat('id-ID').format(value);
             },
+            formatCurrency(value) {
+            return new Intl.NumberFormat('id-ID').format(value);
+            },
+            tip: 0,
+tipFormatted: '',
 
-            formatShippingCost() {
-                const digits = this.shippingCostFormatted.replace(/[^0-9]/g, '');
-                this.shippingCost = digits ? parseInt(digits, 10) : 0;
-                this.shippingCostFormatted = digits ? 'Rp ' + this.formatCurrency(this.shippingCost) : '';
-            },
+formatTip(e) {
+    let val = this.tipFormatted.replace(/[^0-9]/g, '');
+    this.tip = val ? parseInt(val) : 0;
+    this.tipFormatted = val ? 'Rp ' + new Intl.NumberFormat('id-ID').format(val) : '';
+},
+            // ...existing code...
+paymentReceived: 0,
+paymentReceivedFormatted: '',
 
-            formatTip() {
-                const digits = this.tipFormatted.replace(/[^0-9]/g, '');
-                this.tip = digits ? parseInt(digits, 10) : 0;
-                this.tipFormatted = digits ? 'Rp ' + this.formatCurrency(this.tip) : '';
-            },
+formatPaymentReceived(e) {
+    let val = this.paymentReceivedFormatted.replace(/[^0-9]/g, '');
+    this.paymentReceived = val ? parseInt(val) : 0;
+    this.paymentReceivedFormatted = val ? 'Rp ' + new Intl.NumberFormat('id-ID').format(val) : '';
+},
+// ...existing code...
 
-            formatPaymentReceived() {
-                const digits = this.paymentReceivedFormatted.replace(/[^0-9]/g, '');
-                this.paymentReceived = digits ? parseInt(digits, 10) : 0;
-                this.paymentReceivedFormatted = digits ? 'Rp ' + this.formatCurrency(this.paymentReceived) : '';
-            },
-
-            grandTotal() {
-                return this.total + this.shippingCost + this.tip;
-            },
-
-            balanceDue() {
-                return Math.max(this.grandTotal() - this.paymentReceived, 0);
-            },
-
-            changeDue() {
-                return Math.max(this.paymentReceived - this.grandTotal(), 0);
-            },
+           // ...existing code...
+formatShippingCost(e) {
+    let val = this.shippingCostFormatted.replace(/[^0-9]/g, '');
+    this.shippingCost = val ? parseInt(val) : 0;
+    this.shippingCostFormatted = val ? 'Rp ' + new Intl.NumberFormat('id-ID').format(val) : '';
+},
+// ...existing code...
 
             handleRegularCustomerChange() {
-                this.buyerName = this.selectedRegularCustomer || '';
+                if (this.selectedRegularCustomer) {
+                    this.buyerName = this.selectedRegularCustomer;
+                } else {
+                    this.buyerName = '';
+                }
             },
-        };
+
+            checkout() {
+                if (this.cart.length === 0) {
+                    alert('Keranjang kosong!');
+                    return;
+                }
+                alert('Total pembayaran: ' + this.formatCurrency(this.total + this.shippingCost));
+            }
+        }
     }
     </script>
 </x-app-layout>
