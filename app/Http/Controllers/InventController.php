@@ -43,8 +43,27 @@ class InventController extends Controller
      */
     public function create()
     {
-        $stock = Stockin::all();
-        return view('inventory.invent_activity',compact(['stock']));
+        $stock = Stockin::orderByDesc('created_at')->get();
+
+        $groupedStock = $stock
+            ->groupBy(function ($item) {
+                return optional($item->created_at)->format('Y-m-d') ?: 'unknown';
+            })
+            ->sortKeysUsing(function ($a, $b) {
+                if ($a === 'unknown') {
+                    return 1;
+                }
+                if ($b === 'unknown') {
+                    return -1;
+                }
+
+                return strcmp($b, $a);
+            })
+            ->map(function ($entries) {
+                return $entries->sortByDesc('created_at')->values();
+            });
+
+        return view('inventory.invent_activity', compact(['stock', 'groupedStock']));
 
     }
     public function createStock()
@@ -55,66 +74,67 @@ class InventController extends Controller
         return view('inventory.create_stock',compact(['produk', 'category', 'units']));
 
     }
-public function updateStock(Request $request)
-{
-    $validated = $request->validate([
-        'name_p'   => 'required|exists:products,id',
-        'harga_p'  => 'required|numeric|min:0',
-        'stok'     => 'required|integer|min:1',
-        'satuan'   => 'required|exists:units,id',
-        'harga_t'  => 'required|numeric|min:0',
-        'bukti'    => 'nullable|image|max:2048',
-    ]);
 
-    // Ambil produk dan satuan
-    $produk   = Produk::findOrFail($validated['name_p']);
-    $unit     = Units::findOrFail($validated['satuan']);
-    $supplier = Supplier::find($produk->supplier_id)?->name ?? 'Unknown';
+    public function updateStock(Request $request)
+    {
+        $validated = $request->validate([
+            'name_p'   => 'required|exists:products,id',
+            'harga_p'  => 'required|numeric|min:0',
+            'stok'     => 'required|integer|min:1',
+            'satuan'   => 'required|exists:units,id',
+            'harga_t'  => 'required|numeric|min:0',
+            'bukti'    => 'nullable|image|max:2048',
+        ]);
 
-    // Simpan bukti jika ada
-    $buktiPath = null;
-    if ($request->hasFile('bukti')) {
-        $buktiPath = $request->file('bukti')->store('bukti', 'public');
+        // Ambil produk dan satuan
+        $produk   = Produk::findOrFail($validated['name_p']);
+        $unit     = Units::findOrFail($validated['satuan']);
+        $supplier = Supplier::find($produk->supplier_id)?->name ?? 'Unknown';
+
+        // Simpan bukti jika ada
+        $buktiPath = null;
+        if ($request->hasFile('bukti')) {
+            $buktiPath = $request->file('bukti')->store('bukti', 'public');
+        }
+
+        // Hitung stok tambahan dalam satuan produk saat ini
+        $produkUnit = $produk->units;
+        $produkConversion = $produkUnit?->conversion_to_base ?: ($unit->conversion_to_base ?: 1);
+        $inputConversion = $unit->conversion_to_base ?: 1;
+
+        // Konversi stok masuk ke satuan produk
+        $stokDalamSatuanProduk = $produkConversion > 0
+            ? ($validated['stok'] * $inputConversion) / $produkConversion
+            : $validated['stok'];
+
+        // Catat stok masuk (tetap tampilkan satuan asli yg dimasukkan user)
+        Stockin::create([
+            'product_name'  => $produk->name,
+            'supplier_name' => $supplier,
+            'stock_qty'     => $validated['stok'],     // jumlah asli yg diinput user (mis. 5 dus)
+            'satuan'        => $unit->name,            // nama satuan (mis. dus)
+            'prices'        => $validated['harga_p'],
+            'total_price'   => $validated['harga_t'],
+            'bukti'         => $buktiPath,
+        ]);
+
+        // Update stok produk dalam satuan produk
+        $produk->stock_quantity += $stokDalamSatuanProduk;
+        if (!$produk->satuan) {
+            $produk->satuan = $unit->id;
+        }
+        $produk->save();
+
+        // Catat aktivitas
+        Activity::create([
+            'user'      => Auth::check() ? Auth::user()->name : 'Guest',
+            'action'    => 'Menambah stok',
+            'model'     => 'inventori',
+            'record_id' => $produk->id,
+        ]);
+
+        return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
     }
-
-    // Hitung stok tambahan dalam satuan produk saat ini
-    $produkUnit = $produk->units;
-    $produkConversion = $produkUnit?->conversion_to_base ?: ($unit->conversion_to_base ?: 1);
-    $inputConversion = $unit->conversion_to_base ?: 1;
-
-    // Konversi stok masuk ke satuan produk
-    $stokDalamSatuanProduk = $produkConversion > 0
-        ? ($validated['stok'] * $inputConversion) / $produkConversion
-        : $validated['stok'];
-
-    // Catat stok masuk (tetap tampilkan satuan asli yg dimasukkan user)
-    Stockin::create([
-        'product_name'  => $produk->name,
-        'supplier_name' => $supplier,
-        'stock_qty'     => $validated['stok'],     // jumlah asli yg diinput user (mis. 5 dus)
-        'satuan'        => $unit->name,            // nama satuan (mis. dus)
-        'prices'        => $validated['harga_p'],
-        'total_price'   => $validated['harga_t'],
-        'bukti'         => $buktiPath,
-    ]);
-
-    // Update stok produk dalam satuan produk
-    $produk->stock_quantity += $stokDalamSatuanProduk;
-    if (!$produk->satuan) {
-        $produk->satuan = $unit->id;
-    }
-    $produk->save();
-
-    // Catat aktivitas
-    Activity::create([
-        'user'      => Auth::check() ? Auth::user()->name : 'Guest',
-        'action'    => 'Menambah stok',
-        'model'     => 'inventori',
-        'record_id' => $produk->id,
-    ]);
-
-    return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
-}
 
     /**
      * Store a newly created resource in storage.
@@ -181,7 +201,8 @@ public function updateStock(Request $request)
     ]);
 
 
-    return redirect()->back()->with('success', 'Semua produk berhasil diperbarui!');    }
+        return redirect()->back()->with('success', 'Semua produk berhasil diperbarui!');
+    }
 
     /**
      * Remove the specified resource from storage.

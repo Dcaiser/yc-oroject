@@ -9,6 +9,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UnitsController;
+use App\Http\Controllers\CustomerController;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashController;
@@ -81,6 +82,11 @@ Route::middleware('auth')->group(function () {
     // units (satuan)
     Route::get('/units/create', [UnitsController::class, 'create'])->name('addunit');
     Route::post('/units', [UnitsController::class, 'store'])->name('units.store');
+
+    // customers
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
 
 });

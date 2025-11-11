@@ -80,7 +80,7 @@
                                 </tr>
                             @endif
                             <tr class="bg-green-100/60">
-                                <td colspan="7" class="px-4 py-2 text-xs font-semibold uppercase text-green-700">Tanggal: {{ $dateLabel }}</td>
+                                <td colspan="7" class="px-4 py-2 text-xs font-semibold text-green-700 uppercase">Tanggal: {{ $dateLabel }}</td>
                             </tr>
                             @foreach($transactions as $payment)
                             @php
@@ -142,7 +142,7 @@
                                                     class="w-full py-2 pl-8 pr-3 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                                                 >
                                             </div>
-                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                                            <button type="submit" onclick="alert('tandai sudah dibayar?')" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
                                                 Tandai Dibayar
                                             </button>
                                         </form>

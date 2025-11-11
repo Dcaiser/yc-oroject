@@ -258,7 +258,7 @@
                     <div class="mr-3 icon-wrapper">
                         <i class="text-sm fas fa-tags"></i>
                     </div>
-                    <span>Kategori Produk</span>
+                    <span>pengaturan data</span>
                 </a>
                 @endif
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 use Illuminate\Validation\ValidationException;
 use App\Models\Produk;
+use App\Models\Customer;
 use App\Models\PosTransaction;
 use App\Models\PosTransactionItem;
 use Illuminate\Support\Str;
@@ -18,8 +19,11 @@ class Poscontroller extends Controller
     {
         $product = Produk::with(['prices', 'units'])->get();
         $customertypes = ['agent', 'reseller', 'pelanggan'];
+        $regularCustomers = Customer::select('id', 'customer_name', 'address', 'shipping_cost')
+            ->orderBy('customer_name')
+            ->get();
 
-        return view('pos.index', compact('product', 'customertypes'));
+        return view('pos.index', compact('product', 'customertypes', 'regularCustomers'));
     }
 
     public function status(Request $request)

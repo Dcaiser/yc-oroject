@@ -47,10 +47,33 @@
             </div>
         </div>
 
+        <!-- Pelanggan Terdaftar -->
+        <div class="mb-8">
+            <label class="block mb-2 text-lg font-semibold text-green-700">Pilih Pelanggan</label>
+            <select
+                x-model="selectedRegularCustomerId"
+                @change="handleRegularCustomerChange"
+                class="w-full p-3 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400"
+            >
+                <option value="__manual">Pelanggan baru / input manual</option>
+                <template x-for="customer in regularCustomers" :key="customer.id">
+                    <option :value="customer.id" x-text="customer.customer_name"></option>
+                </template>
+            </select>
+            <input type="hidden" name="customer_id" :value="selectedRegularCustomer ? selectedRegularCustomer.id : ''">
+            <p class="mt-2 text-sm text-green-600" x-cloak x-show="selectedRegularCustomerId === '__manual'">
+                Pilih pelanggan terdaftar atau masukkan nama baru di bawah.
+            </p>
+            <div class="px-4 py-3 mt-4 border border-green-200 rounded-xl bg-green-50" x-cloak x-show="selectedRegularCustomer">
+                <p class="text-xs font-semibold tracking-wide text-green-600 uppercase">Alamat Pelanggan</p>
+                <p class="mt-1 text-sm leading-relaxed text-green-700" x-text="selectedRegularCustomer.address || 'Alamat belum tersedia' "></p>
+            </div>
+        </div>
+
         <!-- Nama Pembeli -->
-        <div class="mb-8" x-show="!selectedRegularCustomer">
+        <div class="mb-8" x-cloak x-show="!selectedRegularCustomer">
             <label class="block mb-2 text-lg font-semibold text-green-700">Nama Pembeli</label>
-            <input type="text" name="customer_name" x-model="buyerName" placeholder="Masukkan nama pembeli" required
+            <input type="text" name="customer_name" x-model="buyerName" placeholder="Masukkan nama pembeli" :required="!selectedRegularCustomer"
                    class="w-full p-3 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
         </div>
 
@@ -178,6 +201,14 @@
             <div class="p-8 bg-white shadow-xl rounded-2xl h-fit" x-show="cart.length > 0">
                 <h3 class="mb-5 text-xl font-bold text-green-900"><i class="fa-solid fa-cash-register"></i> Ringkasan Belanja</h3>
                 <div class="space-y-3 text-green-700">
+                    <div class="flex justify-between" x-show="buyerName">
+                        <span>Nama Pembeli</span>
+                        <span class="font-semibold text-green-700" x-text="buyerName"></span>
+                    </div>
+                    <div x-cloak x-show="selectedRegularCustomer && selectedRegularCustomer.address" class="space-y-1">
+                        <span class="text-sm font-semibold text-green-700">Alamat</span>
+                        <p class="text-sm leading-relaxed text-green-600" x-text="selectedRegularCustomer.address"></p>
+                    </div>
                     <div class="flex justify-between">
                         <span>Total Item</span>
                         <span class="font-semibold" x-text="cart.length + ' produk'"></span>
@@ -241,9 +272,14 @@
             total: 0,
             shippingCost: 0,
             shippingCostFormatted: '',
-            regularCustomers: regularCustomersData,
-            selectedRegularCustomer: '',
+            regularCustomers: Array.isArray(regularCustomersData) ? regularCustomersData : [],
+            selectedRegularCustomerId: '__manual',
+            selectedRegularCustomer: null,
             buyerName: '',
+
+            init() {
+                this.handleRegularCustomerChange();
+            },
 
             getPrice(product) {
                 if (!product.prices) return 0;
@@ -323,11 +359,31 @@ formatShippingCost(e) {
 // ...existing code...
 
             handleRegularCustomerChange() {
-                if (this.selectedRegularCustomer) {
-                    this.buyerName = this.selectedRegularCustomer;
-                } else {
+                if (!this.selectedRegularCustomerId || this.selectedRegularCustomerId === '__manual') {
+                    this.selectedRegularCustomer = null;
                     this.buyerName = '';
+                    return;
                 }
+
+                const selected = this.regularCustomers.find(customer => String(customer.id) === String(this.selectedRegularCustomerId));
+
+                if (selected) {
+                    this.selectedRegularCustomer = selected;
+                    this.buyerName = selected.customer_name || '';
+                    this.applyShippingCost(selected.shipping_cost ?? 0);
+                } else {
+                    this.selectedRegularCustomer = null;
+                    this.buyerName = '';
+                    this.applyShippingCost(0);
+                }
+            },
+
+            applyShippingCost(value) {
+                const numeric = Number(value) || 0;
+                this.shippingCost = numeric;
+                this.shippingCostFormatted = numeric
+                    ? 'Rp ' + new Intl.NumberFormat('id-ID').format(numeric)
+                    : '';
             },
 
             resolveUnit(product) {
