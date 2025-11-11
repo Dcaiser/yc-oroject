@@ -65,9 +65,9 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="font-semibold">{{ $payment->customer_name ?? '-' }}</div>
-                                    <div class="text-xs capitalize text-green-600">{{ $payment->customer_type ?? '-' }}</div>
+                                    <div class="text-xs text-green-600 capitalize">{{ $payment->customer_type ?? '-' }}</div>
                                     @if(!empty($payment->note))
-                                        <div class="px-2 py-1 mt-2 text-xs text-green-700 bg-green-50 rounded-lg">Catatan: {{ $payment->note }}</div>
+                                        <div class="px-2 py-1 mt-2 text-xs text-green-700 rounded-lg bg-green-50">Catatan: {{ $payment->note }}</div>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 font-semibold">Rp {{ number_format($grandTotal, 0, ',', '.') }}</td>
@@ -91,7 +91,7 @@
                                 <td colspan="7" class="px-4 py-3">
                                     <div class="flex flex-wrap justify-between gap-6">
                                         <div>
-                                            <p class="font-semibold uppercase text-green-600">Rincian Item</p>
+                                            <p class="font-semibold text-green-600 uppercase">Rincian Item</p>
                                             <ul class="mt-1 space-y-1 list-disc list-inside">
                                                 @forelse($payment->items ?? [] as $item)
                                                     <li>
@@ -104,7 +104,7 @@
                                             </ul>
                                         </div>
                                         <div>
-                                            <p class="font-semibold uppercase text-green-600">Ringkasan Biaya</p>
+                                            <p class="font-semibold text-green-600 uppercase">Ringkasan Biaya</p>
                                             <div class="space-y-1">
                                                 <div>Subtotal: <span class="font-semibold">Rp {{ number_format($payment->subtotal ?? 0, 0, ',', '.') }}</span></div>
                                                 <div>Ongkir: <span class="font-semibold">Rp {{ number_format($payment->shipping_cost ?? 0, 0, ',', '.') }}</span></div>

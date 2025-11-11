@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 use Illuminate\Validation\ValidationException;
 use App\Models\Produk;
 use App\Models\PosTransaction;
@@ -128,6 +130,15 @@ class Poscontroller extends Controller
             }, 3);
         } catch (ValidationException $exception) {
             return back()->withErrors($exception->errors())->withInput();
+        } catch (Throwable $exception) {
+            Log::error('POS checkout failed', [
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
+
+            return back()->withErrors([
+                'checkout' => 'Terjadi kesalahan saat memproses transaksi. Silakan coba lagi atau hubungi admin.',
+            ])->withInput();
         }
 
         return redirect()->route('pos.payments')->with('success', 'Transaksi POS berhasil dicatat.');

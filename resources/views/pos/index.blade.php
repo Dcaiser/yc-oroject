@@ -15,6 +15,16 @@
     <div x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }})"
          class="min-h-screen p-8 bg-gradient-to-br from-green-50 via-white to-green-100">
 
+        @if ($errors->any())
+            <div class="p-4 mb-6 text-sm text-red-800 border border-red-200 bg-red-50 rounded-xl">
+                <ul class="space-y-1 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Tipe Pembeli -->
         <div class="mb-10">
             <h3 class="mb-3 text-xl font-semibold text-green-800"><i class="fa-solid fa-person"></i> Pilih Tipe pembeli</h3>
@@ -95,27 +105,19 @@
                         <tbody>
                             <template x-for="(item, index) in cart" :key="index">
                                 <tr class="transition hover:bg-green-50">
-                                    <td class="px-5 py-3 font-medium text-green-900 border-b" x-text="item.name">
-                                        <input type="hidden" :name="'cart[id]['+index+']'" :value="item.id" required>
-                                        <input type="hidden" :name="'cart[name]['+index+']'" :value="item.name" required>
-                                    </td>
-                                    <td class="px-5 py-3 font-bold text-green-700 border-b" x-text="formatCurrency(item.price)">
-                                        <input type="hidden" :name="'cart[price]['+index+']'" :value="item.price" required>
-                                    </td>
+                                    <td class="px-5 py-3 font-medium text-green-900 border-b" x-text="item.name"></td>
+                                    <td class="px-5 py-3 font-bold text-green-700 border-b" x-text="formatCurrency(item.price)"></td>
                                     <td class="px-5 py-3 border-b">
-                                        <input required
+                                        <input
                                                type="number" min="1" x-model.number="item.qty"
                                                @input="updateSubtotal(index)"
-                                               :name="'cart[qty]['+index+']'"
+                                               name="cart[qty][]"
                                                class="w-20 px-3 py-2 text-center transition bg-white border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-300">
                                     </td>
                                     <td class="px-5 py-3 border-b">
                                         <span class="capitalize" x-text="item.satuan || '-'"></span>
-                                        <input type="hidden" :name="'cart[satuan]['+index+']'" :value="item.satuan" required>
                                     </td>
-                                    <td class="px-5 py-3 font-semibold text-green-700 border-b" x-text="formatCurrency(item.subtotal)">
-                                        <input type="hidden" :name="'cart[subtotal]['+index+']'" :value="item.subtotal" required>
-                                    </td>
+                                    <td class="px-5 py-3 font-semibold text-green-700 border-b" x-text="formatCurrency(item.subtotal)"></td>
                                     <td class="px-5 py-3 text-center border-b">
                                         <button type="button" @click="removeProduct(index)"
                                                 class="px-4 py-2 text-white transition shadow bg-gradient-to-r from-green-500 to-green-700 rounded-xl hover:scale-110">
@@ -126,6 +128,17 @@
                             </template>
                         </tbody>
                     </table>
+                    <div class="hidden">
+                        <template x-for="(item, index) in cart" :key="'hidden-'+index">
+                            <div>
+                                <input type="hidden" name="cart[id][]" :value="item.id">
+                                <input type="hidden" name="cart[name][]" :value="item.name">
+                                <input type="hidden" name="cart[price][]" :value="item.price">
+                                <input type="hidden" name="cart[satuan][]" :value="item.satuan">
+                                <input type="hidden" name="cart[subtotal][]" :value="item.subtotal">
+                            </div>
+                        </template>
+                    </div>
                     <!-- Input Ongkir -->
                     <div class="mb-8">
                         <label class="block mb-2 text-lg font-semibold text-green-700">Ongkir</label>
@@ -219,15 +232,13 @@
 
             addToCart(product) {
                 const price = this.getPrice(product);
+                const unitLabel = this.resolveUnit(product);
                 const existing = this.cart.find(i => i.id === product.id);
-                const rawUnit = product && Object.prototype.hasOwnProperty.call(product, 'satuan') ? product.satuan : null;
-                const unitLabel = product && product.units && product.units.name
-                    ? product.units.name
-                    : (typeof rawUnit === 'string' ? rawUnit : 'pcs');
 
                 if (existing) {
                     existing.qty += 1;
                     existing.subtotal = existing.qty * existing.price;
+                    existing.satuan = unitLabel;
                 } else {
                     this.cart.push({
                         id: product.id,
@@ -296,6 +307,30 @@ formatShippingCost(e) {
                 } else {
                     this.buyerName = '';
                 }
+            },
+
+            resolveUnit(product) {
+                if (product && product.units && product.units.name) {
+                    return product.units.name;
+                }
+
+                if (product && Object.prototype.hasOwnProperty.call(product, 'unit_name') && product.unit_name) {
+                    return product.unit_name;
+                }
+
+                const rawUnit = product && Object.prototype.hasOwnProperty.call(product, 'satuan')
+                    ? product.satuan
+                    : null;
+
+                if (typeof rawUnit === 'string' && rawUnit.trim() !== '') {
+                    return Number.isNaN(Number(rawUnit)) ? rawUnit : 'pcs';
+                }
+
+                if (typeof rawUnit === 'number' && !Number.isNaN(rawUnit)) {
+                    return 'pcs';
+                }
+
+                return 'pcs';
             },
 
             checkout() {
