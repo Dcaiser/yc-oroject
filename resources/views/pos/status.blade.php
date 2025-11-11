@@ -46,7 +46,7 @@
                     <tbody class="divide-y divide-green-50">
                         @foreach($payments as $index => $payment)
                             @php
-                                $createdAt = isset($payment->created_at) ? \Carbon\Carbon::parse($payment->created_at) : null;
+                                $createdAt = $payment->created_at;
                                 $grandTotal = $payment->grand_total ?? 0;
                                 $paid = $payment->payment_received ?? 0;
                                 $balance = $payment->balance_due ?? max($grandTotal - $paid, 0);
@@ -61,6 +61,7 @@
                                 <td class="px-4 py-3">
                                     <div class="font-medium">{{ $createdAt?->translatedFormat('d M Y H:i') ?? '-' }}</div>
                                     <div class="text-xs text-green-600">Ref: {{ $payment->reference ?? '-' }}</div>
+                                    <div class="text-xs text-green-600">Order: {{ $payment->order_id ?? '-' }}</div>
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="font-semibold">{{ $payment->customer_name ?? '-' }}</div>
@@ -94,7 +95,7 @@
                                             <ul class="mt-1 space-y-1 list-disc list-inside">
                                                 @forelse($payment->items ?? [] as $item)
                                                     <li>
-                                                        {{ $item->name ?? 'Produk' }} — {{ $item->qty ?? 0 }} {{ $item->unit ?? 'pcs' }}
+                                                        {{ $item->product_name ?? $item->name ?? 'Produk' }} — {{ $item->qty ?? 0 }} {{ $item->unit ?? 'pcs' }}
                                                         <span class="font-semibold">(Rp {{ number_format($item->subtotal ?? 0, 0, ',', '.') }})</span>
                                                     </li>
                                                 @empty

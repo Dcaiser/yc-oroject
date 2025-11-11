@@ -10,9 +10,8 @@
             </span>
         </div>
     </x-slot>
-<form action="" method="POST" class="" onsubmit="alert('yakin ingin checkout?')">
+<form action="{{ route('pos.checkout') }}" method="POST" onsubmit="return confirm('Yakin ingin checkout?')">
     @csrf
-    @method('POST')
     <div x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }})"
          class="min-h-screen p-8 bg-gradient-to-br from-green-50 via-white to-green-100">
 
@@ -98,6 +97,7 @@
                                 <tr class="transition hover:bg-green-50">
                                     <td class="px-5 py-3 font-medium text-green-900 border-b" x-text="item.name">
                                         <input type="hidden" :name="'cart[id]['+index+']'" :value="item.id" required>
+                                        <input type="hidden" :name="'cart[name]['+index+']'" :value="item.name" required>
                                     </td>
                                     <td class="px-5 py-3 font-bold text-green-700 border-b" x-text="formatCurrency(item.price)">
                                         <input type="hidden" :name="'cart[price]['+index+']'" :value="item.price" required>
@@ -110,13 +110,8 @@
                                                class="w-20 px-3 py-2 text-center transition bg-white border-2 border-green-200 rounded-xl focus:ring-2 focus:ring-green-300">
                                     </td>
                                     <td class="px-5 py-3 border-b">
-                                        <select x-model="item.satuan"
-                                                :name="'cart[satuan]['+index+']'"
-                                                class="w-full p-2 bg-white border-2 border-green-200 rounded-xl" required>
-                                            <option value="pcs">pcs</option>
-                                            <option value="box">dus</option>
-                                            <option value="lusin">lusin</option>
-                                        </select>
+                                        <span class="capitalize" x-text="item.satuan || '-'"></span>
+                                        <input type="hidden" :name="'cart[satuan]['+index+']'" :value="item.satuan" required>
                                     </td>
                                     <td class="px-5 py-3 font-semibold text-green-700 border-b" x-text="formatCurrency(item.subtotal)">
                                         <input type="hidden" :name="'cart[subtotal]['+index+']'" :value="item.subtotal" required>
@@ -223,10 +218,15 @@
             },
 
             addToCart(product) {
-                let price = this.getPrice(product);
-                let existing = this.cart.find(i => i.id === product.id);
+                const price = this.getPrice(product);
+                const existing = this.cart.find(i => i.id === product.id);
+                const rawUnit = product && Object.prototype.hasOwnProperty.call(product, 'satuan') ? product.satuan : null;
+                const unitLabel = product && product.units && product.units.name
+                    ? product.units.name
+                    : (typeof rawUnit === 'string' ? rawUnit : 'pcs');
+
                 if (existing) {
-                    existing.qty++;
+                    existing.qty += 1;
                     existing.subtotal = existing.qty * existing.price;
                 } else {
                     this.cart.push({
@@ -234,9 +234,11 @@
                         name: product.name,
                         price: price,
                         qty: 1,
+                        satuan: unitLabel,
                         subtotal: price
                     });
                 }
+
                 this.calculateTotal();
             },
 
