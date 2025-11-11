@@ -194,12 +194,33 @@
                         <span>Tip</span>
                         <span class="font-bold text-green-700" x-text="formatCurrency(tip)"></span>
                     </div>
+                    <div class="flex justify-between">
+                        <span>Uang Diterima</span>
+                        <span class="font-bold text-green-700" x-text="formatCurrency(paymentReceived)"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Status Pembayaran</span>
+                        <span class="font-bold" :class="paymentReceived >= (total + shippingCost + tip) ? 'text-green-600' : 'text-yellow-600'"
+                              x-text="paymentReceived >= (total + shippingCost + tip) ? 'Dibayar' : 'Belum Dibayar'"></span>
+                    </div>
                 </div>
                 <hr class="my-4">
                 <div class="flex justify-between text-xl font-extrabold text-green-900">
                     <span>Grand Total</span>
                     <span x-text="formatCurrency(total + shippingCost + tip)"></span>
                     <input type="hidden" name="grand_total" :value="total + shippingCost + tip">
+                </div>
+                <div class="mt-6">
+                    <label class="block mb-2 text-sm font-semibold text-green-700">Nominal Uang Diterima</label>
+                    <div class="relative">
+                        <span class="absolute text-sm font-bold text-green-700 -translate-y-1/2 left-4 top-1/2">Rp</span>
+                        <input type="text"
+                               x-model="paymentReceivedFormatted"
+                               @input="formatPaymentReceived"
+                               name="payment_received"
+                               placeholder="Masukkan nominal pembayaran"
+                               class="w-full p-3 pl-12 transition bg-white border-2 border-green-200 shadow rounded-xl focus:ring-2 focus:ring-green-400">
+                    </div>
                 </div>
                 <!-- Input Pembayaran Diterima -->
                 <button type="submit"

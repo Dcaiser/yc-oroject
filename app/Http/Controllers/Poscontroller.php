@@ -22,12 +22,23 @@ class Poscontroller extends Controller
         return view('pos.index', compact('product', 'customertypes'));
     }
 
-    public function status()
+    public function status(Request $request)
     {
-        $payments = PosTransaction::with('items')->latest()->get();
+        $query = PosTransaction::with('items')->orderByDesc('created_at');
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->input('date'));
+        }
+
+        $payments = $query->get();
+        $groupedPayments = $payments->groupBy(function ($payment) {
+            return optional($payment->created_at)->format('Y-m-d') ?: 'unknown';
+        });
 
         return view('pos.status', [
             'payments' => $payments,
+            'groupedPayments' => $groupedPayments,
+            'selectedDate' => $request->input('date'),
         ]);
     }
 
@@ -142,6 +153,44 @@ class Poscontroller extends Controller
         }
 
         return redirect()->route('pos.payments')->with('success', 'Transaksi POS berhasil dicatat.');
+    }
+
+    public function applyPayment(Request $request, PosTransaction $transaction)
+    {
+        $request->validate([
+            'payment_amount' => ['required', 'string'],
+            'transaction_id' => ['required', 'integer'],
+        ], [
+            'payment_amount.required' => 'Nominal pembayaran wajib diisi.',
+        ]);
+
+        if ((int) $request->input('transaction_id') !== $transaction->id) {
+            return back()
+                ->withErrors(['payment_amount' => 'Transaksi tidak valid.'])
+                ->withInput($request->all());
+        }
+
+        $amount = $this->normalizeCurrency($request->input('payment_amount'));
+
+        if ($amount <= 0) {
+            return back()
+                ->withErrors(['payment_amount' => 'Nominal pembayaran harus lebih dari 0.'])
+                ->withInput($request->all());
+        }
+
+        $totalPaid = $transaction->payment_received + $amount;
+        $balanceDue = max($transaction->grand_total - $totalPaid, 0);
+        $changeDue = max($totalPaid - $transaction->grand_total, 0);
+        $status = $balanceDue === 0 ? 'paid' : 'pending';
+
+        $transaction->update([
+            'payment_received' => $totalPaid,
+            'balance_due' => $balanceDue,
+            'change_due' => $changeDue,
+            'status' => $status,
+        ]);
+
+        return back()->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
     protected function generateOrderId(): string

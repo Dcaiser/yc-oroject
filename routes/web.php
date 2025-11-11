@@ -67,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos', [Poscontroller::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [Poscontroller::class, 'checkout'])->name('pos.checkout');
     Route::get('/pos/status', [Poscontroller::class, 'status'])->name('pos.payments');
+    Route::post('/pos/status/{transaction}/pay', [Poscontroller::class, 'applyPayment'])->name('pos.payments.pay');
 });
 
 

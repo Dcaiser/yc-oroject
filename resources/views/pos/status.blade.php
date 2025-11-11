@@ -21,6 +21,27 @@
             </div>
         @endif
 
+        <form action="{{ route('pos.payments') }}" method="GET" class="flex flex-wrap items-end gap-3 mb-6">
+            <div>
+                <label for="filter-date" class="block text-sm font-semibold text-green-700">Tampilkan per tanggal</label>
+                <input
+                    id="filter-date"
+                    type="date"
+                    name="date"
+                    value="{{ $selectedDate }}"
+                    class="px-3 py-2 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                >
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                    Filter
+                </button>
+                <a href="{{ route('pos.payments') }}" class="px-4 py-2 text-sm font-semibold text-green-700 transition border border-green-300 rounded-lg hover:bg-green-50">
+                    Reset
+                </a>
+            </div>
+        </form>
+
         @if($payments->isEmpty())
             <div class="flex flex-col items-center justify-center py-16 text-center text-green-700">
                 <div class="flex items-center justify-center w-16 h-16 mb-4 bg-green-100 rounded-full">
@@ -44,7 +65,24 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-green-50">
-                        @foreach($payments as $index => $payment)
+                        @php $rowNumber = 1; @endphp
+                        @foreach($groupedPayments as $dateKey => $transactions)
+                            @php
+                                $dateLabel = $dateKey !== 'unknown'
+                                    ? \Carbon\Carbon::createFromFormat('Y-m-d', $dateKey)->translatedFormat('d M Y')
+                                    : 'Tanggal tidak diketahui';
+                            @endphp
+                            @if(!$loop->first)
+                                <tr>
+                                    <td colspan="7" class="py-2">
+                                        <div class="h-px bg-green-200"></div>
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr class="bg-green-100/60">
+                                <td colspan="7" class="px-4 py-2 text-xs font-semibold uppercase text-green-700">Tanggal: {{ $dateLabel }}</td>
+                            </tr>
+                            @foreach($transactions as $payment)
                             @php
                                 $createdAt = $payment->created_at;
                                 $grandTotal = $payment->grand_total ?? 0;
@@ -55,9 +93,14 @@
                                 $isPaid = $status === 'paid';
                                 $badgeClass = $isPaid ? 'bg-green-500' : 'bg-yellow-500';
                                 $statusLabel = $isPaid ? 'Sudah Dibayar' : 'Belum Dibayar';
+                                $prefillPayment = number_format($balance > 0 ? $balance : $grandTotal, 0, ',', '.');
+
+                                if (old('transaction_id') == $payment->id) {
+                                    $prefillPayment = old('payment_amount', $prefillPayment);
+                                }
                             @endphp
                             <tr class="align-top hover:bg-green-50">
-                                <td class="px-4 py-3 font-semibold">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 font-semibold">{{ $rowNumber++ }}</td>
                                 <td class="px-4 py-3">
                                     <div class="font-medium">{{ $createdAt?->translatedFormat('d M Y H:i') ?? '-' }}</div>
                                     <div class="text-xs text-green-600">Ref: {{ $payment->reference ?? '-' }}</div>
@@ -85,6 +128,28 @@
                                     <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-white rounded-full {{ $badgeClass }}">
                                         {{ $statusLabel }}
                                     </span>
+                                    @if(!$isPaid)
+                                        <form action="{{ route('pos.payments.pay', $payment) }}" method="POST" class="mt-3 space-y-2 sm:flex sm:items-center sm:space-y-0 sm:space-x-2">
+                                            @csrf
+                                            <input type="hidden" name="transaction_id" value="{{ $payment->id }}">
+                                            <div class="relative sm:w-40">
+                                                <span class="absolute text-xs font-semibold text-green-600 transform -translate-y-1/2 left-3 top-1/2">Rp</span>
+                                                <input
+                                                    type="text"
+                                                    name="payment_amount"
+                                                    value="{{ $prefillPayment }}"
+                                                    placeholder="Nominal pembayaran"
+                                                    class="w-full py-2 pl-8 pr-3 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                                                >
+                                            </div>
+                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                                                Tandai Dibayar
+                                            </button>
+                                        </form>
+                                        @if($errors->has('payment_amount') && (int) old('transaction_id') === $payment->id)
+                                            <p class="mt-2 text-xs font-semibold text-red-600">{{ $errors->first('payment_amount') }}</p>
+                                        @endif
+                                    @endif
                                 </td>
                             </tr>
                             <tr class="text-xs text-green-700 bg-green-50/60">
@@ -114,6 +179,7 @@
                                     </div>
                                 </td>
                             </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 </table>
