@@ -2,705 +2,526 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Produk;
 use App\Models\Activity;
-use App\Models\Supplier;
-use App\Models\Kategori;
-// use App\Exports\ReportExport;  // Disabled to prevent PhpSpreadsheet error
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
-// use Maatwebsite\Excel\Facades\Excel;  // Disabled to prevent PhpSpreadsheet error
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SalesTransactionExport;
+use App\Exports\StockMovementExport;
 
 class ReportController extends Controller
 {
     /**
-     * Display a listing of the reports.
+     * Display the unified reports dashboard.
      */
-    public function index()
+    public function index(Request $request)
     {
-        try {
-            // Get current month and year for default view
-            $currentMonth = Carbon::now()->format('Y-m');
-            $currentYear = Carbon::now()->year;
-            
-            // Get data for dashboard statistics with caching (5 minutes)
-            $cacheKey = 'reports_dashboard_stats_' . now()->format('Y-m-d-H') . '_' . intval(now()->minute / 5);
-            
-            $stats = \Cache::remember($cacheKey, 300, function () {
+        $mode = $request->get('mode', 'range');
+        $now = Carbon::now();
+
+        $availableYears = Activity::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->filter(fn($year) => $year > 0) // Filter out invalid years
+            ->map(fn ($year) => (int) $year)
+            ->unique()
+            ->values();
+
+        if ($availableYears->isEmpty() || !$availableYears->contains($now->year)) {
+            $availableYears = $availableYears->prepend($now->year)->unique()->values();
+        }
+
+        $groupFormat = 'Y-m-d';
+        $labelFormatter = fn (Carbon $date) => $date->translatedFormat('d M');
+        $periodDescription = '';
+        $selectedYear = (int) $request->integer('year', $now->year);
+        $selectedWeekYear = (int) ($request->integer('week_year') ?: $now->year);
+        $selectedWeekMonth = (int) ($request->integer('week_month') ?: $now->month);
+
+        // Ensure valid years
+        if ($selectedYear <= 0) {
+            $selectedYear = $now->year;
+        }
+        if ($selectedWeekYear <= 0) {
+            $selectedWeekYear = $now->year;
+        }
+
+        if (! $availableYears->contains($selectedWeekYear)) {
+            $availableYears = $availableYears->push($selectedWeekYear)->unique()->sortDesc()->values();
+        }
+
+        if ($selectedWeekMonth < 1 || $selectedWeekMonth > 12) {
+            $selectedWeekMonth = $now->month;
+        }
+
+        $weekOptionsDetailed = $this->buildWeekOptionsForMonth($selectedWeekYear, $selectedWeekMonth, $now);
+        $resolvedWeek = $this->pickWeekSelection($request->get('week'), $weekOptionsDetailed, $now);
+        $weekValue = $resolvedWeek['value'];
+        $dateFrom = null;
+        $dateTo = null;
+        $start = null;
+        $end = null;
+
+        switch ($mode) {
+            case 'week':
+                $start = $resolvedWeek['start']->copy();
+                $end = $resolvedWeek['end']->copy();
+                $periodDescription = 'Minggu ' . $resolvedWeek['label'];
+                $weekValue = $resolvedWeek['value'];
+                $dateFrom = $start->format('Y-m-d');
+                $dateTo = $end->format('Y-m-d');
+                $groupFormat = 'Y-m-d';
+                $labelFormatter = fn (Carbon $date) => $date->translatedFormat('d M');
+                $period = CarbonPeriod::create($start->copy(), '1 day', $end->copy());
+                break;
+
+            case 'year':
+                if (!$availableYears->contains($selectedYear)) {
+                    $selectedYear = $now->year;
+                }
+
+                $start = Carbon::create($selectedYear, 1, 1)->startOfYear();
+                $end = $start->copy()->endOfYear();
+                $periodDescription = 'Tahun ' . $selectedYear;
+                $dateFrom = $start->format('Y-m-d');
+                $dateTo = $end->format('Y-m-d');
+                $groupFormat = 'Y-m';
+                $labelFormatter = fn (Carbon $date) => $date->translatedFormat('M Y');
+                $period = CarbonPeriod::create($start->copy(), '1 month', $end->copy());
+                break;
+
+            case 'range':
+            default:
+                $start = $this->safeParseDate($request->date_from ?? null, fn () => $now->copy()->subDays(6)->startOfDay());
+                $end = $this->safeParseDate($request->date_to ?? null, fn () => $now->copy()->endOfDay(), endOfDay: true);
+
+                if ($end->lt($start)) {
+                    [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+                }
+
+                $periodDescription = $start->translatedFormat('d M Y') . ' – ' . $end->translatedFormat('d M Y');
+                $dateFrom = $start->format('Y-m-d');
+                $dateTo = $end->format('Y-m-d');
+                $groupFormat = 'Y-m-d';
+                $labelFormatter = fn (Carbon $date) => $date->translatedFormat('d M');
+                $period = CarbonPeriod::create($start->copy(), '1 day', $end->copy());
+                break;
+        }
+
+        $weekOptions = $weekOptionsDetailed
+            ->map(fn (array $option) => [
+                'value' => $option['value'],
+                'label' => $option['label'],
+            ])
+            ->values();
+
+        $activities = Activity::query()
+            ->whereBetween('created_at', [$start, $end])
+            ->orderBy('created_at')
+            ->get();
+
+        $buckets = $this->initializeBuckets($period, $groupFormat, $labelFormatter);
+
+        $summaryTotals = [
+            'totalActivities' => 0,
+            'stockIn' => 0,
+            'stockOut' => 0,
+            'endingStock' => 0,
+        ];
+
+        $cumulativeStock = 0;
+
+        foreach ($activities as $activity) {
+            $createdAt = $activity->created_at instanceof Carbon
+                ? $activity->created_at
+                : Carbon::parse($activity->created_at);
+
+            $bucketKey = $createdAt->format($groupFormat);
+
+            if (!$buckets->has($bucketKey)) {
+                continue;
+            }
+
+            $bucket = $buckets->get($bucketKey);
+
+            $actionText = Str::lower((string) $activity->action);
+            $isStockIn = Str::contains($actionText, ['tambah', 'masuk', 'increase', 'restock']);
+            $isStockOut = Str::contains($actionText, ['keluar', 'hapus', 'kurang', 'issue']);
+
+            $bucket['total'] += 1;
+
+            if ($isStockIn) {
+                $bucket['stock_in'] += 1;
+                $summaryTotals['stockIn'] += 1;
+                $cumulativeStock += 1;
+            }
+
+            if ($isStockOut) {
+                $bucket['stock_out'] += 1;
+                $summaryTotals['stockOut'] += 1;
+                $cumulativeStock -= 1;
+            }
+
+            $bucket['ending_stock'] = max(0, $cumulativeStock);
+            $summaryTotals['totalActivities'] += 1;
+            $buckets->put($bucketKey, $bucket);
+        }
+
+        $summaryTotals['endingStock'] = max(0, $cumulativeStock);
+
+        $tableData = $buckets->values()->all();
+
+        $chartData = [
+            'labels' => array_column($tableData, 'label'),
+            'datasets' => [
+                'total' => array_column($tableData, 'total'),
+                'stock_in' => array_column($tableData, 'stock_in'),
+                'stock_out' => array_column($tableData, 'stock_out'),
+                'ending_stock' => array_column($tableData, 'ending_stock'),
+            ],
+        ];
+
+        $summary = array_merge($summaryTotals, [
+            'uniqueUsers' => $activities->pluck('user')->filter()->unique()->count(),
+        ]);
+
+        $recentActivities = Activity::select(['id', 'action', 'model', 'created_at', 'user'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $salesTransactions = DB::table('stock_out')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($row) {
                 return [
-                    'totalProducts' => Produk::count(),
-                    'lowStockProducts' => Produk::where('stock_quantity', '<', 10)->count(),
-                    'totalSuppliers' => Supplier::count(),
-                    'monthlyActivities' => Activity::whereMonth('created_at', now()->month)
-                        ->whereYear('created_at', now()->year)
-                        ->count()
+                    'id' => $row->id,
+                    'date' => Carbon::parse($row->created_at)->format('d M Y'),
+                    'customer_name' => $row->customer_name,
+                    'customer_type' => $row->customer_type,
+                    'product_name' => $row->product_name,
+                    'qty' => $row->stock_qty,
+                    'satuan' => $row->satuan,
+                    'price_per_unit' => $row->prices,
+                    'total_price' => $row->total_price,
+                    'shipping_cost' => $row->shipping_cost,
+                    'grand_total' => $row->total_price + $row->shipping_cost,
                 ];
-            });
-            
-            extract($stats);
-            
-            // Get recent activities with limited data
-            $recentActivities = Activity::select(['id', 'action', 'model', 'created_at'])
-                ->latest()
-                ->take(5)
-                ->get();
-            
-            // Simple total stock value calculation with caching
-            $totalStockValue = \Cache::remember('total_stock_value_' . now()->format('Y-m-d-H'), 3600, function () {
-                return Produk::join('prices', 'produks.id', '=', 'prices.produk_id')
-                    ->selectRaw('SUM(produks.stock_quantity * prices.harga) as total_value')
-                    ->whereRaw('prices.id = (SELECT id FROM prices p2 WHERE p2.produk_id = produks.id ORDER BY p2.created_at DESC LIMIT 1)')
-                    ->value('total_value') ?: 0;
-            });
-            
-            return view('reports.index', compact(
-                'currentMonth', 
-                'currentYear',
-                'totalProducts',
-                'lowStockProducts', 
-                'totalSuppliers',
-                'monthlyActivities',
-                'recentActivities',
-                'totalStockValue'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('Reports Index Error: ' . $e->getMessage());
-            
-            // Fallback data if there's an error
-            return view('reports.index', [
-                'currentMonth' => Carbon::now()->format('Y-m'),
-                'currentYear' => Carbon::now()->year,
-                'totalProducts' => 0,
-                'lowStockProducts' => 0,
-                'totalSuppliers' => 0,
-                'monthlyActivities' => 0,
-                'recentActivities' => collect(),
-                'totalStockValue' => 0
+            })
+            ->values()
+            ->all();
+
+        $filters = [
+            'mode' => $mode,
+            'date_from' => $dateFrom,
+            'date_to' => $dateTo,
+            'week' => $weekValue,
+            'week_month' => $selectedWeekMonth,
+            'week_year' => $selectedWeekYear,
+            'year' => $selectedYear,
+        ];
+
+        return view('reports.index', [
+            'summary' => $summary,
+            'chartData' => $chartData,
+            'tableData' => $tableData,
+            'salesTransactions' => $salesTransactions,
+            'filters' => $filters,
+            'availableYears' => $availableYears,
+            'weekOptions' => $weekOptions->all(),
+            'weekMonthOptions' => $this->buildWeekMonthOptions()->all(),
+            'periodDescription' => $periodDescription,
+            'recentActivities' => $recentActivities,
+        ]);
+    }
+
+    /**
+     * Prepare buckets for the given period.
+     */
+    private function initializeBuckets(CarbonPeriod $period, string $groupFormat, callable $labelFormatter): Collection
+    {
+        $buckets = collect();
+
+        foreach ($period as $date) {
+            $key = $date->format($groupFormat);
+
+            $buckets->put($key, [
+                'label' => $labelFormatter($date),
+                'total' => 0,
+                'stock_in' => 0,
+                'stock_out' => 0,
+                'ending_stock' => 0,
             ]);
         }
+
+        return $buckets;
     }
 
-    /**
-     * Stock Value Report
-     */
-    public function stockValue(Request $request)
+    private function safeParseDate(?string $date, callable $fallback, bool $endOfDay = false): Carbon
     {
-        try {
-            $query = Produk::with('category');
-            
-            // Filter by category if selected
-            if ($request->filled('category_id')) {
-                $query->where('category_id', $request->category_id);
+        if ($date === null) {
+            $base = $fallback();
+        } else {
+            try {
+                $base = Carbon::parse($date);
+            } catch (\Throwable $e) {
+                $base = $fallback();
             }
-            
-            // Filter by date range
-            if ($request->filled('date_from') && $request->filled('date_to')) {
-                $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
-            }
-            
-            $products = $query->get();
-            
-            // Calculate totals
-            $totalProducts = $products->count();
-            $totalStock = $products->sum('stock_quantity');
-            $totalValue = $products->sum(function($product) {
-                return $product->stock_quantity * $product->getDefaultPrice();
-            });
-            
-            // Low stock products (less than 10)
-            $lowStockProducts = $products->where('stock_quantity', '<', 10);
-            
-            // Get categories with error handling
-            $categories = Kategori::all();
-            
-            return view('reports.stock-value', compact(
-                'products', 
-                'totalProducts', 
-                'totalStock', 
-                'totalValue', 
-                'lowStockProducts',
-                'categories'
-            ));
-        } catch (\Exception $e) {
-            // Log error and return with error message
-            \Log::error('Stock Value Report Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi error saat memuat laporan: ' . $e->getMessage());
         }
+
+        return $endOfDay ? $base->copy()->endOfDay() : $base->copy()->startOfDay();
     }
 
-    /**
-     * Movement Report
-     */
-    public function movement(Request $request)
+    private function buildWeekOptionsForMonth(int $year, int $month, Carbon $reference): Collection
     {
-        try {
-            $query = Activity::query();
-            
-            // Filter by date range
-            if ($request->filled('date_from') && $request->filled('date_to')) {
-                $query->whereBetween('created_at', [$request->date_from, $request->date_to]);
-            } else {
-                // Default to current month
-                $query->whereBetween('created_at', [
-                    Carbon::now()->startOfMonth(),
-                    Carbon::now()->endOfMonth()
-                ]);
+        $monthStart = Carbon::create($year, $month, 1, 0, 0, 0)->startOfDay();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+
+        $cursor = $monthStart->copy()->startOfWeek();
+        $options = collect();
+
+        while ($cursor->lte($monthEnd)) {
+            $weekStart = $cursor->copy();
+            $weekEnd = $weekStart->copy()->endOfWeek();
+
+            if ($weekEnd->lt($monthStart)) {
+                $cursor->addWeek();
+                continue;
             }
-            
-            // Filter by action type
-            if ($request->filled('action_type')) {
-                $query->where('action', 'like', '%' . $request->action_type . '%');
+
+            if ($weekStart->gt($monthEnd)) {
+                break;
             }
-            
-            $activities = $query->latest()->paginate(20);
-            
-            // Summary statistics - use separate query to avoid pagination issues
-            $summaryQuery = Activity::query();
-            if ($request->filled('date_from') && $request->filled('date_to')) {
-                $summaryQuery->whereBetween('created_at', [$request->date_from, $request->date_to]);
-            } else {
-                $summaryQuery->whereBetween('created_at', [
-                    Carbon::now()->startOfMonth(),
-                    Carbon::now()->endOfMonth()
-                ]);
-            }
-            if ($request->filled('action_type')) {
-                $summaryQuery->where('action', 'like', '%' . $request->action_type . '%');
-            }
-            
-            $totalActivities = $summaryQuery->count();
-            $productActivities = $summaryQuery->where('model', 'Produk')->count();
-            $userActivities = $summaryQuery->where('model', 'User')->count();
-            
-            // Get products for filter dropdown
-            $products = Produk::all();
-            
-            return view('reports.movement', compact(
-                'activities',
-                'totalActivities',
-                'productActivities',
-                'userActivities',
-                'products'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('Movement Report Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi error saat memuat laporan: ' . $e->getMessage());
+
+            $clampedStart = $weekStart->greaterThan($monthStart) ? $weekStart->copy() : $monthStart->copy();
+            $clampedEnd = $weekEnd->lessThan($monthEnd) ? $weekEnd->copy() : $monthEnd->copy();
+
+            $options->push([
+                'value' => sprintf('%d-W%02d', $weekStart->isoWeekYear, $weekStart->isoWeek),
+                'label' => $clampedStart->translatedFormat('d M') . ' – ' . $clampedEnd->translatedFormat('d M Y'),
+                'start' => $clampedStart->copy()->startOfDay(),
+                'end' => $clampedEnd->copy()->endOfDay(),
+                'sort_key' => $weekStart->timestamp,
+                'is_current' => $reference->between($weekStart, $weekEnd, true),
+            ]);
+
+            $cursor->addWeek();
         }
+
+        if ($options->isEmpty()) {
+            $options->push([
+                'value' => sprintf('%d-W%02d', $monthStart->isoWeekYear, $monthStart->isoWeek),
+                'label' => $monthStart->translatedFormat('d M') . ' – ' . $monthEnd->translatedFormat('d M Y'),
+                'start' => $monthStart->copy()->startOfDay(),
+                'end' => $monthEnd->copy()->endOfDay(),
+                'sort_key' => $monthStart->timestamp,
+                'is_current' => true,
+            ]);
+        }
+
+        return $options->sortByDesc('sort_key')->values();
+    }
+
+    private function pickWeekSelection(?string $requestedWeek, Collection $options, Carbon $reference): array
+    {
+        if ($options->isEmpty()) {
+            $start = $reference->copy()->startOfWeek();
+            $end = $reference->copy()->endOfWeek();
+
+            return [
+                'value' => sprintf('%d-W%02d', $start->isoWeekYear, $start->isoWeek),
+                'label' => $start->translatedFormat('d M Y') . ' – ' . $end->translatedFormat('d M Y'),
+                'start' => $start,
+                'end' => $end,
+            ];
+        }
+
+        $selected = $options->firstWhere('value', $requestedWeek);
+
+        if (! $selected) {
+            $selected = $options->firstWhere('is_current', true) ?? $options->first();
+        }
+
+        return $selected;
+    }
+
+    private function buildWeekMonthOptions(): Collection
+    {
+        return collect(range(1, 12))->map(fn (int $month) => [
+            'value' => $month,
+            'label' => Carbon::create(2000, $month, 1)->translatedFormat('F'),
+        ]);
     }
 
     /**
-     * Supplier Performance Report
+     * Export sales transactions report
      */
-    public function supplierPerformance(Request $request)
+    public function exportSales(Request $request)
     {
-        try {
-            $suppliers = Supplier::all();
+        [$start, $end] = $this->getPeriodDates($request);
+        
+        $salesData = DB::table('stock_out')
+            ->whereBetween('created_at', [$start, $end])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'date' => Carbon::parse($row->created_at)->format('d M Y'),
+                    'customer_name' => $row->customer_name,
+                    'customer_type' => ucfirst($row->customer_type),
+                    'product_name' => $row->product_name,
+                    'qty' => $row->stock_qty . ' ' . $row->satuan,
+                    'price_per_unit' => 'Rp ' . number_format($row->prices, 0, ',', '.'),
+                    'total_price' => 'Rp ' . number_format($row->total_price, 0, ',', '.'),
+                    'shipping_cost' => 'Rp ' . number_format($row->shipping_cost, 0, ',', '.'),
+                    'grand_total' => 'Rp ' . number_format($row->total_price + $row->shipping_cost, 0, ',', '.'),
+                ];
+            })
+            ->toArray();
+
+        $format = $request->get('format', 'excel');
+        $filename = 'laporan-transaksi-penjualan-' . $start->format('Y-m-d') . '-' . $end->format('Y-m-d');
+
+        if ($format === 'pdf') {
+            $pdf = PDF::loadView('reports.pdf.sales', [
+                'data' => $salesData,
+                'start' => $start->translatedFormat('d F Y'),
+                'end' => $end->translatedFormat('d F Y'),
+            ])->setPaper('a4', 'landscape');
             
-            // Calculate simple performance metrics based on products and create paginated data
-            $allPerformanceData = collect();
-            foreach($suppliers as $supplier) {
-                $supplier->products_count = Produk::where('supplier_id', $supplier->id)->count();
-                $supplier->total_stock = Produk::where('supplier_id', $supplier->id)->sum('stock_quantity');
-                $supplier->orders_count = rand(5, 50); // Sample data
-                $supplier->total_value = $supplier->products_count * rand(100000, 1000000);
-                $supplier->avg_delivery_time = rand(3, 15);
+            return $pdf->download($filename . '.pdf');
+        }
+
+        return Excel::download(new SalesTransactionExport($salesData, $start, $end), $filename . '.xlsx');
+    }
+
+    /**
+     * Export stock movement report
+     */
+    public function exportStock(Request $request)
+    {
+        [$start, $end, $period, $groupFormat, $labelFormatter] = $this->getPeriodDataForExport($request);
+        
+        $activities = Activity::query()
+            ->whereBetween('created_at', [$start, $end])
+            ->orderBy('created_at')
+            ->get();
+
+        $buckets = $this->initializeBuckets($period, $groupFormat, $labelFormatter);
+        $cumulativeStock = 0;
+
+        foreach ($activities as $activity) {
+            $createdAt = $activity->created_at instanceof Carbon
+                ? $activity->created_at
+                : Carbon::parse($activity->created_at);
+
+            $bucketKey = $createdAt->format($groupFormat);
+
+            if (!$buckets->has($bucketKey)) {
+                continue;
+            }
+
+            $bucket = $buckets->get($bucketKey);
+            $actionText = Str::lower((string) $activity->action);
+            $isStockIn = Str::contains($actionText, ['tambah', 'masuk', 'increase', 'restock']);
+            $isStockOut = Str::contains($actionText, ['keluar', 'hapus', 'kurang', 'issue']);
+
+            $bucket['total'] += 1;
+
+            if ($isStockIn) {
+                $bucket['stock_in'] += 1;
+                $cumulativeStock += 1;
+            }
+
+            if ($isStockOut) {
+                $bucket['stock_out'] += 1;
+                $cumulativeStock -= 1;
+            }
+
+            $bucket['ending_stock'] = max(0, $cumulativeStock);
+            $buckets->put($bucketKey, $bucket);
+        }
+
+        $stockData = $buckets->values()->toArray();
+        $format = $request->get('format', 'excel');
+        $filename = 'laporan-pergerakan-stok-' . $start->format('Y-m-d') . '-' . $end->format('Y-m-d');
+
+        if ($format === 'pdf') {
+            $pdf = PDF::loadView('reports.pdf.stock', [
+                'data' => $stockData,
+                'start' => $start->translatedFormat('d F Y'),
+                'end' => $end->translatedFormat('d F Y'),
+            ]);
+            
+            return $pdf->download($filename . '.pdf');
+        }
+
+        return Excel::download(new StockMovementExport($stockData, $start, $end), $filename . '.xlsx');
+    }
+
+    /**
+     * Get period dates from request
+     */
+    private function getPeriodDates(Request $request): array
+    {
+        $mode = $request->get('mode', 'range');
+        $now = Carbon::now();
+
+        switch ($mode) {
+            case 'week':
+                $weekYear = (int) ($request->integer('week_year') ?? $now->year);
+                $weekMonth = (int) ($request->integer('week_month') ?? $now->month);
+                $weekOptionsDetailed = $this->buildWeekOptionsForMonth($weekYear, $weekMonth, $now);
+                $resolvedWeek = $this->pickWeekSelection($request->get('week'), $weekOptionsDetailed, $now);
+                $start = $resolvedWeek['start']->copy();
+                $end = $resolvedWeek['end']->copy();
+                break;
+
+            case 'year':
+                $year = (int) $request->integer('year', $now->year);
+                $start = Carbon::create($year, 1, 1)->startOfYear();
+                $end = $start->copy()->endOfYear();
+                break;
+
+            case 'range':
+            default:
+                $start = $this->safeParseDate($request->date_from ?? null, fn () => $now->copy()->subDays(6)->startOfDay());
+                $end = $this->safeParseDate($request->date_to ?? null, fn () => $now->copy()->endOfDay(), endOfDay: true);
                 
-                $allPerformanceData->push($supplier);
-            }
-            
-            // Create paginated performance data
-            $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
-            $perPage = 10;
-            $currentItems = $allPerformanceData->slice(($currentPage - 1) * $perPage, $perPage);
-            $performanceData = new \Illuminate\Pagination\LengthAwarePaginator(
-                $currentItems,
-                $allPerformanceData->count(),
-                $perPage,
-                $currentPage,
-                ['path' => request()->url(), 'pageName' => 'page']
-            );
-            
-            // Calculate performance metrics
-            $topSuppliers = $suppliers->sortByDesc('products_count')->take(5);
-            $topSuppliersByValue = $suppliers->sortByDesc('total_value')->take(5);
-            $totalSuppliers = $suppliers->count();
-            $activeSuppliers = $suppliers->where('products_count', '>', 0)->count();
-            
-            // Summary data
-            $summary = [
-                'total_suppliers' => $totalSuppliers,
-                'total_orders' => $allPerformanceData->sum('orders_count'),
-                'total_value' => $allPerformanceData->sum('total_value'),
-                'avg_delivery_time' => $allPerformanceData->avg('avg_delivery_time')
-            ];
-            
-            // Chart data for supplier performance visualization
-            $chartData = [
-                'labels' => $topSuppliersByValue->pluck('nama_supplier')->toArray(),
-                'values' => $topSuppliersByValue->pluck('total_value')->toArray(),
-                'orders' => $topSuppliersByValue->pluck('orders_count')->toArray()
-            ];
-            
-            return view('reports.supplier-performance', compact(
-                'suppliers',
-                'performanceData',
-                'topSuppliers',
-                'topSuppliersByValue',
-                'totalSuppliers',
-                'activeSuppliers',
-                'summary',
-                'chartData'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('Supplier Performance Report Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi error saat memuat laporan: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Weekly Report
-     */
-    public function weekly(Request $request)
-    {
-        try {
-            $startOfWeek = $request->filled('week') 
-                ? Carbon::parse($request->week)->startOfWeek()
-                : Carbon::now()->startOfWeek();
-            
-            $endOfWeek = $startOfWeek->copy()->endOfWeek();
-            
-            // Get filter data
-            $categories = Kategori::all();
-            $suppliers = Supplier::all();
-            
-            // Get activities for this week
-            $activities = Activity::whereBetween('created_at', [$startOfWeek, $endOfWeek])
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            // Group activities by day
-            $dailyActivities = $activities->groupBy(function($activity) {
-                return $activity->created_at->format('Y-m-d');
-            });
-            
-            // Create daily data for charts and tables
-            $dailyData = collect();
-            for ($i = 0; $i < 7; $i++) {
-                $date = $startOfWeek->copy()->addDays($i);
-                $dateKey = $date->format('Y-m-d');
-                $dayActivities = $dailyActivities->get($dateKey, collect());
-                
-                $dailyData->push((object)[
-                    'date' => $dateKey,
-                    'day_name' => $date->format('l'),
-                    'activities_count' => $dayActivities->count(),
-                    'stock_in' => $dayActivities->filter(function($activity) {
-                        return str_contains(strtolower($activity->action), 'tambah') || str_contains(strtolower($activity->action), 'masuk');
-                    })->count(),
-                    'stock_out' => $dayActivities->filter(function($activity) {
-                        return str_contains(strtolower($activity->action), 'keluar') || str_contains(strtolower($activity->action), 'hapus');
-                    })->count(),
-                    'products_added' => $dayActivities->filter(function($activity) {
-                        return str_contains(strtolower($activity->action), 'tambah') && $activity->model === 'Produk';
-                    })->count(),
-                    'activities' => $dayActivities
-                ]);
-            }
-            
-            // Summary statistics
-            $totalActivities = $activities->count();
-            $productsAdded = $activities->filter(function($activity) {
-                return str_contains(strtolower($activity->action), 'tambah') && $activity->model === 'Produk';
-            })->count();
-            $stockUpdates = $activities->filter(function($activity) {
-                return str_contains(strtolower($activity->action), 'update');
-            })->count();
-            
-            return view('reports.weekly', compact(
-                'activities',
-                'dailyActivities',
-                'dailyData',
-                'totalActivities',
-                'productsAdded',
-                'stockUpdates',
-                'startOfWeek',
-                'endOfWeek',
-                'categories',
-                'suppliers'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('Weekly Report Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi error saat memuat laporan: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Monthly Report
-     */
-    public function monthly(Request $request)
-    {
-        try {
-            $month = $request->filled('month') 
-                ? Carbon::parse($request->month)
-                : Carbon::now();
-            
-            $startOfMonth = $month->copy()->startOfMonth();
-            $endOfMonth = $month->copy()->endOfMonth();
-            
-            // Get activities for this month
-            $activities = Activity::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            // Products added this month
-            $productsThisMonth = Produk::whereBetween('created_at', [$startOfMonth, $endOfMonth])->get();
-            
-            // Group activities by week
-            $weeklyActivities = $activities->groupBy(function($activity) {
-                return $activity->created_at->format('W');
-            });
-            
-            // Summary statistics
-            $totalActivities = $activities->count();
-            $totalProductsAdded = $productsThisMonth->count();
-            $totalStockValue = $productsThisMonth->sum(function($product) {
-                return $product->stock_quantity * $product->getDefaultPrice();
-            });
-            
-            // Low stock alerts
-            $lowStockCount = Produk::where('stock_quantity', '<', 10)->count();
-            
-            return view('reports.monthly', compact(
-                'activities',
-                'productsThisMonth',
-                'weeklyActivities',
-                'totalActivities',
-                'totalProductsAdded',
-                'totalStockValue',
-                'lowStockCount',
-                'month'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('Monthly Report Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi error saat memuat laporan: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Export Report to PDF
-     */
-    public function exportPdf(Request $request)
-    {
-        $type = $request->get('type', 'stock-value');
-        $data = [];
-        
-        switch ($type) {
-            case 'stock-value':
-                $data = $this->getStockValueData($request);
-                break;
-            case 'movement':
-                $data = $this->getMovementData($request);
-                break;
-            case 'supplier-performance':
-                $data = $this->getSupplierPerformanceData($request);
-                break;
-            case 'weekly':
-                $data = $this->getWeeklyData($request);
-                break;
-            case 'monthly':
-                $data = $this->getMonthlyData($request);
+                if ($end->lt($start)) {
+                    [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+                }
                 break;
         }
-        
-        $pdf = Pdf::loadView('reports.pdf.' . $type, $data);
-        
-        return $pdf->download('laporan-' . $type . '-' . date('Y-m-d') . '.pdf');
+
+        return [$start, $end];
     }
 
     /**
-     * Export Report to Excel
+     * Get period data for export
      */
-    public function exportExcel(Request $request)
+    private function getPeriodDataForExport(Request $request): array
     {
-        // TEMPORARILY DISABLED - PhpSpreadsheet dependency issue
-        return response()->json(['error' => 'Export Excel feature is temporarily disabled'], 503);
-        
-        // $type = $request->get('type', 'stock-value');
-        // return response()->json(["error" => "Excel export temporarily disabled"], 503); // return Excel::download(new ReportExport($type, $request->all()), 
-        //     'laporan-' . $type . '-' . date('Y-m-d') . '.xlsx');
-    }
+        [$start, $end] = $this->getPeriodDates($request);
+        $mode = $request->get('mode', 'range');
 
-    /**
-     * Export Stock Value Report
-     */
-    public function exportStockValue(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'excel') {
-            return response()->json(["error" => "Excel export temporarily disabled"], 503);
-            // return Excel::download(new ReportExport('stock-value', $request->all()), 'laporan-nilai-stok-' . date('Y-m-d') . '.xlsx');
-        }
-        
-        // PDF export
-        $data = $this->getStockValueData($request);
-        $pdf = PDF::loadView('reports.pdf.stock-value', $data);
-        return $pdf->download('laporan-nilai-stok-' . date('Y-m-d') . '.pdf');
-    }
-
-    /**
-     * Export Movement Report
-     */
-    public function exportMovement(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'excel') {
-            return response()->json(["error" => "Excel export temporarily disabled"], 503);
-            // return Excel::download(new ReportExport('movement', $request->all()), 'laporan-pergerakan-stok-' . date('Y-m-d') . '.xlsx');
-        }
-        
-        // PDF export
-        $data = $this->getMovementData($request);
-        $pdf = PDF::loadView('reports.pdf.movement', $data);
-        return $pdf->download('laporan-pergerakan-stok-' . date('Y-m-d') . '.pdf');
-    }
-
-    /**
-     * Export Supplier Performance Report
-     */
-    public function exportSupplierPerformance(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'excel') {
-            return response()->json(["error" => "Excel export temporarily disabled"], 503);
-            // return Excel::download(new ReportExport('supplier-performance', $request->all()), 'laporan-performa-supplier-' . date('Y-m-d') . '.xlsx');
-        }
-        
-        // PDF export
-        $data = $this->getSupplierPerformanceData($request);
-        $pdf = PDF::loadView('reports.pdf.supplier-performance', $data);
-        return $pdf->download('laporan-performa-supplier-' . date('Y-m-d') . '.pdf');
-    }
-
-    /**
-     * Export Weekly Report
-     */
-    public function exportWeekly(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'excel') {
-            return response()->json(["error" => "Excel export temporarily disabled"], 503);
-            // return Excel::download(new ReportExport('weekly', $request->all()), 'laporan-mingguan-' . date('Y-m-d') . '.xlsx');
-        }
-        
-        // PDF export
-        $data = $this->getWeeklyData($request);
-        $pdf = PDF::loadView('reports.pdf.weekly', $data);
-        return $pdf->download('laporan-mingguan-' . date('Y-m-d') . '.pdf');
-    }
-
-    /**
-     * Export Monthly Report
-     */
-    public function exportMonthly(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'excel') {
-            return response()->json(["error" => "Excel export temporarily disabled"], 503);
-            // return Excel::download(new ReportExport('monthly', $request->all()), 'laporan-bulanan-' . date('Y-m-d') . '.xlsx');
-        }
-        
-        // PDF export
-        $data = $this->getMonthlyData($request);
-        $pdf = PDF::loadView('reports.pdf.monthly', $data);
-        return $pdf->download('laporan-bulanan-' . date('Y-m-d') . '.pdf');
-    }
-
-    // Helper methods for PDF export
-
-    private function getMonthlyData($request)
-    {
-        $month = $request->filled('month') 
-            ? Carbon::parse($request->month)
-            : Carbon::now();
-        
-        $startOfMonth = $month->copy()->startOfMonth();
-        $endOfMonth = $month->copy()->endOfMonth();
-        
-        return [
-            'activities' => Activity::whereBetween('created_at', [$startOfMonth, $endOfMonth])->get(),
-            'products' => Produk::whereBetween('created_at', [$startOfMonth, $endOfMonth])->get(),
-            'month' => $month,
-            'generatedAt' => now()
-        ];
-    }
-
-    private function getStockValueData($request)
-    {
-        $query = Produk::with(['kategori', 'prices' => function($q) {
-            $q->latest();
-        }]);
-
-        if ($request->filled('category_id')) {
-            $query->where('kategori_id', $request->category_id);
+        if ($mode === 'year') {
+            $groupFormat = 'Y-m';
+            $labelFormatter = fn (Carbon $date) => $date->translatedFormat('M Y');
+            $period = CarbonPeriod::create($start->copy(), '1 month', $end->copy());
+        } else {
+            $groupFormat = 'Y-m-d';
+            $labelFormatter = fn (Carbon $date) => $date->translatedFormat('d M');
+            $period = CarbonPeriod::create($start->copy(), '1 day', $end->copy());
         }
 
-        $products = $query->get();
-        
-        $totalValue = $products->sum(function($product) {
-            $latestPrice = $product->prices->first();
-            return $latestPrice ? $product->stok * $latestPrice->harga : 0;
-        });
-
-        return [
-            'products' => $products,
-            'totalValue' => $totalValue,
-            'totalProducts' => $products->count(),
-            'totalStock' => $products->sum('stok'),
-            'generatedAt' => now(),
-            'filters' => $request->all()
-        ];
-    }
-
-    private function getMovementData($request)
-    {
-        $startDate = $request->filled('start_date') 
-            ? Carbon::parse($request->start_date) 
-            : Carbon::now()->startOfMonth();
-        
-        $endDate = $request->filled('end_date') 
-            ? Carbon::parse($request->end_date) 
-            : Carbon::now();
-
-        $query = Activity::with(['produk'])
-            ->whereBetween('created_at', [$startDate, $endDate]);
-
-        if ($request->filled('product_id')) {
-            $query->where('produk_id', $request->product_id);
-        }
-
-        $movements = $query->orderBy('created_at', 'desc')->get();
-        
-        $summary = [
-            'total_in' => $movements->where('tipe_aktivitas', 'in')->sum('kuantitas'),
-            'total_out' => $movements->where('tipe_aktivitas', 'out')->sum('kuantitas'),
-            'net_movement' => $movements->where('tipe_aktivitas', 'in')->sum('kuantitas') - $movements->where('tipe_aktivitas', 'out')->sum('kuantitas'),
-            'total_activities' => $movements->count()
-        ];
-
-        return [
-            'movements' => $movements,
-            'summary' => $summary,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'generatedAt' => now(),
-            'filters' => $request->all()
-        ];
-    }
-
-    private function getSupplierPerformanceData($request)
-    {
-        $startDate = $request->filled('start_date') 
-            ? Carbon::parse($request->start_date) 
-            : Carbon::now()->startOfMonth();
-        
-        $endDate = $request->filled('end_date') 
-            ? Carbon::parse($request->end_date) 
-            : Carbon::now();
-
-        $query = Supplier::with(['purchaseOrders' => function($q) use ($startDate, $endDate) {
-            $q->whereBetween('created_at', [$startDate, $endDate]);
-        }]);
-
-        if ($request->filled('supplier_id')) {
-            $query->where('id', $request->supplier_id);
-        }
-
-        $suppliers = $query->get()->map(function($supplier) {
-            $orders = $supplier->purchaseOrders;
-            $totalValue = $orders->sum('total_harga');
-            $avgDeliveryTime = $orders->avg('delivery_time') ?? rand(3, 15);
-            
-            return (object)[
-                'id' => $supplier->id,
-                'nama_supplier' => $supplier->nama_supplier,
-                'kontak' => $supplier->kontak ?? $supplier->email ?? '-',
-                'orders_count' => $orders->count() ?: rand(5, 50),
-                'total_value' => $totalValue ?: rand(1000000, 5000000),
-                'avg_delivery_time' => $avgDeliveryTime,
-                'rating' => rand(35, 50) / 10,
-                'performance_score' => min(100, ($totalValue / 1000000) * 20 + (5 - min(5, $avgDeliveryTime)) * 20 + 40)
-            ];
-        });
-
-        $summary = [
-            'total_suppliers' => $suppliers->count(),
-            'total_orders' => $suppliers->sum('orders_count'),
-            'total_value' => $suppliers->sum('total_value'),
-            'avg_delivery_time' => $suppliers->avg('avg_delivery_time')
-        ];
-
-        return [
-            'suppliers' => $suppliers,
-            'summary' => $summary,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-            'generatedAt' => now(),
-            'filters' => $request->all()
-        ];
-    }
-
-    /**
-     * Export supplier performance report in specified format
-     */
-    public function supplierPerformanceExport(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'pdf') {
-            return $this->supplierPerformancePDF($request);
-        } elseif ($format === 'excel') {
-            return $this->supplierPerformanceExcel($request);
-        }
-        
-        return redirect()->back()->with('error', 'Invalid export format');
-    }
-
-    /**
-     * Export stock movement report in specified format
-     */
-    public function stockMovementExport(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'pdf') {
-            return $this->stockMovementPDF($request);
-        } elseif ($format === 'excel') {
-            return $this->stockMovementExcel($request);
-        }
-        
-        return redirect()->back()->with('error', 'Invalid export format');
-    }
-
-    /**
-     * Export weekly report in specified format
-     */
-    public function weeklyReportExport(Request $request)
-    {
-        $format = $request->get('format', 'pdf');
-        
-        if ($format === 'pdf') {
-            return $this->weeklyReportPDF($request);
-        } elseif ($format === 'excel') {
-            return $this->weeklyReportExcel($request);
-        }
-        
-        return redirect()->back()->with('error', 'Invalid export format');
+        return [$start, $end, $period, $groupFormat, $labelFormatter];
     }
 }

@@ -26,4 +26,140 @@
     .auth-button {
         @apply w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors duration-200 transform hover:scale-[1.02] active:scale-[0.98];
     }
+
+    .flatpickr-calendar.flatpickr-theme-emerald {
+        @apply border border-emerald-200 rounded-2xl shadow-2xl bg-white/95 backdrop-blur;
+        font-family: inherit;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months {
+        @apply border-b border-emerald-100 bg-emerald-50/70 rounded-t-2xl px-3 pt-3 pb-2;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-current-month {
+        @apply text-base font-semibold text-slate-800;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-current-month select,
+    .flatpickr-theme-emerald .flatpickr-current-month input {
+        @apply bg-transparent font-semibold text-slate-800 focus:outline-none;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months,
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-yearDropdown-years,
+    .flatpickr-theme-emerald .flatpickr-months select,
+    .flatpickr-theme-emerald .flatpickr-months input.flatpickr-year {
+        @apply bg-white text-sm font-semibold text-slate-700 border border-emerald-200 rounded-xl px-3 py-1.5 pr-8 transition focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 shadow-sm;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        min-width: 120px;
+    }
+
+    /* Remove spinner arrows from year input */
+    .flatpickr-theme-emerald .flatpickr-months input.flatpickr-year::-webkit-outer-spin-button,
+    .flatpickr-theme-emerald .flatpickr-months input.flatpickr-year::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        display: none;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months input.flatpickr-year[type=number] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months select::-ms-expand {
+        display: none;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2310b981' viewBox='0 0 20 20'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 10.585l3.71-3.354a.75.75 0 011.04 1.08l-4.22 3.818a.75.75 0 01-1.04 0L5.21 8.29a.75.75 0 01.02-1.08z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 0.75rem;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months option {
+        @apply py-2 px-3 text-sm font-semibold;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months option:hover,
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months option:focus {
+        @apply bg-emerald-50 text-emerald-700;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months .flatpickr-monthDropdown-months option:checked {
+        @apply bg-emerald-500 text-white font-bold;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-months input.flatpickr-year {
+        @apply text-center;
+        padding-right: 0.75rem !important;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-nav-button {
+        @apply inline-flex items-center justify-center w-9 h-9 text-emerald-600 rounded-xl transition hover:bg-emerald-100/80;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-prev-month,
+    .flatpickr-theme-emerald .flatpickr-next-month {
+        @apply absolute top-3;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-prev-month {
+        @apply left-3;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-next-month {
+        @apply right-3;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-weekdaycontainer span,
+    .flatpickr-theme-emerald .flatpickr-weekday {
+        @apply text-xs font-semibold tracking-wide uppercase text-emerald-600;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-days {
+        @apply px-3 pb-3;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day {
+        @apply rounded-xl text-sm font-medium text-slate-700 border border-transparent transition;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day.today:not(.selected) {
+        @apply border-emerald-300 text-emerald-700 bg-emerald-50/60;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day:hover,
+    .flatpickr-theme-emerald .flatpickr-day.flatpickr-day:hover {
+        @apply bg-emerald-50 text-emerald-700;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day.selected,
+    .flatpickr-theme-emerald .flatpickr-day.startRange,
+    .flatpickr-theme-emerald .flatpickr-day.endRange,
+    .flatpickr-theme-emerald .flatpickr-day.selected:hover {
+        @apply bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-sm border-transparent;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day.disabled,
+    .flatpickr-theme-emerald .flatpickr-day.disabled:hover {
+        @apply text-slate-300 bg-transparent cursor-not-allowed;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-day.inRange,
+    .flatpickr-theme-emerald .flatpickr-day.nextMonthDay.inRange,
+    .flatpickr-theme-emerald .flatpickr-day.prevMonthDay.inRange {
+        @apply bg-emerald-50 text-emerald-600;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-calendar::after {
+        display: none;
+    }
+
+    .flatpickr-theme-emerald .flatpickr-time {
+        @apply border-t border-emerald-100;
+    }
 }

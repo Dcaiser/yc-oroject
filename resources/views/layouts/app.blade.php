@@ -311,76 +311,13 @@
 
                 <!-- Reports - Manager & Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <div x-data="{ reportsOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
-                    <button @click="reportsOpen = !reportsOpen"
-                        class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.*') ? 'active-nav-link' : '' }}">
-                        <div class="icon-wrapper mr-3">
-                            <i class="fas fa-chart-line text-sm"></i>
-                        </div>
-                        <span class="flex-1 text-left sidebar-label">Laporan</span>
-                        <i class="fas fa-chevron-down text-sm transition-transform duration-300 collapse-chevron" 
-                           :class="{ 'rotate-180': reportsOpen }"></i>
-                    </button>
-                    
-                    <!-- Dropdown Menu -->
-                    <div x-show="reportsOpen" 
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 transform -translate-y-2"
-                         x-transition:enter-end="opacity-100 transform translate-y-0"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 transform translate-y-0"
-                         x-transition:leave-end="opacity-0 transform -translate-y-2"
-                         class="dropdown-menu p-2 space-y-0.5 ml-3">
-                        
-                        <a href="{{ route('reports.index') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.index') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-chart-pie text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Dashboard Laporan</span>
-                        </a>
-                        
-                        <a href="{{ route('reports.supplier-performance') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.supplier-performance') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-truck text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Performa Supplier</span>
-                        </a>
-                        
-                        <a href="{{ route('reports.stock-value') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.stock-value') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-dollar-sign text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Nilai Stok</span>
-                        </a>
-                        
-                        <a href="{{ route('reports.movement') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.movement') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-arrows-alt text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Pergerakan Stok</span>
-                        </a>
-                        
-                        <a href="{{ route('reports.weekly') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.weekly') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-calendar-week text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Laporan Mingguan</span>
-                        </a>
-                        
-                        <a href="{{ route('reports.monthly') }}" 
-                           class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.monthly') ? 'bg-white/15' : '' }}">
-                            <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                <i class="fas fa-calendar-alt text-xs"></i>
-                            </div>
-                            <span class="sidebar-label">Laporan Bulanan</span>
-                        </a>
+                <a href="{{ route('reports.index') }}"
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.index') ? 'active-nav-link' : '' }}">
+                    <div class="icon-wrapper mr-3">
+                        <i class="fas fa-chart-line text-sm"></i>
                     </div>
-                </div>
+                    <span class="sidebar-label">Laporan</span>
+                </a>
                 @endif
 
                 <!-- Activities - Manager & Admin -->
@@ -641,75 +578,13 @@
 
                         <!-- Reports - Manager & Admin -->
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                        <div x-data="{ reportsOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
-                            <button @click="reportsOpen = !reportsOpen"
-                                class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.*') ? 'active-nav-link' : '' }}">
-                                <div class="icon-wrapper mr-3">
-                                    <i class="fas fa-chart-line text-sm"></i>
-                                </div>
-                                <span class="flex-1 text-left sidebar-label">Laporan</span>
-                                <i class="fas fa-chevron-down text-sm transition-transform duration-300" 
-                                   :class="{ 'rotate-180': reportsOpen }"></i>
-                            </button>
-                            
-                            <div x-show="reportsOpen" 
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
-                                 x-transition:enter-end="opacity-100 transform translate-y-0"
-                                 x-transition:leave="transition ease-in duration-150"
-                                 x-transition:leave-start="opacity-100 transform translate-y-0"
-                                 x-transition:leave-end="opacity-0 transform -translate-y-2"
-                                 class="dropdown-menu p-2 space-y-0.5 ml-3">
-                                
-                                <a href="{{ route('reports.index') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.index') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-chart-pie text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Dashboard Laporan</span>
-                                </a>
-                                
-                                <a href="{{ route('reports.supplier-performance') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.supplier-performance') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-truck text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Performa Supplier</span>
-                                </a>
-                                
-                                <a href="{{ route('reports.stock-value') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.stock-value') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-dollar-sign text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Nilai Stok</span>
-                                </a>
-                                
-                                <a href="{{ route('reports.movement') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.movement') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-arrows-alt text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Pergerakan Stok</span>
-                                </a>
-                                
-                                <a href="{{ route('reports.weekly') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.weekly') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-calendar-week text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Laporan Mingguan</span>
-                                </a>
-                                
-                                <a href="{{ route('reports.monthly') }}" @click="sidebarOpen = false"
-                                   class="dropdown-item flex items-center py-2 px-3 text-emerald-100/90 hover:text-white text-xs {{ request()->routeIs('reports.monthly') ? 'bg-white/15' : '' }}">
-                                    <div class="w-5 h-5 flex items-center justify-center bg-white/10 rounded mr-2">
-                                        <i class="fas fa-calendar-alt text-xs"></i>
-                                    </div>
-                                    <span class="sidebar-label">Laporan Bulanan</span>
-                                </a>
+                        <a href="{{ route('reports.index') }}" @click="sidebarOpen = false"
+                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.index') ? 'active-nav-link' : '' }}">
+                            <div class="icon-wrapper mr-3">
+                                <i class="fas fa-chart-line text-sm"></i>
                             </div>
-                        </div>
+                            <span class="sidebar-label">Laporan</span>
+                        </a>
                         @endif
 
                         <!-- Activities -->
