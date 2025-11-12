@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-extrabold text-green-900 flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-700 rounded-full"><i class="fas fa-box"></i></span>
+            <h2 class="flex items-center gap-2 text-xl font-extrabold text-green-900">
+                <span class="inline-flex items-center justify-center w-10 h-10 text-green-700 bg-green-100 rounded-full"><i class="fas fa-box"></i></span>
                 {{ __('Daftar Produk') }}
             </h2>
             <a href="{{ route('products.create') }}"
-                class="flex items-center px-4 py-2 font-medium text-white bg-gradient-to-r from-green-500 to-green-700 rounded-lg shadow hover:scale-105 transition">
+                class="flex items-center px-4 py-2 font-medium text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                 <i class="mr-2 fas fa-plus"></i>Tambah Produk
             </a>
         </div>
@@ -32,7 +32,7 @@
                                 </div>
                             </div>
                             <button type="submit"
-                                class="px-4 py-2 text-white bg-gradient-to-r from-green-500 to-green-700 rounded-r-xl hover:scale-105 transition">
+                                class="px-4 py-2 text-white transition bg-gradient-to-r from-green-500 to-green-700 rounded-r-xl hover:scale-105">
                                 <i class="fas fa-search"></i>
                             </button>
                         </form>
@@ -43,7 +43,7 @@
                         <form action="{{ route('deleteall') }}" method="post" onsubmit="return confirm('Yakin hapus semua data?')">
                             @csrf
                             @method('DELETE')
-                            <button class="p-3 text-white bg-gradient-to-r from-red-500 to-red-700 rounded-lg shadow hover:scale-105 transition" type="submit">
+                            <button class="p-3 text-white transition rounded-lg shadow bg-gradient-to-r from-red-500 to-red-700 hover:scale-105" type="submit">
                                 <i class="fa-solid fa-trash"></i> Hapus Semua
                             </button>
                         </form>
@@ -68,7 +68,7 @@
                     @foreach ($products as $product)
                     <div class="overflow-hidden transition-shadow duration-300 bg-white border border-green-100 rounded-lg hover:shadow-lg">
                         <!-- Product Image -->
-                        <div class="bg-green-100 aspect-w-16 aspect-h-12 flex items-center justify-center">
+                        <div class="flex items-center justify-center bg-green-100 aspect-w-16 aspect-h-12">
                             <img src="{{ $product['gambar'] ?? 'https://via.placeholder.com/300x200?text=No+Image' }}"
                                 alt="{{ $product['nama'] }}"
                                 class="object-cover w-full h-48 rounded-t-lg">
@@ -82,8 +82,16 @@
 
                             <!-- Price and Stock -->
                             <div class="flex items-center justify-between mb-3">
-                                <span class="flex text-sm text-green-700">
-                                    Stok: {{ $product['stock_quantity'] ?? 0  }}&nbsp;{{ $product['satuan'] }}
+                                @php
+                                    $unit = $product->units;
+                                    $stok = $product->stock_quantity ?? 0;
+                                    $formattedStock = fmod($stok, 1) === 0.0
+                                        ? number_format($stok, 0, ',', '.')
+                                        : rtrim(rtrim(number_format($stok, 4, ',', '.'), '0'), ',');
+                                    $displayUnit = $unit?->name ?? '-';
+                                @endphp
+                                <span class="text-sm font-semibold text-green-700">
+                                    {{ $formattedStock }} {{ $displayUnit }}
                                 </span>
                             </div>
 
@@ -93,7 +101,7 @@
                                 <button
                                     @click="op = true"
                                     type="button"
-                                    class="flex-1 px-3 py-2 text-sm font-medium text-center text-green-900 bg-green-100 rounded hover:bg-green-200 transition">
+                                    class="flex-1 px-3 py-2 text-sm font-medium text-center text-green-900 transition bg-green-100 rounded hover:bg-green-200">
                                     <i class="mr-1 fas fa-edit"></i>Detail
                                 </button>
 
@@ -137,7 +145,7 @@
                                                                 <p class="mb-4 text-sm text-green-500">atau</p>
                                                                 <button type="button"
                                                                     @click="$refs.fileInput.click()"
-                                                                    class="px-4 py-2 text-white bg-gradient-to-r from-green-500 to-green-700 rounded-lg shadow hover:scale-105 transition">
+                                                                    class="px-4 py-2 text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                                                                     Pilih File
                                                                 </button>
                                                             </div>
@@ -250,25 +258,42 @@
                                             </div>
 
                                             <!-- Stok -->
-                                            <div>
+                                           <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Jumlah Stok</label>
-                                                <input type="number" name="stock1" value="{{ $product['stock_quantity'] ?? '' }}" class="w-full p-2 border border-green-200 rounded">
+                                                <div class="flex items-center gap-2">
+                                                    <input
+                                                        type="number"
+                                                        name="stock1"
+                                                            value="{{ old('stock1', $product->stock_quantity) }}"
+                                                        class="w-full p-2 border border-green-200 rounded focus:ring-2 focus:ring-green-400 focus:outline-none"
+                                                    >
+                                                    <span class="px-3 py-2 text-sm font-semibold text-green-800 bg-green-100 rounded">
+                                                            {{ $product->units?->name ?? '-' }}
+                                                    </span>
+                                                </div>
                                             </div>
+
                                             <div>
                                                 <label class="block mb-1 text-sm font-medium text-green-700">Satuan</label>
-                                                <input type="text" name="satuan1" value="{{ $product['satuan'] }}" class="w-full p-2 border border-green-200 rounded">
+                                                    <select name="satuan1" class="w-full p-2 border border-green-200 rounded">
+                                                        @foreach($units as $unitOption)
+                                                            <option value="{{ $unitOption->id }}" {{ $product->satuan == $unitOption->id ? 'selected' : '' }}>
+                                                                {{ $unitOption->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
                                             </div>
 
                                             <!-- Tombol Submit -->
                                             <div class="flex gap-2 pt-4 text-right">
-                                                <button type="submit" class="px-4 py-2 text-white bg-gradient-to-r from-green-500 to-green-700 rounded shadow hover:scale-105 transition">
+                                                <button type="submit" class="px-4 py-2 text-white transition rounded shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                                                     Simpan Perubahan
                                                 </button>
                                         </form>
                                                 <form action="{{ route('products.destroy', $product->id) }}" onsubmit="return confirm('yakin ingin hapus?')" method="POST">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-700 rounded shadow hover:scale-105 transition">
+                                                    <button type="submit" class="px-4 py-2 text-white transition rounded shadow bg-gradient-to-r from-red-500 to-red-700 hover:scale-105">
                                                         Hapus
                                                     </button>
                                                 </form>
@@ -295,7 +320,7 @@
                     <h3 class="mb-2 text-lg font-medium text-green-900">Produk tidak ada</h3>
                     <p class="mb-4 text-green-500">Mulai dengan menambahkan produk.</p>
                     <a href="{{ route('products.create') }}"
-                        class="inline-flex items-center px-4 py-2 text-white bg-gradient-to-r from-green-500 to-green-700 rounded-lg shadow hover:scale-105 transition">
+                        class="inline-flex items-center px-4 py-2 text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                         <i class="mr-2 fas fa-plus"></i>Tambah Produk
                     </a>
                 </div>

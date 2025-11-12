@@ -22,16 +22,26 @@ class Produk extends Model
         'sku',
         'stock_quantity',
         'description',
+        'image_path',
         'satuan',
         'supplier_id'
     ];
+
+    protected $appends = ['image_url'];
 
     public function prices()
 {
     return $this->hasMany(Price::class, 'product_id');
 }
-public function stockin()
-{
-    return $this->hasMany(Stockin::class, 'id');
-}
+    public function units()
+    {
+        return $this->belongsTo(Units::class, 'satuan');
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
+    }
+
+
 }
