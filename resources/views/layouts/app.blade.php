@@ -49,12 +49,20 @@
         /* Modern Sidebar Gradient */
         .sidebar-gradient {
             background: linear-gradient(135deg, #047857 0%, #064e3b 100%);
+            transition: width 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                        padding 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        [x-cloak] {
+            display: none !important;
         }
 
         /* Navigation Item Styles */
         .nav-item {
             border-radius: 12px;
-            transition: background 0.25s ease, box-shadow 0.25s ease;
+            transition: background 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                        box-shadow 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                        transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
         }
 
         .nav-item:hover {
@@ -74,7 +82,8 @@
             justify-content: center;
             width: 2rem;
             height: 2rem;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1),
+                        color 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
         }
 
         .nav-item:hover .icon-wrapper {
@@ -205,8 +214,8 @@
 <body class="font-sans antialiased bg-gray-100">
     <div x-data="{ sidebarCollapsed: false }" class="flex min-h-screen">
         <!-- Sidebar -->
-     <aside class="fixed z-30 hidden h-screen shadow-2xl sidebar-gradient lg:block"
-         :class="sidebarCollapsed ? 'sidebar-collapsed w-24 pt-6' : 'w-64 pt-6'">
+     <aside class="fixed z-30 hidden h-screen pt-6 shadow-2xl sidebar-gradient lg:block transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+         :class="sidebarCollapsed ? 'sidebar-collapsed w-24' : 'w-64'">
             @php
                 $authUser = Auth::user();
                 $rawAvatarPath = $authUser->avatar ?? null;
@@ -240,39 +249,50 @@
             <button type="button"
                 class="hidden lg:flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition"
                             @click="sidebarCollapsed = !sidebarCollapsed"
-                            :title="sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'">
+                            :title="sidebarCollapsed ? 'Perluas sidebar' : 'Perkecil sidebar'">
                         <i class="text-base fas" :class="sidebarCollapsed ? 'fa-caret-right' : 'fa-caret-left'"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Navigation -->
-            <nav class="py-4 space-y-1 overflow-y-auto hide-scrollbar"
-                 :class="sidebarCollapsed ? 'px-2 h-[calc(100vh-150px)] pb-16' : 'px-4 h-[calc(100vh-180px)] pb-20'">
+          <nav class="py-4 space-y-1 overflow-y-auto hide-scrollbar transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+              :class="sidebarCollapsed ? 'px-2 h-[calc(100vh-150px)] pb-16' : 'px-4 h-[calc(100vh-180px)] pb-20'">
                 <!-- Dashboard - Semua user yang login -->
                 <a href="{{ route('dashboard') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('dashboard') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Dashboard' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-tachometer-alt text-sm"></i>
                     </div>
                     <span class="sidebar-label">Dashboard</span>
                 </a>
 
-                <!-- User Management - Hanya Admin -->
-                @if(Auth::user()->role === 'admin')
-                <a href="{{ route('users.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
+                <!-- Point of Sale -->
+                <a href="{{ route('pos') }}"
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Point of Sale' : null">
                     <div class="icon-wrapper mr-3">
-                        <i class="fas fa-users text-sm"></i>
+                        <i class="fa-solid fa-cart-shopping text-sm"></i>
                     </div>
-                    <span class="sidebar-label">Manajemen User</span>
+                    <span class="sidebar-label">Point of Sale</span>
                 </a>
-                @endif
+
+                <!-- Inventory -->
+                <a href="{{ route('invent') }}"
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Inventory' : null">
+                    <div class="icon-wrapper mr-3">
+                        <i class="fas fa-warehouse text-sm"></i>
+                    </div>
+                    <span class="sidebar-label">Inventory</span>
+                </a>
 
                 <!-- Product Management - Manager dan Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('products.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('products.*') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('products.*') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Produk' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-box text-sm"></i>
                     </div>
@@ -283,7 +303,8 @@
                 <!-- Category - Manager dan Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('category') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Kategori Produk' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-tags text-sm"></i>
                     </div>
@@ -291,18 +312,10 @@
                 </a>
                 @endif
 
-                <!-- Inventory -->
-                <a href="{{ route('invent') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-warehouse text-sm"></i>
-                    </div>
-                    <span class="sidebar-label">Inventory</span>
-                </a>
-
                 <!-- Supplier -->
                 <a href="{{ route('suppliers.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('suppliers.*') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Supplier' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-truck text-sm"></i>
                     </div>
@@ -312,7 +325,8 @@
                 <!-- Reports - Manager & Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('reports.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.index') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('reports.index') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Laporan' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fas fa-chart-line text-sm"></i>
                     </div>
@@ -323,7 +337,8 @@
                 <!-- Activities - Manager & Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('activities.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}">
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Aktivitas' : null">
                     <div class="icon-wrapper mr-3">
                         <i class="fa-solid fa-note-sticky text-sm"></i>
                     </div>
@@ -331,20 +346,24 @@
                 </a>
                 @endif
 
-                <!-- Point of Sale -->
-                <a href="{{ route('pos') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
+                <!-- User Management - Hanya Admin -->
+                @if(Auth::user()->role === 'admin')
+                <a href="{{ route('users.index') }}"
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Manajemen User' : null">
                     <div class="icon-wrapper mr-3">
-                        <i class="fa-solid fa-cart-shopping text-sm"></i>
+                        <i class="fas fa-users text-sm"></i>
                     </div>
-                    <span class="sidebar-label">Point of Sale</span>
+                    <span class="sidebar-label">Manajemen User</span>
                 </a>
+                @endif
 
                 <!-- Staff Create Report Button -->
                 @if(in_array(Auth::user()->role, ['staff']))
                 <div class="mt-4 px-4">
-                    <a href="#" 
-                       class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-all duration-200 shadow text-sm">
+                          <a href="#" 
+                              class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-all duration-200 shadow text-sm"
+                              :title="sidebarCollapsed ? 'Buat Laporan' : null">
                         <i class="fas fa-plus"></i>
                         <span class="sidebar-label">Buat Laporan</span>
                     </a>
@@ -525,16 +544,23 @@
                             <span class="sidebar-label">Dashboard</span>
                         </a>
 
-                        <!-- User Management - Admin only -->
-                        @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('users.index') }}" @click="sidebarOpen = false"
-                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
+                        <!-- Point of Sale -->
+                        <a href="{{ route('pos') }}" @click="sidebarOpen = false"
+                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
                             <div class="icon-wrapper mr-3">
-                                <i class="fas fa-users text-sm"></i>
+                                <i class="fa-solid fa-cart-shopping text-sm"></i>
                             </div>
-                            <span class="sidebar-label">Manajemen User</span>
+                            <span class="sidebar-label">Point of Sale</span>
                         </a>
-                        @endif
+
+                        <!-- Inventory -->
+                        <a href="{{ route('invent') }}" @click="sidebarOpen = false"
+                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}">
+                            <div class="icon-wrapper mr-3">
+                                <i class="fas fa-warehouse text-sm"></i>
+                            </div>
+                            <span class="sidebar-label">Inventory</span>
+                        </a>
 
                         <!-- Product Management -->
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
@@ -557,15 +583,6 @@
                             <span class="sidebar-label">Kategori Produk</span>
                         </a>
                         @endif
-
-                        <!-- Inventory -->
-                        <a href="{{ route('invent') }}" @click="sidebarOpen = false"
-                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('invent') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fas fa-warehouse text-sm"></i>
-                            </div>
-                            <span class="sidebar-label">Inventory</span>
-                        </a>
 
                         <!-- Supplier -->
                         <a href="{{ route('suppliers.index') }}" @click="sidebarOpen = false"
@@ -598,14 +615,16 @@
                         </a>
                         @endif
 
-                        <!-- Point of Sale -->
-                        <a href="{{ route('pos') }}" @click="sidebarOpen = false"
-                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}">
+                        <!-- User Management - Admin only -->
+                        @if(Auth::user()->role === 'admin')
+                        <a href="{{ route('users.index') }}" @click="sidebarOpen = false"
+                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('users.*') ? 'active-nav-link' : '' }}">
                             <div class="icon-wrapper mr-3">
-                                <i class="fa-solid fa-cart-shopping text-sm"></i>
+                                <i class="fas fa-users text-sm"></i>
                             </div>
-                            <span class="sidebar-label">Point of Sale</span>
+                            <span class="sidebar-label">Manajemen User</span>
                         </a>
+                        @endif
 
                         <!-- Mobile User Profile Trigger -->
                         <div class="pt-6 mt-6 border-t border-white/10">
@@ -697,7 +716,7 @@
         </div>
 
         <!-- Main Content Area -->
-        <main class="flex-1" :class="sidebarCollapsed ? 'lg:ml-24' : 'lg:ml-64'">
+    <main class="flex-1 transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]" :class="sidebarCollapsed ? 'lg:ml-24' : 'lg:ml-64'">
             <div class="h-16 lg:hidden"></div>
 
             @isset($header)
