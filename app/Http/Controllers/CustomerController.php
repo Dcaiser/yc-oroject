@@ -5,9 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
+    public function index(): View
+    {
+        $customers = Customer::orderBy('customer_name')->get();
+
+        return view('customers.index', compact('customers'));
+    }
+
     public function store(Request $request): RedirectResponse
     {
     $validated = $this->validateCustomer($request);
@@ -16,7 +24,7 @@ class CustomerController extends Controller
     Customer::create($validated);
 
         return redirect()
-            ->route('category')
+            ->route('customers.index')
             ->with('success', 'Pelanggan baru berhasil ditambahkan.');
     }
 
@@ -28,7 +36,7 @@ class CustomerController extends Controller
     $customer->update($validated);
 
         return redirect()
-            ->route('category')
+            ->route('customers.index')
             ->with('success', 'Data pelanggan berhasil diperbarui.');
     }
 
@@ -37,7 +45,7 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()
-            ->route('category')
+            ->route('customers.index')
             ->with('success', 'Pelanggan berhasil dihapus.');
     }
 

@@ -202,6 +202,48 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
+        .sidebar-dropdown {
+            position: relative;
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-dropdown-panel {
+            margin-top: 0.35rem;
+            padding: 0.45rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+        }
+
+        .sidebar-dropdown-link {
+            display: flex;
+            align-items: center;
+            padding: 0.55rem 0.75rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.82);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .sidebar-dropdown-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+        }
+
+        .sidebar-dropdown-link.is-active {
+            background: rgba(16, 185, 129, 0.22);
+            color: #ffffff;
+        }
+
+        .sidebar-collapsed .sidebar-dropdown-panel {
+            position: absolute;
+            left: calc(100% + 1rem);
+            top: 0;
+            width: 14rem;
+        }
+
         .collapsed-user-dropdown {
             left: calc(100% + 1rem) !important;
             right: auto !important;
@@ -268,15 +310,37 @@
                     <span class="sidebar-label">Dashboard</span>
                 </a>
 
-                <!-- Point of Sale -->
-                <a href="{{ route('pos') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') ? 'active-nav-link' : '' }}"
-                    :title="sidebarCollapsed ? 'Point of Sale' : null">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fa-solid fa-cart-shopping text-sm"></i>
+                <!-- Point of Sale Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('pos') || request()->routeIs('pos.payments*') ? 'true' : 'false' }} }"
+                     class="sidebar-dropdown">
+                    <button type="button"
+                        class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('pos') || request()->routeIs('pos.payments*') ? 'active-nav-link' : '' }}"
+                        :title="sidebarCollapsed ? 'Point of Sale' : null"
+                        @click="open = !open">
+                        <div class="icon-wrapper mr-3">
+                            <i class="fa-solid fa-cart-shopping text-sm"></i>
+                        </div>
+                        <span class="sidebar-label">Point of Sale</span>
+                        <span class="ml-auto collapse-chevron transition-transform" :class="open ? 'rotate-180' : ''">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </span>
+                    </button>
+
+                    <div x-show="open" x-transition.opacity.duration.200ms x-cloak
+                        class="sidebar-dropdown-panel"
+                        :class="sidebarCollapsed ? 'ml-0' : 'ml-3'">
+                        <a href="{{ route('pos') }}"
+                            class="sidebar-dropdown-link {{ request()->routeIs('pos') ? 'is-active' : '' }}"
+                            :title="sidebarCollapsed ? 'Kasir' : null">
+                            <span class="sidebar-label">Kasir</span>
+                        </a>
+                        <a href="{{ route('pos.payments') }}"
+                            class="sidebar-dropdown-link {{ request()->routeIs('pos.payments*') ? 'is-active' : '' }}"
+                            :title="sidebarCollapsed ? 'Status Pembayaran' : null">
+                            <span class="sidebar-label">Status Pembayaran</span>
+                        </a>
                     </div>
-                    <span class="sidebar-label">Point of Sale</span>
-                </a>
+                </div>
 
                 <!-- Inventory -->
                 <a href="{{ route('invent') }}"
@@ -302,14 +366,37 @@
 
                 <!-- Category - Manager dan Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="{{ route('category') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') ? 'active-nav-link' : '' }}"
-                    :title="sidebarCollapsed ? 'Kategori Produk' : null">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fas fa-tags text-sm"></i>
+                <!-- Master Data Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('category') || request()->routeIs('customers.*') ? 'true' : 'false' }} }"
+                     class="sidebar-dropdown">
+                    <button type="button"
+                        class="nav-item flex items-center w-full py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('category') || request()->routeIs('customers.*') ? 'active-nav-link' : '' }}"
+                        :title="sidebarCollapsed ? 'Data Referensi' : null"
+                        @click="open = !open">
+                        <div class="icon-wrapper mr-3">
+                            <i class="fas fa-tags text-sm"></i>
+                        </div>
+                        <span class="sidebar-label">Data Referensi</span>
+                        <span class="ml-auto collapse-chevron transition-transform" :class="open ? 'rotate-180' : ''">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </span>
+                    </button>
+
+                    <div x-show="open" x-transition.opacity.duration.200ms x-cloak
+                        class="sidebar-dropdown-panel"
+                        :class="sidebarCollapsed ? 'ml-0' : 'ml-3'">
+                        <a href="{{ route('category') }}"
+                            class="sidebar-dropdown-link {{ request()->routeIs('category') ? 'is-active' : '' }}"
+                            :title="sidebarCollapsed ? 'Kategori & Satuan' : null">
+                            <span class="sidebar-label">Kategori &amp; Satuan</span>
+                        </a>
+                        <a href="{{ route('customers.index') }}"
+                            class="sidebar-dropdown-link {{ request()->routeIs('customers.*') ? 'is-active' : '' }}"
+                            :title="sidebarCollapsed ? 'Daftar Pelanggan' : null">
+                            <span class="sidebar-label">Daftar Pelanggan</span>
+                        </a>
                     </div>
-                    <span class="sidebar-label">Kategori Produk</span>
-                </a>
+                </div>
                 @endif
 
                 <!-- Supplier -->

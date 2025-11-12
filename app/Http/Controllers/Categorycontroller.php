@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
 use App\Models\Units;
-use App\Models\Customer;
 
 class Categorycontroller extends Controller
 {
@@ -17,9 +16,8 @@ class Categorycontroller extends Controller
     $category = Kategori::orderBy('name')->get();
     // load units so the view can show 'Satuan' table below categories
     $units = Units::orderBy('name')->get();
-    $customers = Customer::orderBy('customer_name')->get();
 
-    return view('category.index', compact('category', 'units', 'customers'));
+    return view('category.index', compact('category', 'units'));
     }
 
     /**
