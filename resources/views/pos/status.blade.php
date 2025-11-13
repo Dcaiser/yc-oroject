@@ -90,13 +90,13 @@
                                 $balance = $payment->balance_due ?? max($grandTotal - $paid, 0);
                                 $change = $payment->change_due ?? max($paid - $grandTotal, 0);
                                 $status = $payment->status ?? 'pending';
-                                $isPaid = $status === 'paid';
+                                $isPaid = in_array($status, ['paid', 'dibayar'], true);
                                 $badgeClass = $isPaid ? 'bg-green-500' : 'bg-yellow-500';
-                                $statusLabel = $isPaid ? 'Sudah Dibayar' : 'Belum Dibayar';
-                                $prefillPayment = number_format($balance > 0 ? $balance : $grandTotal, 0, ',', '.');
+                                $statusLabel = $isPaid ? 'Dibayar' : 'Belum Dibayar';
+                                $prefillPayment = (string) ($balance > 0 ? $balance : $grandTotal);
 
                                 if (old('transaction_id') == $payment->id) {
-                                    $prefillPayment = old('payment_amount', $prefillPayment);
+                                    $prefillPayment = preg_replace('/[^0-9]/', '', (string) old('payment_amount', $prefillPayment));
                                 }
                             @endphp
                             <tr class="align-top hover:bg-green-50">
@@ -129,7 +129,12 @@
                                         {{ $statusLabel }}
                                     </span>
                                     @if(!$isPaid)
-                                        <form action="{{ route('pos.payments.pay', $payment) }}" method="POST" class="mt-3 space-y-2 sm:flex sm:items-center sm:space-y-0 sm:space-x-2">
+                                        <form
+                                            action="{{ route('pos.payments.pay', $payment) }}"
+                                            method="POST"
+                                            class="mt-3 space-y-2 sm:flex sm:items-center sm:space-y-0 sm:space-x-2"
+                                            data-payment-form
+                                        >
                                             @csrf
                                             <input type="hidden" name="transaction_id" value="{{ $payment->id }}">
                                             <div class="relative sm:w-40">
@@ -139,10 +144,12 @@
                                                     name="payment_amount"
                                                     value="{{ $prefillPayment }}"
                                                     placeholder="Nominal pembayaran"
+                                                    inputmode="numeric"
+                                                    data-payment-input
                                                     class="w-full py-2 pl-8 pr-3 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                                                 >
                                             </div>
-                                            <button type="submit" onclick="alert('tandai sudah dibayar?')" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
                                                 Tandai Dibayar
                                             </button>
                                         </form>
@@ -187,3 +194,23 @@
         @endif
     </div>
 </x-app-layout>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-payment-form]').forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!confirm('Tandai transaksi ini sebagai sudah dibayar?')) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    var input = form.querySelector('[data-payment-input]');
+                    if (input) {
+                        input.value = input.value.replace(/[^0-9]/g, '');
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

@@ -80,7 +80,7 @@ class Poscontroller extends Controller
         $tip = $this->normalizeCurrency($request->input('tip'));
         $grandTotal = $this->normalizeCurrency($request->input('grand_total', $subtotal + $shipping + $tip));
         $paymentReceived = $this->normalizeCurrency($request->input('payment_received'));
-        $status = $paymentReceived >= $grandTotal && $grandTotal > 0 ? 'paid' : 'pending';
+    $status = $paymentReceived >= $grandTotal && $grandTotal > 0 ? 'dibayar' : 'pending';
         $customerName = $request->filled('customer_name') ? $request->input('customer_name') : 'Tanpa Nama';
         $customerType = $request->input('customer_type');
         $note = $request->input('note');
@@ -185,7 +185,7 @@ class Poscontroller extends Controller
         $totalPaid = $transaction->payment_received + $amount;
         $balanceDue = max($transaction->grand_total - $totalPaid, 0);
         $changeDue = max($totalPaid - $transaction->grand_total, 0);
-        $status = $balanceDue === 0 ? 'paid' : 'pending';
+    $status = $balanceDue === 0 ? 'dibayar' : 'pending';
 
         $transaction->update([
             'payment_received' => $totalPaid,
