@@ -319,8 +319,8 @@
             <div class="rounded-3xl border border-orange-100 bg-white/95 shadow-sm">
                 <div class="border-b border-orange-100 bg-orange-50/40 px-6 py-5">
                     <p class="text-xs font-semibold uppercase tracking-wide text-orange-600">Peringatan stok</p>
-                    <h3 class="mt-1 text-xl font-bold text-slate-900">Produk perlu perhatian</h3>
-                    <p class="mt-0.5 text-sm text-slate-500">Segera isi ulang stok yang mulai menipis.</p>
+                    <h3 class="mt-1 text-xl font-bold text-slate-900">Produk yang perlu direstock</h3>
+                    <p class="mt-0.5 text-sm text-slate-500">Segera tambahkan stok untuk produk ini.</p>
                 </div>
                 <div class="p-6 space-y-3">
                     @forelse ($inventoryAlerts as $item)
