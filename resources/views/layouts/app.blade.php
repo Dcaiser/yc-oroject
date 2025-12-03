@@ -45,6 +45,43 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- AlpineJS Component Definition -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('currencyField', ({ initial = 0, name }) => ({
+                name,
+                raw: Number(initial) || 0,
+                display: '',
+                init() {
+                    this.display = this.format(this.raw);
+                },
+                selectAll(event) {
+                    event.target.select();
+                },
+                handleInput(event) {
+                    const digits = event.target.value.replace(/[^0-9]/g, '');
+                    this.raw = digits ? parseInt(digits, 10) : 0;
+                    this.display = this.format(this.raw);
+                },
+                format(value) {
+                    return new Intl.NumberFormat('id-ID').format(value || 0);
+                }
+            }));
+
+            Alpine.data('searchAssist', ({ initial = '', dataset = [] }) => ({
+                term: initial || '',
+                dataset: Array.isArray(dataset) ? dataset : [],
+                get matchCount() {
+                    if (!this.term) {
+                        return this.dataset.length;
+                    }
+                    const keyword = this.term.toLowerCase();
+                    return this.dataset.filter((item) => item && item.includes(keyword)).length;
+                }
+            }));
+        });
+    </script>
+
     <style>
         /* Modern Sidebar Gradient */
         .sidebar-gradient {
@@ -409,6 +446,16 @@
                     <span class="sidebar-label">Supplier</span>
                 </a>
 
+                <!-- Aktivitas -->
+                <a href="{{ route('activities.index') }}"
+                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}"
+                    :title="sidebarCollapsed ? 'Aktivitas' : null">
+                    <div class="icon-wrapper mr-3">
+                        <i class="fas fa-clipboard-list text-sm"></i>
+                    </div>
+                    <span class="sidebar-label">Aktivitas</span>
+                </a>
+
                 <!-- Reports - Manager & Admin -->
                 @if(in_array(Auth::user()->role, ['manager', 'admin']))
                 <a href="{{ route('reports.index') }}"
@@ -418,18 +465,6 @@
                         <i class="fas fa-chart-line text-sm"></i>
                     </div>
                     <span class="sidebar-label">Laporan</span>
-                </a>
-                @endif
-
-                <!-- Activities - Manager & Admin -->
-                @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                <a href="{{ route('activities.index') }}"
-                    class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}"
-                    :title="sidebarCollapsed ? 'Aktivitas' : null">
-                    <div class="icon-wrapper mr-3">
-                        <i class="fa-solid fa-note-sticky text-sm"></i>
-                    </div>
-                    <span class="sidebar-label">Aktivitas</span>
                 </a>
                 @endif
 
@@ -680,6 +715,15 @@
                             <span class="sidebar-label">Supplier</span>
                         </a>
 
+                        <!-- Aktivitas -->
+                        <a href="{{ route('activities.index') }}" @click="sidebarOpen = false"
+                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}">
+                            <div class="icon-wrapper mr-3">
+                                <i class="fas fa-clipboard-list text-sm"></i>
+                            </div>
+                            <span class="sidebar-label">Aktivitas</span>
+                        </a>
+
                         <!-- Reports - Manager & Admin -->
                         @if(in_array(Auth::user()->role, ['manager', 'admin']))
                         <a href="{{ route('reports.index') }}" @click="sidebarOpen = false"
@@ -688,17 +732,6 @@
                                 <i class="fas fa-chart-line text-sm"></i>
                             </div>
                             <span class="sidebar-label">Laporan</span>
-                        </a>
-                        @endif
-
-                        <!-- Activities -->
-                        @if(in_array(Auth::user()->role, ['manager', 'admin']))
-                        <a href="{{ route('activities.index') }}" @click="sidebarOpen = false"
-                            class="nav-item flex items-center py-2.5 px-3 text-white text-sm font-medium {{ request()->routeIs('activities.*') ? 'active-nav-link' : '' }}">
-                            <div class="icon-wrapper mr-3">
-                                <i class="fa-solid fa-note-sticky text-sm"></i>
-                            </div>
-                            <span class="sidebar-label">Aktivitas</span>
                         </a>
                         @endif
 

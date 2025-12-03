@@ -21,6 +21,20 @@ class AdminDemoSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create units first
+        $unitRecords = collect([
+            ['name' => 'pcs', 'conversion_to_base' => 1],
+            ['name' => 'unit', 'conversion_to_base' => 1],
+            ['name' => 'box', 'conversion_to_base' => 12],
+            ['name' => 'lusin', 'conversion_to_base' => 12],
+            ['name' => 'kg', 'conversion_to_base' => 1],
+        ])->mapWithKeys(fn ($unit) => [
+            $unit['name'] => DB::table('units')->updateOrInsert(
+                ['name' => $unit['name']],
+                ['conversion_to_base' => $unit['conversion_to_base'], 'created_at' => now(), 'updated_at' => now()]
+            ) ? DB::table('units')->where('name', $unit['name'])->first() : null
+        ]);
+
         $users = collect([
             [
                 'name' => 'Admin Example',
@@ -98,8 +112,7 @@ class AdminDemoSeeder extends Seeder
                 'price' => 14500000,
                 'stock_quantity' => 24,
                 'satuan' => 'unit',
-                'description' => 'Ultrabook 14 inci untuk operasional harian tim.
-                ',
+                'description' => 'Ultrabook 14 inci untuk operasional harian tim.',
                 'category' => 'Elektronik',
                 'supplier_code' => 'SUP-DEMO1',
                 'prices' => [
@@ -114,8 +127,7 @@ class AdminDemoSeeder extends Seeder
                 'price' => 4200000,
                 'stock_quantity' => 18,
                 'satuan' => 'unit',
-                'description' => 'Printer laser monokrom untuk kebutuhan cetak dokumen.
-                ',
+                'description' => 'Printer laser monokrom untuk kebutuhan cetak dokumen.',
                 'category' => 'Perlengkapan Kantor',
                 'supplier_code' => 'SUP-DEMO1',
                 'prices' => [
@@ -139,9 +151,10 @@ class AdminDemoSeeder extends Seeder
                     'pelanggan' => 6850000,
                 ],
             ],
-        ])->mapWithKeys(function (array $productData) use ($categoryRecords, $supplierRecords) {
+        ])->mapWithKeys(function (array $productData) use ($categoryRecords, $supplierRecords, $unitRecords) {
             $category = $categoryRecords[$productData['category']];
             $supplier = $supplierRecords[$productData['supplier_code']];
+            $unit = $unitRecords[$productData['satuan']] ?? $unitRecords['pcs'];
 
             $product = Produk::updateOrCreate(
                 ['sku' => $productData['sku']],
@@ -152,7 +165,7 @@ class AdminDemoSeeder extends Seeder
                     'supplier_id' => $supplier->id,
                     'stock_quantity' => $productData['stock_quantity'],
                     'description' => trim($productData['description']),
-                    'satuan' => $productData['satuan'],
+                    'satuan' => $unit->id,
                 ]
             );
 
@@ -197,6 +210,9 @@ class AdminDemoSeeder extends Seeder
             $product = $products[$adjustment['sku']];
             $supplier = $supplierRecords[$adjustment['supplier_code']];
             $totalPrice = $adjustment['unit_price'] * $adjustment['stock_qty'];
+            
+            // Get unit name from units table
+            $unitName = DB::table('units')->where('id', $product->satuan)->value('name') ?? 'pcs';
 
             $stockIn = Stockin::updateOrCreate(
                 [
@@ -207,7 +223,7 @@ class AdminDemoSeeder extends Seeder
                     'total_price' => $totalPrice,
                 ],
                 [
-                    'satuan' => $product->satuan,
+                    'satuan' => $unitName,
                 ]
             );
 
@@ -279,13 +295,16 @@ class AdminDemoSeeder extends Seeder
             $product = $products[$sample['sku']];
             $timestamp = $sample['sold_at'];
             $totalPrice = $sample['quantity'] * $sample['unit_price'];
+            
+            // Get unit name from units table
+            $unitName = DB::table('units')->where('id', $product->satuan)->value('name') ?? 'pcs';
 
             DB::table('stock_out')->insert([
                 'product_name' => $product->name,
                 'customer_name' => $sample['customer_name'],
                 'customer_type' => $sample['customer_type'],
                 'stock_qty' => $sample['quantity'],
-                'satuan' => $product->satuan,
+                'satuan' => $unitName,
                 'prices' => $sample['unit_price'],
                 'shipping_cost' => $sample['shipping_cost'],
                 'total_price' => $totalPrice,

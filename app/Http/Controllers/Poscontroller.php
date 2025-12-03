@@ -3,254 +3,235 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Throwable;
-use Illuminate\Validation\ValidationException;
 use App\Models\Produk;
+use App\Models\Kategori;
 use App\Models\Customer;
 use App\Models\PosTransaction;
 use App\Models\PosTransactionItem;
-use Illuminate\Support\Str;
+use App\Models\Activity;
 
 class Poscontroller extends Controller
 {
     public function index()
     {
-        $product = Produk::with(['prices', 'units'])->get();
-        $customertypes = ['agent', 'reseller', 'pelanggan'];
+        $product = Produk::with(['prices', 'category:id,name', 'units'])
+            ->orderBy('name')
+            ->get();
+
+            
+        $categories = Kategori::select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
         $regularCustomers = Customer::select('id', 'customer_name', 'address', 'shipping_cost')
             ->orderBy('customer_name')
             ->get();
 
-        return view('pos.index', compact('product', 'customertypes', 'regularCustomers'));
+        $customertypes = ['agent', 'reseller', 'pelanggan'];
+
+        return view('pos.index', compact('product', 'customertypes', 'categories', 'regularCustomers'));
     }
 
-    public function status(Request $request)
-    {
-        $query = PosTransaction::with('items')->orderByDesc('created_at');
-
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', $request->input('date'));
-        }
-
-        $payments = $query->get();
-        $groupedPayments = $payments->groupBy(function ($payment) {
-            return optional($payment->created_at)->format('Y-m-d') ?: 'unknown';
-        });
-
-        return view('pos.status', [
-            'payments' => $payments,
-            'groupedPayments' => $groupedPayments,
-            'selectedDate' => $request->input('date'),
-        ]);
-    }
-
+    /**
+     * Process checkout and create transaction
+     */
     public function checkout(Request $request)
     {
         $request->validate([
-            'customer_type' => ['required', 'string'],
-            'customer_name' => ['nullable', 'string'],
-            'cart.id' => ['required', 'array', 'min:1'],
-            'cart.name' => ['required', 'array', 'min:1'],
-            'cart.qty' => ['required', 'array', 'min:1'],
-            'cart.satuan' => ['required', 'array', 'min:1'],
-            'cart.price' => ['required', 'array', 'min:1'],
-            'cart.subtotal' => ['required', 'array', 'min:1'],
-            'cart.name.*' => ['string'],
-            'cart.qty.*' => ['numeric', 'min:1'],
-            'cart.satuan.*' => ['string'],
-            'grand_total' => ['required'],
-            'shippingCost' => ['nullable'],
-            'tip' => ['nullable'],
-            'payment_received' => ['nullable'],
-            'note' => ['nullable', 'string'],
-        ], [
-            'cart.id.min' => 'Keranjang tidak boleh kosong.',
+            'customer_type' => 'required|string|in:agent,reseller,pelanggan',
+            'customer_name' => 'nullable|string|max:255',
+            'customer_id' => 'nullable|exists:customers,id',
+            'cart' => 'required|array',
+            'cart.id' => 'required|array|min:1',
+            'cart.id.*' => 'required|exists:products,id',
+            'cart.qty' => 'required|array|min:1',
+            'cart.qty.*' => 'required|integer|min:1',
+            'cart.price' => 'required|array',
+            'cart.price.*' => 'required|numeric|min:0',
+            'cart.subtotal' => 'required|array',
+            'cart.subtotal.*' => 'required|numeric|min:0',
+            'grand_total' => 'required|numeric|min:0',
+            'payment_received' => 'required|numeric|min:0',
+            'shipping_cost' => 'nullable|numeric|min:0',
+            'tip' => 'nullable|numeric|min:0',
+            'note' => 'nullable|string|max:1000',
         ]);
 
-        $items = $this->extractCartItems($request);
+        // Get validated values (now all numeric, no parsing needed)
+        $shippingCost = (int) ($request->shipping_cost ?? 0);
+        $tip = (int) ($request->tip ?? 0);
+        $paymentReceived = (int) $request->payment_received;
+        $grandTotal = (int) $request->grand_total;
 
-        if (empty($items)) {
-            return back()->withErrors(['cart' => 'Keranjang tidak boleh kosong.'])->withInput();
+        // Get customer name
+        $customerName = $request->customer_name;
+        if ($request->customer_id) {
+            $customer = Customer::find($request->customer_id);
+            if ($customer) {
+                $customerName = $customer->customer_name;
+            }
         }
 
-        $subtotal = array_sum(array_column($items, 'subtotal'));
-        $shipping = $this->normalizeCurrency($request->input('shippingCost'));
-        $tip = $this->normalizeCurrency($request->input('tip'));
-        $grandTotal = $this->normalizeCurrency($request->input('grand_total', $subtotal + $shipping + $tip));
-        $paymentReceived = $this->normalizeCurrency($request->input('payment_received'));
-    $status = $paymentReceived >= $grandTotal && $grandTotal > 0 ? 'dibayar' : 'pending';
-        $customerName = $request->filled('customer_name') ? $request->input('customer_name') : 'Tanpa Nama';
-        $customerType = $request->input('customer_type');
-        $note = $request->input('note');
+        // Calculate totals
+        $subtotal = 0;
+        $cartIds = $request->input('cart.id', []);
+        $cartQtys = $request->input('cart.qty', []);
+        $cartPrices = $request->input('cart.price', []);
+        $cartSubtotals = $request->input('cart.subtotal', []);
+        $cartNames = $request->input('cart.name', []);
+        $cartSatuans = $request->input('cart.satuan', []);
 
+        foreach ($cartSubtotals as $itemSubtotal) {
+            $subtotal += (int) $itemSubtotal;
+        }
+
+        // Calculate balance and change
+        $balanceDue = max(0, $grandTotal - $paymentReceived);
+        $changeDue = max(0, $paymentReceived - $grandTotal);
+        $status = $paymentReceived >= $grandTotal ? 'paid' : 'pending';
+
+        // Generate order ID
+        $orderId = 'POS-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($items, $customerName, $customerType, $note, $subtotal, $shipping, $tip, $grandTotal, $paymentReceived, $status) {
-                $productIds = collect($items)->pluck('id');
-
-                $products = Produk::whereIn('id', $productIds)
-                    ->lockForUpdate()
-                    ->get()
-                    ->keyBy('id');
-
-                if ($products->count() !== $productIds->unique()->count()) {
-                    throw ValidationException::withMessages([
-                        'cart' => 'Beberapa produk tidak ditemukan. Silakan muat ulang halaman POS.',
-                    ]);
-                }
-
-                foreach ($items as $item) {
-                    $product = $products->get($item['id']);
-                    $currentStock = $product->stock_quantity ?? 0;
-
-                    if ($currentStock < $item['qty']) {
-                        throw ValidationException::withMessages([
-                            'cart' => "Stok {$product->name} tidak mencukupi (tersedia {$currentStock}).",
-                        ]);
-                    }
-                }
-
-                $transaction = PosTransaction::create([
-                    'order_id' => $this->generateOrderId(),
-                    'reference' => (string) Str::uuid(),
-                    'customer_name' => $customerName,
-                    'customer_type' => $customerType,
-                    'subtotal' => $subtotal,
-                    'shipping_cost' => $shipping,
-                    'tip' => $tip,
-                    'grand_total' => $grandTotal,
-                    'payment_received' => $paymentReceived,
-                    'balance_due' => max($grandTotal - $paymentReceived, 0),
-                    'change_due' => max($paymentReceived - $grandTotal, 0),
-                    'status' => $status,
-                    'note' => $note,
-                ]);
-
-                foreach ($items as $item) {
-                    $product = $products->get($item['id']);
-
-                    $product->decrement('stock_quantity', $item['qty']);
-
-                    PosTransactionItem::create([
-                        'pos_transaction_id' => $transaction->id,
-                        'product_id' => $product->id,
-                        'product_name' => $item['name'],
-                        'qty' => $item['qty'],
-                        'unit' => $item['unit'],
-                        'price' => $item['price'],
-                        'subtotal' => $item['subtotal'],
-                    ]);
-                }
-            }, 3);
-        } catch (ValidationException $exception) {
-            return back()->withErrors($exception->errors())->withInput();
-        } catch (Throwable $exception) {
-            Log::error('POS checkout failed', [
-                'message' => $exception->getMessage(),
-                'trace' => $exception->getTraceAsString(),
+            // Create transaction
+            $transaction = PosTransaction::create([
+                'order_id' => $orderId,
+                'reference' => (string) Str::uuid(),
+                'customer_name' => $customerName,
+                'customer_type' => $request->customer_type,
+                'subtotal' => $subtotal,
+                'shipping_cost' => $shippingCost,
+                'tip' => $tip,
+                'grand_total' => $grandTotal,
+                'payment_received' => $paymentReceived,
+                'balance_due' => $balanceDue,
+                'change_due' => $changeDue,
+                'status' => $status,
+                'note' => $request->note,
             ]);
 
-            return back()->withErrors([
-                'checkout' => 'Terjadi kesalahan saat memproses transaksi. Silakan coba lagi atau hubungi admin.',
-            ])->withInput();
-        }
+            // Create transaction items and reduce stock
+            foreach ($cartIds as $index => $productId) {
+                $qty = (int) ($cartQtys[$index] ?? 1);
+                $price = (int) ($cartPrices[$index] ?? 0);
+                $itemSubtotal = (int) ($cartSubtotals[$index] ?? 0);
+                $productName = $cartNames[$index] ?? '';
+                $unit = $cartSatuans[$index] ?? 'pcs';
 
-        return redirect()->route('pos.payments')->with('success', 'Transaksi POS berhasil dicatat.');
+                PosTransactionItem::create([
+                    'pos_transaction_id' => $transaction->id,
+                    'product_id' => $productId,
+                    'product_name' => $productName,
+                    'qty' => $qty,
+                    'unit' => $unit,
+                    'price' => $price,
+                    'subtotal' => $itemSubtotal,
+                ]);
+
+                // Reduce stock
+                $product = Produk::find($productId);
+                if ($product) {
+                    $product->decrement('stock_quantity', $qty);
+                }
+            }
+
+            // Log activity
+            Activity::create([
+                'action' => 'Transaksi POS',
+                'description' => "Transaksi {$orderId} berhasil dibuat. Total: Rp " . number_format($grandTotal, 0, ',', '.'),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('pos')
+                ->with('success', "Transaksi {$orderId} berhasil disimpan!")
+                ->with('transaction_id', $transaction->id)
+                ->with('order_id', $orderId);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Gagal menyimpan transaksi: ' . $e->getMessage()])->withInput();
+        }
     }
 
+    /**
+     * Display transaction status / payment history
+     */
+    public function status(Request $request)
+    {
+        $selectedDate = $request->get('date', now()->toDateString());
+        
+        $query = PosTransaction::with('items')->orderBy('created_at', 'desc');
+
+        // Filter by date if specified
+        if ($request->has('date') && $request->date) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $payments = $query->get();
+
+        // Group payments by date
+        $groupedPayments = $payments->groupBy(function ($payment) {
+            return $payment->created_at ? $payment->created_at->format('Y-m-d') : 'unknown';
+        });
+
+        return view('pos.status', compact('payments', 'groupedPayments', 'selectedDate'));
+    }
+
+    /**
+     * Apply additional payment to a pending transaction
+     */
     public function applyPayment(Request $request, PosTransaction $transaction)
     {
         $request->validate([
-            'payment_amount' => ['required', 'string'],
-            'transaction_id' => ['required', 'integer'],
-        ], [
-            'payment_amount.required' => 'Nominal pembayaran wajib diisi.',
+            'amount' => 'required|numeric|min:1',
         ]);
 
-        if ((int) $request->input('transaction_id') !== $transaction->id) {
-            return back()
-                ->withErrors(['payment_amount' => 'Transaksi tidak valid.'])
-                ->withInput($request->all());
+        $amount = $this->parseCurrency($request->amount);
+        
+        if ($transaction->status === 'paid') {
+            return back()->withErrors(['error' => 'Transaksi sudah lunas.']);
         }
 
-        $amount = $this->normalizeCurrency($request->input('payment_amount'));
-
-        if ($amount <= 0) {
-            return back()
-                ->withErrors(['payment_amount' => 'Nominal pembayaran harus lebih dari 0.'])
-                ->withInput($request->all());
-        }
-
-        $totalPaid = $transaction->payment_received + $amount;
-        $balanceDue = max($transaction->grand_total - $totalPaid, 0);
-        $changeDue = max($totalPaid - $transaction->grand_total, 0);
-    $status = $balanceDue === 0 ? 'dibayar' : 'pending';
+        $newPaymentReceived = $transaction->payment_received + $amount;
+        $newBalanceDue = max(0, $transaction->grand_total - $newPaymentReceived);
+        $newChangeDue = max(0, $newPaymentReceived - $transaction->grand_total);
+        $newStatus = $newPaymentReceived >= $transaction->grand_total ? 'paid' : 'pending';
 
         $transaction->update([
-            'payment_received' => $totalPaid,
-            'balance_due' => $balanceDue,
-            'change_due' => $changeDue,
-            'status' => $status,
+            'payment_received' => $newPaymentReceived,
+            'balance_due' => $newBalanceDue,
+            'change_due' => $newChangeDue,
+            'status' => $newStatus,
         ]);
 
-        return back()->with('success', 'Status pembayaran berhasil diperbarui.');
+        // Log activity
+        Activity::create([
+            'action' => 'Pembayaran POS',
+            'description' => "Pembayaran Rp " . number_format($amount, 0, ',', '.') . " untuk transaksi {$transaction->order_id}",
+        ]);
+
+        $message = $newStatus === 'paid' 
+            ? "Pembayaran berhasil! Transaksi {$transaction->order_id} sudah lunas."
+            : "Pembayaran Rp " . number_format($amount, 0, ',', '.') . " berhasil ditambahkan. Sisa: Rp " . number_format($newBalanceDue, 0, ',', '.');
+
+        return back()->with('success', $message);
     }
 
-    protected function generateOrderId(): string
+    /**
+     * Parse currency string to integer
+     */
+    private function parseCurrency($value): int
     {
-        do {
-            $orderId = 'POS-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(4));
-        } while (PosTransaction::where('order_id', $orderId)->exists());
-
-        return $orderId;
-    }
-
-    protected function normalizeCurrency($value): int
-    {
-        if ($value === null || $value === '') {
+        if (is_null($value) || $value === '') {
             return 0;
         }
-
-        if (is_numeric($value)) {
-            return (int) $value;
-        }
-
-        $digits = preg_replace('/[^0-9]/', '', (string) $value);
-
-        return $digits === '' ? 0 : (int) $digits;
-    }
-
-    protected function extractCartItems(Request $request): array
-    {
-        $ids = $request->input('cart.id', []);
-        $names = $request->input('cart.name', []);
-        $qtys = $request->input('cart.qty', []);
-        $units = $request->input('cart.satuan', []);
-        $prices = $request->input('cart.price', []);
-        $subtotals = $request->input('cart.subtotal', []);
-
-        $items = [];
-
-        foreach ($ids as $index => $id) {
-            if ($id === null || $id === '') {
-                continue;
-            }
-
-            $price = $this->normalizeCurrency($prices[$index] ?? 0);
-            $qty = max((int) ($qtys[$index] ?? 1), 1);
-            $subtotal = $this->normalizeCurrency($subtotals[$index] ?? ($price * $qty));
-
-            $items[] = [
-                'id' => (int) $id,
-                'name' => $names[$index] ?? '',
-                'qty' => $qty,
-                'unit' => $units[$index] ?? 'pcs',
-                'price' => $price,
-                'subtotal' => $subtotal,
-            ];
-        }
-
-        return $items;
+        // Remove 'Rp', spaces, dots, and other non-numeric characters
+        $cleaned = preg_replace('/[^0-9]/', '', $value);
+        return (int) $cleaned;
     }
 }

@@ -13,16 +13,63 @@ class SupplierController extends Controller
     {
         $query = Supplier::query();
 
-        // Jika ada pencarian
-        if ($request->has('search') && $request->search != '') {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('supplier_code', 'like', '%' . $request->search . '%');
+    $searchTerm = $request->string('search')->trim();
+    $searchValue = $searchTerm->value();
+        $activeFilter = $request->get('filter', 'all');
+        $allowedFilters = ['all', 'recent', 'missing-contact', 'with-po'];
+        if (! in_array($activeFilter, $allowedFilters, true)) {
+            $activeFilter = 'all';
         }
 
-        // Kalau mau pakai pagination (lebih rapi)
-        $suppliers = $query->latest()->paginate(10);
+        if ($searchValue !== '') {
+            $query->where(function ($subQuery) use ($searchValue) {
+                $subQuery->where('name', 'like', "%{$searchValue}%")
+                         ->orWhere('supplier_code', 'like', "%{$searchValue}%")
+                         ->orWhere('contact_person', 'like', "%{$searchValue}%");
+            });
+        }
 
-        return view('supplier.index', compact('suppliers'));
+        switch ($activeFilter) {
+            case 'recent':
+                $query->where('created_at', '>=', now()->subDays(30));
+                break;
+            case 'missing-contact':
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNull('phone')
+                             ->orWhere('phone', '')
+                             ->orWhereNull('email')
+                             ->orWhere('email', '');
+                });
+                break;
+            case 'with-po':
+                $query->whereHas('purchaseOrders');
+                break;
+        }
+
+        $suppliers = $query
+            ->withCount('purchaseOrders')
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $stats = [
+            'total' => Supplier::count(),
+            'newThisMonth' => Supplier::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
+            'activeVendors' => Supplier::whereHas('purchaseOrders')->count(),
+            'missingContacts' => Supplier::where(function ($subQuery) {
+                $subQuery->whereNull('phone')
+                         ->orWhere('phone', '')
+                         ->orWhereNull('email')
+                         ->orWhere('email', '');
+            })->count(),
+        ];
+
+        return view('supplier.index', [
+            'suppliers' => $suppliers,
+            'stats' => $stats,
+            'activeFilter' => $activeFilter,
+            'search' => $searchValue,
+        ]);
     }
 
     // Form tambah supplier

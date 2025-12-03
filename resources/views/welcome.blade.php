@@ -38,13 +38,9 @@
                             Log in
                         </a>
 
-                        @if (Route::has('register'))
-                            <a
-                                href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
-                            </a>
-                        @endif
+                        <span class="inline-flex items-center px-5 py-1.5 text-xs uppercase tracking-[0.2em] text-[#706f6c] dark:text-[#A1A09A]">
+                            Hubungi admin untuk akses
+                        </span>
                     @endauth
                 </nav>
             @endif

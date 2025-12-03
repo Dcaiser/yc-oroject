@@ -94,6 +94,7 @@ Route::middleware('auth')->group(function () {
 //inventory
 Route::middleware('auth')->group(function () {
     Route::get('/inventory', [InventController::class, 'index'])->name('invent');
+    Route::get('/inventory/export', [InventController::class, 'export'])->name('invent.export');
     Route::put('/produk/update-all', [InventController::class, 'update'])->name('updateAll');
     Route::delete('/inventdelete', [InventController::class, 'deleteall'])->name('deleteallinvent');
     Route::get('/inventory/create-stock', [InventController::class, 'createStock'])->name('stock.create');
@@ -108,6 +109,7 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
 Route::delete('/activities/clear', [ActivityController::class, 'clear'])->name('activities.clear');
+Route::delete('/activities/bulk-delete', [ActivityController::class, 'bulkDelete'])->name('activities.bulk-delete');
 });
 
 // suppliers

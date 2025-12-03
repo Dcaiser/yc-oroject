@@ -24,18 +24,67 @@ class InventController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $categoryFilter = $request->input('category', 'all');
+        $stockFilter = $request->input('stock', 'all');
+        $perPage = (int) $request->input('per_page', 12);
+        $perPageOptions = [12, 24, 36];
 
-        // Query data dengan kondisi search
-        $products = Produk::with('category') // ambil data kategori juga
-        ->when($search, function ($query, $search) {
-            return $query->where('name', 'like', "%{$search}%")
-                         ->orWhere('description', 'like', "%{$search}%");
-        })
-        ->paginate(10);
+        if (!in_array($perPage, $perPageOptions, true)) {
+            $perPage = 12;
+        }
+
+        $productsQuery = $this->buildInventoryQuery($search, $categoryFilter, $stockFilter);
+
+        $products = $productsQuery->paginate($perPage)->withQueryString();
+
+        $inventoryStats = [
+            'total_sku' => Produk::count(),
+            'total_stock' => Produk::sum('stock_quantity') ?? 0,
+            'low_stock' => Produk::whereBetween('stock_quantity', [1, 10])->count(),
+            'out_of_stock' => Produk::where('stock_quantity', '<=', 0)->count(),
+        ];
+
         $units = Units::all();
         $supplier = Supplier::all();
         $category = Kategori::all();
-        return view('inventory.index', compact(['products','category','units','supplier']));
+
+        return view('inventory.index', compact(
+            'products',
+            'category',
+            'units',
+            'supplier',
+            'inventoryStats',
+            'categoryFilter',
+            'stockFilter',
+            'perPage',
+            'perPageOptions',
+            'search'
+        ));
+    }
+
+    protected function buildInventoryQuery(?string $search, string $categoryFilter, string $stockFilter)
+    {
+        return Produk::with(['category', 'units', 'prices'])
+            ->when($search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%");
+                });
+            })
+            ->when($categoryFilter !== 'all', function ($query) use ($categoryFilter) {
+                $query->where('category_id', $categoryFilter);
+            })
+            ->when($stockFilter === 'low', function ($query) {
+                $query->whereBetween('stock_quantity', [1, 10]);
+            })
+            ->when($stockFilter === 'out', function ($query) {
+                $query->where('stock_quantity', '<=', 0);
+            })
+            ->when($stockFilter === 'safe', function ($query) {
+                $query->where('stock_quantity', '>', 10);
+            })
+            ->orderBy('name');
     }
 
     /**
@@ -134,6 +183,52 @@ class InventController extends Controller
         ]);
 
         return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
+    }
+
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        $categoryFilter = $request->input('category', 'all');
+        $stockFilter = $request->input('stock', 'all');
+
+        $products = $this->buildInventoryQuery($search, $categoryFilter, $stockFilter)->get();
+
+        $filename = 'inventori-' . now()->format('Ymd-His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Stok', 'Satuan', 'Harga Agen', 'Harga Reseller', 'Harga Pelanggan'];
+
+        $callback = function () use ($products, $columns) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, $columns);
+
+            foreach ($products as $product) {
+                $priceAgent = optional($product->prices->firstWhere('customer_type', 'agent'))->price;
+                $priceReseller = optional($product->prices->firstWhere('customer_type', 'reseller'))->price;
+                $priceCustomer = optional($product->prices->firstWhere('customer_type', 'pelanggan'))->price;
+
+                fputcsv($handle, [
+                    $product->id,
+                    $product->name,
+                    $product->sku,
+                    optional($product->category)->name,
+                    $product->stock_quantity,
+                    optional($product->units)->name,
+                    $priceAgent ?? 0,
+                    $priceReseller ?? 0,
+                    $priceCustomer ?? 0,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
