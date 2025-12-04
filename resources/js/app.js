@@ -5,6 +5,14 @@ import flatpickr from 'flatpickr';
 import { Indonesian } from 'flatpickr/dist/l10n/id.js';
 import 'flatpickr/dist/flatpickr.css';
 
+// Font Awesome
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// Chart.js - register globally
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
+window.Chart = Chart;
+
 window.Alpine = Alpine;
 
 Alpine.start();
