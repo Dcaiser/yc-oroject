@@ -1,46 +1,45 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                    <i class="fas fa-plus"></i>
-                </span>
-                <h2 class="text-xl font-semibold leading-tight text-slate-700">Tambah Produk Baru</h2>
-            </div>
-            <p class="text-sm text-slate-500">Lengkapi data produk untuk menambahkan ke inventori.</p>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-indigo-100">
+                <i class="fas fa-plus-circle text-emerald-600"></i>
+            </span>
+            <h2 class="text-xl font-semibold leading-tight text-slate-700">Tambah Produk</h2>
         </div>
     </x-slot>
 
-    <section class="mx-auto max-w-4xl space-y-8 px-4 py-10">
+    <div class="space-y-6">
+        <!-- Breadcrumb -->
+        <x-breadcrumb :items="[['title' => 'Manajemen Produk', 'route' => 'products.index'], ['title' => 'Tambah Produk']]"/>
         <!-- Header Section -->
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/50">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="space-y-1">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-600">
-                        <i class="fas fa-cube"></i>
-                        Produk Baru
-                    </span>
-                    <h1 class="text-2xl font-semibold tracking-tight text-slate-800">Tambah Produk</h1>
-                    <p class="text-sm text-slate-500">Isi form di bawah untuk menambahkan produk baru ke sistem.</p>
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/50">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="max-w-xl space-y-2">
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-800 lg:text-[1.8rem]">Tambah Produk Baru</h1>
+                    <p class="text-sm text-slate-500">
+                        Lengkapi form di bawah untuk menambahkan produk baru ke dalam inventori sistem.
+                    </p>
                 </div>
                 <a href="{{ route('products.index') }}" 
-                    class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800">
+                    class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800">
                     <i class="fas fa-arrow-left me-2"></i>
-                    Kembali
+                    Kembali ke Daftar
                 </a>
             </div>
         </div>
 
         <!-- Form -->
-        <div class="rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
             <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="grid grid-cols-1 gap-0 lg:grid-cols-2 lg:divide-x lg:divide-slate-100">
                     <!-- Left Column - Product Info -->
                     <div class="p-6 space-y-5">
-                        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-emerald-500"></i>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                                <i class="fas fa-info-circle text-sm"></i>
+                            </span>
                             Informasi Produk
                         </h3>
 
@@ -132,8 +131,10 @@
                     <!-- Right Column - Image & Prices -->
                     <div class="p-6 space-y-5 border-t border-slate-100 lg:border-t-0">
                         <!-- Image Upload -->
-                        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                            <i class="fas fa-image text-indigo-500"></i>
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-600">
+                                <i class="fas fa-image text-sm"></i>
+                            </span>
                             Gambar Produk
                         </h3>
 
@@ -187,12 +188,14 @@
                         @enderror
 
                         <!-- Prices -->
-                        <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2 pt-4">
-                            <i class="fas fa-tags text-amber-500"></i>
-                            Harga per Kategori Customer
+                        <h3 class="text-base font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100 pt-4">
+                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                                <i class="fas fa-tags text-sm"></i>
+                            </span>
+                            Harga per Tipe Customer
                         </h3>
 
-                        <div class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <div class="space-y-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                             @foreach ($customertypes as $type)
                                 <div x-data="{ harga: '', hargaRaw: '' }">
                                     <label class="block text-xs font-medium text-slate-600 mb-1">{{ ucfirst($type) }}</label>
@@ -218,20 +221,20 @@
                 </div>
 
                 <!-- Submit Buttons -->
-                <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-4">
+                <div class="flex items-center justify-end gap-3 rounded-b-2xl border-t border-slate-100 bg-slate-50/50 px-6 py-4">
                     <a href="{{ route('products.index') }}"
-                        class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
+                        class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                         Batal
                     </a>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600">
+                        class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                         <i class="fas fa-check"></i>
                         Simpan Produk
                     </button>
                 </div>
             </form>
         </div>
-    </section>
+    </div>
 
     @push('scripts')
     <script>

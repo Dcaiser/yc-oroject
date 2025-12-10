@@ -45,7 +45,7 @@ class CustomerController extends Controller
                 break;
         }
 
-        $customers = $query->orderBy('customer_name')->get();
+        $customers = $query->orderBy('customer_name')->paginate(10)->withQueryString();
 
         // Stats
         $stats = [

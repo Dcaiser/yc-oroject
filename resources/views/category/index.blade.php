@@ -1,13 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                    <i class="fas fa-layer-group"></i>
-                </span>
-                <h2 class="text-xl font-semibold leading-tight text-slate-700">Kategori & Satuan</h2>
-            </div>
-            <p class="text-sm text-slate-500">Kelola kategori produk dan satuan ukuran untuk inventori.</p>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-indigo-100">
+                <i class="fas fa-tags text-emerald-600"></i>
+            </span>
+            <h2 class="text-xl font-semibold leading-tight text-slate-700">Kategori & Satuan</h2>
         </div>
     </x-slot>
 
@@ -22,31 +19,23 @@
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/50">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div class="max-w-xl space-y-2">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-600">
-                        <i class="fas fa-layer-group"></i>
-                        Data Master
-                    </span>
                     <h1 class="text-2xl font-semibold tracking-tight text-slate-800 lg:text-[1.8rem]">Kategori & Satuan</h1>
-                    <p class="text-xs text-slate-500">
+                    <p class="text-sm text-slate-500">
                         Kelola kategori produk dan satuan ukuran untuk inventori Anda.
                     </p>
                 </div>
 
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <button type="button" @click="openCategoryModal()"
-                        class="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600">
-                        <i class="fas fa-plus me-2"></i>
+                    <button type="button" @click="categoryModalMode = 'create'; categoryForm = { id: null, name: '', description: '' }; showCategoryModal = true"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                        <i class="fas fa-plus"></i>
                         Tambah Kategori
                     </button>
-                    <button type="button" @click="openUnitModal()"
-                        class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-400/30 transition hover:bg-indigo-600">
-                        <i class="fas fa-plus me-2"></i>
+                    <button type="button" @click="unitModalMode = 'create'; unitForm = { id: null, name: '', conversion_to_base: 1 }; showUnitModal = true"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-400/30 transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <i class="fas fa-plus"></i>
                         Tambah Satuan
                     </button>
-                    <a href="{{ route('category') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-800">
-                        <i class="fas fa-arrow-rotate-left me-2"></i>
-                        Reset
-                    </a>
                 </div>
             </div>
         </div>
@@ -79,25 +68,25 @@
                     'label' => 'Kategori Populer',
                     'value' => $stats['most_used_category']?->name ?? '-',
                     'sub' => ($stats['most_used_category']?->products_count ?? 0) . ' produk',
-                    'icon' => 'fa-crown',
-                    'accent' => 'bg-purple-500/10 text-purple-600',
+                    'icon' => 'fa-fire',
+                    'accent' => 'bg-rose-500/10 text-rose-600',
                 ],
             ];
         @endphp
 
-        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             @foreach($statCards as $card)
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/50">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/50">
                     <div class="flex items-start justify-between">
                         <div class="space-y-1">
-                            <p class="text-xs font-medium text-slate-500">{{ $card['label'] }}</p>
-                            <p class="text-xl font-semibold text-slate-900">{{ is_numeric($card['value']) ? number_format($card['value']) : $card['value'] }}</p>
+                            <p class="text-sm font-medium text-slate-500">{{ $card['label'] }}</p>
+                            <p class="text-2xl font-semibold text-slate-900">{{ is_numeric($card['value']) ? number_format($card['value']) : $card['value'] }}</p>
                         </div>
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl {{ $card['accent'] }}">
-                            <i class="fas {{ $card['icon'] }} text-base"></i>
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl {{ $card['accent'] }}">
+                            <i class="fas {{ $card['icon'] }} text-lg"></i>
                         </span>
                     </div>
-                    <p class="mt-3 text-xs text-slate-500">{{ $card['sub'] }}</p>
+                    <p class="mt-3 text-sm text-slate-500">{{ $card['sub'] }}</p>
                 </div>
             @endforeach
         </div>
@@ -132,7 +121,7 @@
         @endif
 
         <!-- Main Content -->
-        <div class="rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
+        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
             {{-- Toolbar --}}
             <div class="flex flex-col gap-4 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
                 {{-- Tabs --}}
@@ -160,11 +149,11 @@
                     {{-- Search --}}
                     <form action="{{ route('category') }}" method="GET" class="relative flex-1 sm:max-w-xs">
                         <input type="hidden" name="tab" value="{{ $tab }}">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-400">
                             <i class="fas fa-search"></i>
                         </span>
                         <input type="search" name="search" value="{{ $search }}" placeholder="Cari {{ $tab === 'category' ? 'kategori' : 'satuan' }}..."
-                            class="w-full rounded-xl border-slate-200 py-2.5 pl-10 pr-4 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500">
+                            class="w-full rounded-xl border-2 border-emerald-100 bg-emerald-50/60 py-2.5 pl-12 pr-10 text-sm text-slate-700 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400">
                         @if($search)
                             <a href="{{ route('category', ['tab' => $tab]) }}" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600">
                                 <i class="fas fa-times"></i>
@@ -211,7 +200,7 @@
                                     <i class="fas fa-rotate-left mr-1"></i>Reset pencarian
                                 </a>
                             @else
-                                <button type="button" @click="openCategoryModal()" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600">
+                                <button type="button" @click="categoryModalMode = 'create'; categoryForm = { id: null, name: '', description: '' }; showCategoryModal = true" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
                                     <i class="fas fa-plus"></i>Tambah Kategori
                                 </button>
                             @endif
@@ -279,8 +268,74 @@
 
                         {{-- Pagination --}}
                         @if($categories->hasPages())
-                            <div class="mt-6 border-t border-slate-100 pt-4">
-                                {{ $categories->links() }}
+                            <div class="flex flex-col items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-100 lg:flex-row">
+                                <div class="text-sm text-slate-600">
+                                    Menampilkan <span class="font-medium text-slate-800">{{ $categories->firstItem() ?? 0 }}</span> - <span class="font-medium text-slate-800">{{ $categories->lastItem() ?? 0 }}</span> dari <span class="font-medium text-slate-800">{{ $categories->total() }}</span> kategori
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    {{-- Previous --}}
+                                    @if ($categories->onFirstPage())
+                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed">
+                                            <i class="fas fa-chevron-left text-xs"></i>
+                                            Sebelumnya
+                                        </span>
+                                    @else
+                                        <a href="{{ $categories->previousPageUrl() }}"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-emerald-700 transition bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100">
+                                            <i class="fas fa-chevron-left text-xs"></i>
+                                            Sebelumnya
+                                        </a>
+                                    @endif
+
+                                    {{-- Page Numbers --}}
+                                    @php
+                                        $currentPage = $categories->currentPage();
+                                        $lastPage = $categories->lastPage();
+                                        $start = max(1, $currentPage - 2);
+                                        $end = min($lastPage, $currentPage + 2);
+                                    @endphp
+
+                                    @if($start > 1)
+                                        <a href="{{ $categories->url(1) }}" class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">1</a>
+                                        @if($start > 2)
+                                            <span class="px-1 text-slate-400">...</span>
+                                        @endif
+                                    @endif
+
+                                    @for($page = $start; $page <= $end; $page++)
+                                        @if ($page == $currentPage)
+                                            <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-semibold text-white bg-emerald-500 rounded-lg shadow-sm">
+                                                {{ $page }}
+                                            </span>
+                                        @else
+                                            <a href="{{ $categories->url($page) }}"
+                                               class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">
+                                                {{ $page }}
+                                            </a>
+                                        @endif
+                                    @endfor
+
+                                    @if($end < $lastPage)
+                                        @if($end < $lastPage - 1)
+                                            <span class="px-1 text-slate-400">...</span>
+                                        @endif
+                                        <a href="{{ $categories->url($lastPage) }}" class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">{{ $lastPage }}</a>
+                                    @endif
+
+                                    {{-- Next --}}
+                                    @if ($categories->hasMorePages())
+                                        <a href="{{ $categories->nextPageUrl() }}"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-emerald-700 transition bg-emerald-50 border border-emerald-100 rounded-lg hover:bg-emerald-100">
+                                            Selanjutnya
+                                            <i class="fas fa-chevron-right text-xs"></i>
+                                        </a>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed">
+                                            Selanjutnya
+                                            <i class="fas fa-chevron-right text-xs"></i>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         @endif
                     @endif
@@ -304,7 +359,7 @@
                                     <i class="fas fa-rotate-left mr-1"></i>Reset pencarian
                                 </a>
                             @else
-                                <button type="button" @click="openUnitModal()" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-400/30 transition hover:bg-indigo-600">
+                                <button type="button" @click="unitModalMode = 'create'; unitForm = { id: null, name: '', conversion_to_base: 1 }; showUnitModal = true" class="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-400/30 transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                     <i class="fas fa-plus"></i>Tambah Satuan
                                 </button>
                             @endif
@@ -372,42 +427,112 @@
 
                         {{-- Pagination --}}
                         @if($units->hasPages())
-                            <div class="mt-6 border-t border-slate-100 pt-4">
-                                {{ $units->links() }}
+                            <div class="flex flex-col items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-100 lg:flex-row">
+                                <div class="text-sm text-slate-600">
+                                    Menampilkan <span class="font-medium text-slate-800">{{ $units->firstItem() ?? 0 }}</span> - <span class="font-medium text-slate-800">{{ $units->lastItem() ?? 0 }}</span> dari <span class="font-medium text-slate-800">{{ $units->total() }}</span> satuan
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    {{-- Previous --}}
+                                    @if ($units->onFirstPage())
+                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed">
+                                            <i class="fas fa-chevron-left text-xs"></i>
+                                            Sebelumnya
+                                        </span>
+                                    @else
+                                        <a href="{{ $units->previousPageUrl() }}"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-700 transition bg-indigo-50 border border-indigo-100 rounded-lg hover:bg-indigo-100">
+                                            <i class="fas fa-chevron-left text-xs"></i>
+                                            Sebelumnya
+                                        </a>
+                                    @endif
+
+                                    {{-- Page Numbers --}}
+                                    @php
+                                        $currentPageUnit = $units->currentPage();
+                                        $lastPageUnit = $units->lastPage();
+                                        $startUnit = max(1, $currentPageUnit - 2);
+                                        $endUnit = min($lastPageUnit, $currentPageUnit + 2);
+                                    @endphp
+
+                                    @if($startUnit > 1)
+                                        <a href="{{ $units->url(1) }}" class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">1</a>
+                                        @if($startUnit > 2)
+                                            <span class="px-1 text-slate-400">...</span>
+                                        @endif
+                                    @endif
+
+                                    @for($pageUnit = $startUnit; $pageUnit <= $endUnit; $pageUnit++)
+                                        @if ($pageUnit == $currentPageUnit)
+                                            <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-semibold text-white bg-indigo-500 rounded-lg shadow-sm">
+                                                {{ $pageUnit }}
+                                            </span>
+                                        @else
+                                            <a href="{{ $units->url($pageUnit) }}"
+                                               class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">
+                                                {{ $pageUnit }}
+                                            </a>
+                                        @endif
+                                    @endfor
+
+                                    @if($endUnit < $lastPageUnit)
+                                        @if($endUnit < $lastPageUnit - 1)
+                                            <span class="px-1 text-slate-400">...</span>
+                                        @endif
+                                        <a href="{{ $units->url($lastPageUnit) }}" class="inline-flex items-center justify-center w-8 h-8 text-sm font-medium text-slate-600 transition bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800">{{ $lastPageUnit }}</a>
+                                    @endif
+
+                                    {{-- Next --}}
+                                    @if ($units->hasMorePages())
+                                        <a href="{{ $units->nextPageUrl() }}"
+                                           class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-700 transition bg-indigo-50 border border-indigo-100 rounded-lg hover:bg-indigo-100">
+                                            Selanjutnya
+                                            <i class="fas fa-chevron-right text-xs"></i>
+                                        </a>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed">
+                                            Selanjutnya
+                                            <i class="fas fa-chevron-right text-xs"></i>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         @endif
                     @endif
                 @endif
             </div>
-        </section>
+        </div>
 
         {{-- Category Modal --}}
         <div x-show="showCategoryModal" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 backdrop-blur-sm p-4"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @keydown.escape.window="showCategoryModal = false">
+            x-transition:leave-end="opacity-0">
             
-            <div class="relative w-full max-w-md rounded-3xl bg-white shadow-2xl"
+            <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl"
+                x-show="showCategoryModal"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @click.away="showCategoryModal = false">
+                @click.away="showCategoryModal = false"
+                @keydown.escape.window="showCategoryModal = false">
                 
                 {{-- Header --}}
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
                             <i class="fas fa-tags"></i>
                         </span>
-                        <h3 class="text-lg font-bold text-slate-900" x-text="categoryModalMode === 'create' ? 'Tambah Kategori' : 'Edit Kategori'"></h3>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900" x-text="categoryModalMode === 'create' ? 'Tambah Kategori' : 'Edit Kategori'"></h3>
+                            <p class="text-xs text-slate-500">Kelompokkan produk dengan kategori</p>
+                        </div>
                     </div>
                     <button type="button" @click="showCategoryModal = false" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
                         <i class="fas fa-xmark"></i>
@@ -423,35 +548,40 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label for="category_name" class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Kategori <span class="text-rose-500">*</span></label>
+                            <label for="category_name" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Nama Kategori <span class="text-rose-500">*</span>
+                            </label>
                             <input type="text" id="category_name" name="name" x-model="categoryForm.name" required maxlength="255"
                                 class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500"
-                                placeholder="Contoh: Elektronik, Makanan, dll">
+                                placeholder="Masukkan nama kategori">
                             @error('name')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-rose-600"><i class="fas fa-circle-exclamation mr-1"></i>{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="category_description" class="block text-sm font-semibold text-slate-700 mb-1.5">Deskripsi</label>
+                            <label for="category_description" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Deskripsi <span class="text-xs font-normal text-slate-400">(opsional)</span>
+                            </label>
                             <textarea id="category_description" name="description" x-model="categoryForm.description" rows="3" maxlength="500"
                                 class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-emerald-500 focus:ring-emerald-500 resize-none"
-                                placeholder="Deskripsi singkat kategori (opsional)"></textarea>
+                                placeholder="Deskripsi singkat tentang kategori ini"></textarea>
+                            <p class="mt-1.5 text-xs text-slate-500">Maksimal 500 karakter</p>
                         </div>
                     </div>
 
-                    <div class="mt-6 flex items-center justify-end gap-3">
+                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                         <button type="button" @click="showCategoryModal = false"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                             Batal
                         </button>
-                        <button type="submit" :disabled="isSubmitting"
-                            class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-400/30 transition hover:bg-emerald-600 disabled:opacity-50">
+                        <button type="submit" :disabled="isSubmitting || !categoryForm.name"
+                            class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-50">
                             <template x-if="!isSubmitting">
                                 <i class="fas fa-check"></i>
                             </template>
                             <template x-if="isSubmitting">
-                                <i class="fas fa-circle-notch fa-spin"></i>
+                                <i class="fas fa-spinner fa-spin"></i>
                             </template>
                             <span x-text="isSubmitting ? 'Menyimpan...' : 'Simpan'"></span>
                         </button>
@@ -462,31 +592,35 @@
 
         {{-- Unit Modal --}}
         <div x-show="showUnitModal" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 backdrop-blur-sm p-4"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @keydown.escape.window="showUnitModal = false">
+            x-transition:leave-end="opacity-0">
             
-            <div class="relative w-full max-w-md rounded-3xl bg-white shadow-2xl"
+            <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl"
+                x-show="showUnitModal"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @click.away="showUnitModal = false">
+                @click.away="showUnitModal = false"
+                @keydown.escape.window="showUnitModal = false">
                 
                 {{-- Header --}}
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                     <div class="flex items-center gap-3">
-                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-600">
+                        <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
                             <i class="fas fa-ruler"></i>
                         </span>
-                        <h3 class="text-lg font-bold text-slate-900" x-text="unitModalMode === 'create' ? 'Tambah Satuan' : 'Edit Satuan'"></h3>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900" x-text="unitModalMode === 'create' ? 'Tambah Satuan' : 'Edit Satuan'"></h3>
+                            <p class="text-xs text-slate-500">Satuan ukuran untuk produk</p>
+                        </div>
                     </div>
                     <button type="button" @click="showUnitModal = false" class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
                         <i class="fas fa-xmark"></i>
@@ -502,41 +636,52 @@
 
                     <div class="space-y-4">
                         <div>
-                            <label for="unit_name" class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Satuan <span class="text-rose-500">*</span></label>
+                            <label for="unit_name" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Nama Satuan <span class="text-rose-500">*</span>
+                            </label>
                             <input type="text" id="unit_name" name="name" x-model="unitForm.name" required maxlength="255"
                                 class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Contoh: Kilogram, Liter, Pcs, dll">
+                                placeholder="Contoh: Kilogram, Liter, Pcs, Box">
                             @error('name')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-rose-600"><i class="fas fa-circle-exclamation mr-1"></i>{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label for="unit_conversion" class="block text-sm font-semibold text-slate-700 mb-1.5">Nilai Konversi ke Base <span class="text-rose-500">*</span></label>
+                            <label for="unit_conversion" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Nilai Konversi <span class="text-rose-500">*</span>
+                            </label>
                             <input type="number" id="unit_conversion" name="conversion_to_base" x-model="unitForm.conversion_to_base" required min="0.0001" step="0.0001"
                                 class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="1">
-                            <p class="mt-1 text-xs text-slate-500">
-                                <i class="fas fa-circle-info mr-1"></i>Contoh: 1 Kilogram = 1000 gram, maka nilai = 1000
-                            </p>
+                            
+                            {{-- Info Card --}}
+                            <div class="mt-3 rounded-xl bg-indigo-50 p-3">
+                                <p class="text-xs font-medium text-indigo-700 mb-1.5"><i class="fas fa-lightbulb mr-1"></i>Panduan:</p>
+                                <ul class="space-y-0.5 text-xs text-indigo-600">
+                                    <li>• Pcs/Unit: nilai = 1</li>
+                                    <li>• Lusin (12 pcs): nilai = 12</li>
+                                    <li>• Box (24 pcs): nilai = 24</li>
+                                </ul>
+                            </div>
                             @error('conversion_to_base')
-                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                                <p class="mt-1.5 text-xs text-rose-600"><i class="fas fa-circle-exclamation mr-1"></i>{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
 
-                    <div class="mt-6 flex items-center justify-end gap-3">
+                    <div class="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                         <button type="button" @click="showUnitModal = false"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                             Batal
                         </button>
-                        <button type="submit" :disabled="isSubmitting"
-                            class="inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-400/30 transition hover:bg-indigo-600 disabled:opacity-50">
+                        <button type="submit" :disabled="isSubmitting || !unitForm.name"
+                            class="inline-flex items-center gap-2 rounded-xl bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-50">
                             <template x-if="!isSubmitting">
                                 <i class="fas fa-check"></i>
                             </template>
                             <template x-if="isSubmitting">
-                                <i class="fas fa-circle-notch fa-spin"></i>
+                                <i class="fas fa-spinner fa-spin"></i>
                             </template>
                             <span x-text="isSubmitting ? 'Menyimpan...' : 'Simpan'"></span>
                         </button>
@@ -547,41 +692,49 @@
 
         {{-- Delete Confirmation Modal --}}
         <div x-show="showDeleteModal" x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 backdrop-blur-sm p-4"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            @keydown.escape.window="showDeleteModal = false">
+            x-transition:leave-end="opacity-0">
             
-            <div class="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl text-center"
+            <div class="relative w-full max-w-sm rounded-2xl bg-white shadow-xl"
+                x-show="showDeleteModal"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
-                @click.away="showDeleteModal = false">
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                @click.away="showDeleteModal = false"
+                @keydown.escape.window="showDeleteModal = false">
                 
-                <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-                    <i class="fas fa-triangle-exclamation text-2xl"></i>
-                </div>
+                <div class="p-6 text-center">
+                    {{-- Warning Icon --}}
+                    <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-500">
+                        <i class="fas fa-triangle-exclamation text-xl"></i>
+                    </div>
 
-                <h3 class="text-lg font-bold text-slate-900" x-text="deleteModalTitle"></h3>
-                <p class="mt-2 text-sm text-slate-500" x-text="deleteModalMessage"></p>
+                    <h3 class="text-lg font-bold text-slate-900" x-text="deleteModalTitle"></h3>
+                    <p class="mt-2 text-sm text-slate-500" x-text="deleteModalMessage"></p>
 
-                <div class="mt-6 flex items-center justify-center gap-3">
-                    <button type="button" @click="showDeleteModal = false"
-                        class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
-                        Batal
-                    </button>
-                    <form :action="deleteFormAction" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-rose-400/30 transition hover:bg-rose-600">
-                            <i class="fas fa-trash-can"></i>Ya, Hapus
+                    <div class="mt-6 flex items-center justify-center gap-3">
+                        <button type="button" @click="showDeleteModal = false"
+                            class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
+                            Batal
                         </button>
-                    </form>
+                        <form :action="deleteFormAction" method="POST" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-rose-500/20 transition hover:bg-rose-600">
+                                <i class="fas fa-trash-can"></i>
+                                Ya, Hapus
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

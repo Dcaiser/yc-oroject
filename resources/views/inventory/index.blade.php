@@ -1,69 +1,73 @@
 <x-app-layout>
     <x-slot name="header">
-        @php
-            $totalSku = (int) data_get($inventoryStats, 'total_sku', 0);
-            $activeSku = (int) data_get($inventoryStats, 'active_sku', $totalSku);
-        @endphp
-        <div class="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_auto] items-start">
-            <div class="space-y-2">
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl">
-                        <i class="fas fa-warehouse"></i>
-                    </span>
-                    <div>
-                        <h1 class="text-2xl font-extrabold text-emerald-900">Inventori Produk</h1>
-                        <p class="text-sm text-slate-500">Pantau stok, harga, dan kategori produk dalam satu tampilan.</p>
-                    </div>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <i class="fas fa-warehouse"></i>
+            </span>
+            <h2 class="text-xl font-semibold leading-tight text-slate-700">Inventori Produk</h2>
+        </div>
+    </x-slot>
+
+    <div class="space-y-6">
+        <!-- Breadcrumb -->
+        <x-breadcrumb :items="[['title' => 'Inventori']]" />
+
+        <!-- Header Section with Quick Actions -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/50">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="max-w-xl space-y-2">
+                    <h1 class="text-2xl font-semibold tracking-tight text-slate-800 lg:text-[1.8rem]">Inventori Produk</h1>
+                    <p class="text-sm text-slate-500">
+                        Pantau stok, harga, dan kategori produk dalam satu tampilan.
+                    </p>
                 </div>
-            </div>
 
-            <div class="flex flex-wrap items-center justify-end gap-3" x-data="{ openQuick: false }">
-                @if(in_array(Auth::user()->role ?? '', ['manager', 'admin']))
-                    <a href="{{ route('products.create') }}"
-                       class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-2xl shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
-                        <i class="fas fa-plus"></i>
-                        Produk Baru
-                    </a>
-                @endif
+                <div class="flex flex-wrap items-center gap-2" x-data="{ open: false }" @keydown.escape.window="open = false">
+                    @if(in_array(Auth::user()->role ?? '', ['manager', 'admin']))
+                        <a href="{{ route('products.create') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-emerald-500 hover:bg-emerald-600 transition">
+                            <i class="fas fa-plus"></i>
+                            Produk Baru
+                        </a>
+                    @endif
 
-                <div class="relative z-20" x-data="{ open: false }" @keydown.escape.window="open = false">
-                    <button type="button" @click="open = !open"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100">
-                        <i class="fa-solid fa-bolt"></i>
-                        Aksi Cepat
-                        <i class="fa-solid" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                    </button>
-                    <div x-show="open" x-transition x-cloak @click.outside="open = false"
-                         class="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-100 bg-white shadow-xl divide-y divide-slate-50 z-30">
-                        <div class="py-2 text-sm">
-                            <a href="{{ route('invent_notes') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
-                                <i class="fa-solid fa-book-open"></i>
-                                Catatan Inventori
-                            </a>
-                            @if($products->count() > 0)
-                                <a href="{{ route('stock.create') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                    Tambah Stok
+                    <div class="relative" @click.away="open = false">
+                        <button type="button" @click="open = !open"
+                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 transition">
+                            <i class="fas fa-bolt"></i>
+                            Aksi Cepat
+                            <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        <div x-show="open" x-transition x-cloak
+                             class="absolute right-0 mt-2 w-56 rounded-xl border border-slate-100 bg-white shadow-xl z-30">
+                            <div class="py-2 text-sm">
+                                <a href="{{ route('invent_notes') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
+                                    <i class="fas fa-book-open"></i>
+                                    Catatan Inventori
                                 </a>
-                            @endif
-                            <a href="{{ route('invent', ['import' => 'csv']) }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
-                                <i class="fa-solid fa-file-import"></i>
-                                Import CSV
-                            </a>
-                            @if(Route::has('reports.stock-value'))
-                                <a href="{{ route('reports.stock-value') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
-                                    <i class="fa-solid fa-print"></i>
-                                    Cetak Laporan Stok
+                                @if($products->count() > 0)
+                                    <a href="{{ route('stock.create') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
+                                        <i class="fas fa-layer-group"></i>
+                                        Tambah Stok
+                                    </a>
+                                @endif
+                                <a href="{{ route('invent', ['import' => 'csv']) }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
+                                    <i class="fas fa-file-import"></i>
+                                    Import CSV
                                 </a>
-                            @endif
+                                @if(Route::has('reports.stock-value'))
+                                    <a href="{{ route('reports.stock-value') }}" class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-emerald-50">
+                                        <i class="fas fa-print"></i>
+                                        Cetak Laporan Stok
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </x-slot>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
                  class="flex items-center gap-3 p-4 text-sm font-semibold text-emerald-800 border border-emerald-200 rounded-2xl bg-emerald-50">
