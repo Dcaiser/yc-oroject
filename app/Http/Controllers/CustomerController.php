@@ -3,17 +3,68 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\PosTransaction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class CustomerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $customers = Customer::orderBy('customer_name')->get();
+        $search = $request->input('search');
+        $filter = $request->input('filter', 'all');
+        $hasActiveFilter = (bool) ($search || $filter !== 'all');
 
-        return view('customers.index', compact('customers'));
+        // Base query
+        $query = Customer::query();
+
+        // Apply search
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%");
+            });
+        }
+
+        // Get customer names that have transactions
+        $customersWithTransactions = PosTransaction::distinct()->pluck('customer_name')->toArray();
+
+        // Apply filter
+        switch ($filter) {
+            case 'recent':
+                $query->where('created_at', '>=', Carbon::now()->subDays(30));
+                break;
+            case 'with-transactions':
+                $query->whereIn('customer_name', $customersWithTransactions);
+                break;
+            case 'no-transactions':
+                $query->whereNotIn('customer_name', $customersWithTransactions);
+                break;
+        }
+
+        $customers = $query->orderBy('customer_name')->get();
+
+        // Stats
+        $stats = [
+            'total' => Customer::count(),
+            'newThisMonth' => Customer::where('created_at', '>=', Carbon::now()->subDays(30))->count(),
+            'withTransactions' => Customer::whereIn('customer_name', $customersWithTransactions)->count(),
+            'noPhone' => Customer::where(function($q) {
+                $q->whereNull('phone')->orWhere('phone', '');
+            })->count(),
+        ];
+
+        return view('customers.index', [
+            'customers' => $customers,
+            'stats' => $stats,
+            'search' => $search,
+            'filter' => $filter,
+            'hasActiveFilter' => $hasActiveFilter,
+            'customersWithTransactions' => $customersWithTransactions,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

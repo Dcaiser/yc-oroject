@@ -8,7 +8,7 @@
                 Manajemen User
             </h1>
             <a href="{{ route('users.create') }}"
-               class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-gradient-to-r from-green-500 to-green-700">
+               class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-linear-to-r from-green-500 to-green-700">
                 <i class="mr-2 fas fa-plus"></i>Tambah User
             </a>
         </div>
@@ -96,7 +96,7 @@
                 <div class="flex items-center gap-3">
                     <button id="bulk-delete-btn"
                             type="button"
-                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-red-500 to-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-linear-to-r from-red-500 to-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled>
                         <i class="fas fa-trash"></i>
                         Hapus Dipilih
@@ -242,7 +242,7 @@
                                         </td>
                                         <td class="px-4 py-4 align-top">
                                             <div class="flex items-center gap-3">
-                                                <div class="flex-shrink-0">
+                                                <div class="shrink-0">
                                                     @if($user->avatar)
                                                         <img class="object-cover w-12 h-12 rounded-full ring-2 ring-emerald-100"
                                                              src="{{ asset('storage/' . $user->avatar) }}"
@@ -291,7 +291,7 @@
                                                 ];
                                                 $role = $roleData[$user->role] ?? $roleData['staff'];
                                             @endphp
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold border rounded-full bg-gradient-to-r {{ $role['bg'] }} {{ $role['text'] }} {{ $role['border'] }}">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold border rounded-full bg-linear-to-r {{ $role['bg'] }} {{ $role['text'] }} {{ $role['border'] }}">
                                                 <i class="{{ $role['icon'] }}"></i>
                                                 {{ ucfirst($user->role) }}
                                             </span>
@@ -344,7 +344,7 @@
                                                 <h3 class="text-lg font-semibold text-slate-800">Belum ada user</h3>
                                                 <p class="text-sm text-slate-500">Mulai dengan menambahkan user pertama Anda.</p>
                                                 <a href="{{ route('users.create') }}"
-                                                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02] transition">
+                                                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02] transition">
                                                     <i class="fas fa-plus"></i>
                                                     Tambah User
                                                 </a>
@@ -378,7 +378,7 @@
 
                             @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
                                 @if ($page == $users->currentPage())
-                                    <span class="px-3 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-emerald-500 to-emerald-600">
+                                    <span class="px-3 py-2 text-sm font-semibold text-white rounded-lg shadow bg-linear-to-r from-emerald-500 to-emerald-600">
                                         {{ $page }}
                                     </span>
                                 @else
@@ -430,7 +430,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
                         <i class="fas fa-trash"></i>
                         Hapus User
                     </button>

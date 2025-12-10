@@ -8,7 +8,7 @@
                 Tambah User Baru
             </h1>
             <a href="{{ route('users.index') }}"
-               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-teal-500 to-emerald-600">
+               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
                 <i class="fas fa-arrow-left"></i>
                 Kembali
             </a>
@@ -189,7 +189,7 @@
                                             <p><strong>Drag &amp; drop</strong> file ke sini</p>
                                             <p class="text-xs text-slate-500">atau pilih dari perangkat</p>
                                         </div>
-                                        <button type="button" data-trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-teal-500 to-emerald-600">
+                                        <button type="button" data-trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
                                             <i class="fas fa-upload"></i>Pilih Avatar
                                         </button>
                                     </div>
@@ -242,7 +242,7 @@
                                 Batal
                             </a>
                             <button type="submit"
-                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-emerald-600">
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-emerald-500 to-emerald-600">
                                 <i class="fas fa-save"></i>
                                 Simpan User
                             </button>

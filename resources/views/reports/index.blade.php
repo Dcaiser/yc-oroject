@@ -7,7 +7,7 @@
                 </span>
                 Laporan Inventori
             </h1>
-            <div class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition bg-gradient-to-r from-green-500 to-green-700">
+            <div class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition bg-linear-to-r from-green-500 to-green-700">
                 <i class="mr-2 fas fa-calendar-alt"></i>
                 <span class="text-sm font-semibold">{{ $periodDescription }}</span>
             </div>
@@ -675,7 +675,7 @@
                     </template>
 
                     <!-- Tombol Reset -->
-                    <div class="flex-shrink-0 flex flex-col gap-2">
+                    <div class="shrink-0 flex flex-col gap-2">
                         <label class="text-sm font-semibold text-slate-700 opacity-0 pointer-events-none select-none" aria-hidden="true">Aksi</label>
                         <a href="{{ route('reports.index') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-300">
                             <i class="fas fa-rotate-right"></i>

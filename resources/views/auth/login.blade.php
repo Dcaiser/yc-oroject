@@ -6,12 +6,12 @@
                 <div class="absolute inset-0">
                     <img src="{{ asset('assets/images/login-hero.jpeg') }}" alt="Yatim Center Al-Ruhamaa'" class="h-full w-full object-cover" />
                     <div class="absolute inset-0 bg-emerald-900/60 mix-blend-multiply"></div>
-                    <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-emerald-900/40 to-emerald-950/80"></div>
+                    <div class="absolute inset-0 bg-linear-to-b from-black/40 via-emerald-900/40 to-emerald-950/80"></div>
                 </div>
 
                 <div class="relative flex flex-col gap-5">
                     <div class="flex items-start gap-2.5">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-white.png" alt="Al-Ruhamaa Logo" class="h-10 w-10 object-contain" />
+                        <img src="{{ asset('assets/logo/icon-white.png') }}" alt="Al-Ruhamaa Logo" class="h-10 w-10 object-contain" />
                         <div class="flex flex-col gap-0">
                             <span class="text-sm font-bold uppercase tracking-wide text-white leading-tight">Yatim Center Al - Ruhamaa'</span>
                             <span class="text-xs font-medium uppercase tracking-wide text-emerald-100">Sistem Wakaf</span>
@@ -38,7 +38,7 @@
             <section class="flex w-full flex-col justify-center bg-white p-5 pt-6 sm:p-6 sm:pt-8 lg:w-7/12 lg:px-8 lg:py-10">
                 <!-- Mobile Header (show on mobile only) -->
                 <div class="flex items-center gap-2.5 mb-5 lg:hidden">
-                    <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png" alt="Al-Ruhamaa Logo" class="h-9 w-9 object-contain" />
+                    <img src="{{ asset('assets/logo/icon-green.png') }}" alt="Al-Ruhamaa Logo" class="h-9 w-9 object-contain" />
                     <div class="flex flex-col gap-0">
                         <span class="text-sm font-bold uppercase tracking-wide text-emerald-700 leading-tight">Yatim Center Al - Ruhamaa'</span>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Sistem Wakaf</span>

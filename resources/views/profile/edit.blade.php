@@ -8,7 +8,7 @@
                 Pengaturan Profil
             </h1>
             <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-teal-500 to-emerald-600">
+               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
                 <i class="fas fa-arrow-left"></i>
                 Kembali ke Dashboard
             </a>
@@ -52,7 +52,7 @@
                 <section class="p-6 border border-emerald-100 rounded-2xl bg-white/90 shadow-sm">
                     <div class="flex flex-col items-center gap-4 text-center">
                         <button type="button"
-                                class="relative w-28 h-28 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 ring-4 ring-emerald-100 shadow-lg cursor-zoom-in focus:outline-none focus:ring-4 focus:ring-emerald-300/60"
+                                class="relative w-28 h-28 overflow-hidden rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 ring-4 ring-emerald-100 shadow-lg cursor-zoom-in focus:outline-none focus:ring-4 focus:ring-emerald-300/60"
                                 x-data="{}"
                                 x-on:click.prevent="$dispatch('open-modal', 'profile-avatar-preview')">
                             @if ($profileAvatarUrl)
@@ -160,7 +160,7 @@
 
             <div class="flex justify-end">
                 <button type="button"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-gradient-to-r from-emerald-500 to-teal-500 hover:scale-[1.02]"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-linear-to-r from-emerald-500 to-teal-500 hover:scale-[1.02]"
                         x-on:click="$dispatch('close')">
                     <i class="fas fa-check"></i>
                     Tutup

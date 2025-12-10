@@ -8,7 +8,7 @@
                 {{ __('Status Pembayaran') }}
             </h2>
             <a href="{{ route('pos') }}"
-               class="flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
+               class="flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-linear-to-r from-green-500 to-green-700 hover:scale-105">
                 <i class="mr-2 fas fa-arrow-left"></i>Kembali ke POS
             </a>
         </div>
@@ -33,7 +33,7 @@
                 >
             </div>
             <div class="flex items-center gap-2">
-                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-linear-to-r from-green-500 to-green-700 hover:scale-[1.02]">
                     Filter
                 </button>
                 <a href="{{ route('pos.payments') }}" class="px-4 py-2 text-sm font-semibold text-green-700 transition border border-green-300 rounded-lg hover:bg-green-50">
@@ -149,7 +149,7 @@
                                                     class="w-full py-2 pl-8 pr-3 text-sm border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                                                 >
                                             </div>
-                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-[1.02]">
+                                            <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-linear-to-r from-green-500 to-green-700 hover:scale-[1.02]">
                                                 Tandai Dibayar
                                             </button>
                                         </form>

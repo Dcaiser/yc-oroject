@@ -17,7 +17,7 @@ class DashController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $lowStockThreshold = config('inventory.low_stock_threshold', 10);
+        $lowStockThreshold = config('inventory.low_stock_threshold', 20);
 
         $stats = [
             'total_products' => Produk::count(),
@@ -146,14 +146,14 @@ class DashController extends Controller
             [
                 'label' => 'Order Belum Lunas',
                 'value' => $pendingPayments,
-                'icon' => 'fa-wallet',
+                'icon' => 'fa-receipt',
                 'accent' => 'rose',
                 'hint' => 'Transaksi yang masih menunggu pembayaran',
             ],
             [
                 'label' => 'Stok Produk Rendah',
                 'value' => $attentionSku,
-                'icon' => 'fa-circle-exclamation',
+                'icon' => 'fa-triangle-exclamation',
                 'accent' => 'indigo',
                 'hint' => 'Produk mendekati batas stok aman',
             ],
@@ -167,7 +167,7 @@ class DashController extends Controller
                 [
                     'label' => 'Kelola Pengguna',
                     'description' => 'Tambah, ubah, atau hapus Akun Pengguna',
-                    'icon' => 'fa-users',
+                    'icon' => 'fa-user-gear',
                     'url' => route('users.index'),
                     'style' => 'bg-indigo-500/10 text-indigo-600',
                 ],
@@ -181,7 +181,7 @@ class DashController extends Controller
                 [
                     'label' => 'Kelola Supplier',
                     'description' => 'Atur pemasok barang dan informasi lainnya',
-                    'icon' => 'fa-truck',
+                    'icon' => 'fa-truck-fast',
                     'url' => route('suppliers.index'),
                     'style' => 'bg-amber-500/10 text-amber-600',
                 ],
@@ -197,7 +197,7 @@ class DashController extends Controller
                 [
                     'label' => 'Inventori',
                     'description' => 'Cek stok dan nilai barang',
-                    'icon' => 'fa-boxes',
+                    'icon' => 'fa-boxes-stacked',
                     'url' => route('invent'),
                     'style' => 'bg-blue-500/10 text-blue-600',
                 ],
@@ -211,7 +211,7 @@ class DashController extends Controller
                 [
                     'label' => 'Laporan Penjualan',
                     'description' => 'Unduh ringkasan penjualan',
-                    'icon' => 'fa-chart-bar',
+                    'icon' => 'fa-chart-line',
                     'url' => route('reports.index'),
                     'style' => 'bg-teal-500/10 text-teal-600',
                 ],
@@ -248,7 +248,7 @@ class DashController extends Controller
                 [
                     'label' => 'Aktivitas Sistem',
                     'description' => 'Lihat aktivitas terbaru tim',
-                    'icon' => 'fa-tasks',
+                    'icon' => 'fa-clipboard-check',
                     'url' => route('activities.index'),
                     'style' => 'bg-fuchsia-500/10 text-fuchsia-600',
                 ],
@@ -266,7 +266,7 @@ class DashController extends Controller
             [
                 'label' => 'Inventori',
                 'description' => 'Lihat stok terbaru',
-                'icon' => 'fa-box-open',
+                'icon' => 'fa-box',
                 'url' => route('invent'),
                 'style' => 'bg-blue-500/10 text-blue-600',
             ],

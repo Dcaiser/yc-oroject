@@ -9,7 +9,7 @@
         <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 transform animate-bounce-in">
             <!-- Success Icon -->
             <div class="flex justify-center mb-4">
-                <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
+                <div class="w-16 h-16 bg-linear-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                     </svg>
@@ -25,7 +25,7 @@
             </p>
             
             <!-- Button -->
-            <a href="{{ route('login') }}" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/25">
+            <a href="{{ route('login') }}" class="w-full bg-linear-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/25">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
                 </svg>
@@ -52,8 +52,8 @@
                 <!-- Header -->
                 <div class="text-center mb-6">
                     <div class="flex flex-col items-center justify-center mb-4">
-                        <img src="https://yatimcenter-alruhamaa.org/assets/images/logo/icon-green.png" 
-                             alt="Al-Ruhamaa Logo" 
+                        <img src="{{ asset('assets/logo/icon-green.png') }}"
+                             alt="Al-Ruhamaa Logo"
                              class="w-12 h-12 object-contain mb-2">
                         <span class="text-sm font-bold uppercase tracking-wide text-emerald-700 leading-tight">Yatim Center Al - Ruhamaa'</span>
                         <span class="text-xs font-medium uppercase tracking-wide text-slate-500">Sistem Wakaf</span>

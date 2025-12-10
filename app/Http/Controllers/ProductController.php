@@ -20,19 +20,42 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $categoryFilter = $request->input('category');
 
-        $products = Produk::with('category')// ambil data kategori juga
-        ->when($search, function ($query, $search) {
-            return $query->where('name', 'like', "%{$search}%")
-                         ->orWhere('description', 'like', "%{$search}%");
-        })
-        ->paginate(10);
+        $products = Produk::with(['category', 'units', 'prices'])
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%")
+                             ->orWhere('sku', 'like', "%{$search}%")
+                             ->orWhere('description', 'like', "%{$search}%");
+            })
+            ->when($categoryFilter, function ($query, $categoryFilter) {
+                return $query->where('category_id', $categoryFilter);
+            })
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10)
+            ->appends($request->query());
+
+        // Stats
+        $totalProducts = Produk::count();
+        $lowStockCount = Produk::where('stock_quantity', '<=', 20)->where('stock_quantity', '>', 0)->count();
+        $outOfStockCount = Produk::where('stock_quantity', '<=', 0)->count();
+        $totalCategories = Kategori::whereHas('products')->count();
+        
+        $stats = [
+            'total' => $totalProducts,
+            'low_stock' => $lowStockCount,
+            'out_of_stock' => $outOfStockCount,
+            'categories_used' => $totalCategories,
+        ];
 
         $units = Units::all();
         $supplier = Supplier::all();
         $category = Kategori::all();
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.index', compact(['products','category','customertypes','supplier','units']))->with('i', (request()->input('page', 1) - 1) * 10);
+        
+        return view('products.index', compact([
+            'products', 'category', 'customertypes', 'supplier', 'units', 'stats', 'search', 'categoryFilter'
+        ]));
     }
 
     public function create()

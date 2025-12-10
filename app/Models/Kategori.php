@@ -10,4 +10,11 @@ class Kategori extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['name', 'description'];
 
+    /**
+     * Get products that belong to this category
+     */
+    public function products()
+    {
+        return $this->hasMany(Produk::class, 'category_id');
+    }
 }

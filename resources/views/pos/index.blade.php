@@ -6,7 +6,7 @@
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-start gap-3">
-                <span class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl flex-shrink-0">
+                <span class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-700 rounded-2xl shrink-0">
                     <i class="fas fa-cash-register text-lg"></i>
                 </span>
                 <div>
@@ -295,7 +295,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: -150, behavior: 'smooth' })"
                                                 x-show="categoryScrollLeft > 0"
-                                                class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/90 to-transparent z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
+                                                class="absolute left-0 top-0 bottom-0 w-8 bg-linear-to-r from-white via-white/90 to-transparent z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
                                                 :class="{ 'opacity-80': categoryScrollLeft > 0 }">
                                             <i class="fas fa-chevron-left text-emerald-600 text-sm"></i>
                                         </button>
@@ -326,7 +326,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: 150, behavior: 'smooth' })"
                                                 x-show="categoryScrollRight > 5"
-                                                class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/90 to-transparent z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                                                class="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-white via-white/90 to-transparent z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
                                                 :class="{ 'opacity-80': categoryScrollRight > 5 }">
                                             <i class="fas fa-chevron-right text-emerald-600 text-sm"></i>
                                         </button>
@@ -516,7 +516,7 @@
                         
                         <!-- Quick Total Bar - Always visible when cart has items -->
                         <div x-show="cart.length > 0" 
-                             class="px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
+                             class="px-4 py-3 bg-linear-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
                             <div class="text-white">
                                 <p class="text-xs opacity-80">Total Belanja</p>
                                 <p class="text-xl font-extrabold" x-text="'Rp ' + formatCurrency(total)"></p>
@@ -530,7 +530,7 @@
                         <div class="p-4 space-y-3 max-h-[50vh] overflow-y-auto" x-show="cart.length > 0" x-ref="cartContainer">
                             <!-- Unified Card Layout for Desktop & Mobile - No horizontal scroll -->
                             <template x-for="(item, index) in cart" :key="'cart-'+item.id">
-                                <div class="relative p-4 bg-gradient-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-100 hover:border-emerald-200 transition-all group">
+                                <div class="relative p-4 bg-linear-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-100 hover:border-emerald-200 transition-all group">
                                     <!-- Delete Button - Top Right -->
                                     <button type="button"
                                             @click="removeProduct(index)"
@@ -625,7 +625,7 @@
                         
                         <!-- Grand Total Bar - Prominent -->
                         <div x-show="cart.length > 0" 
-                             class="px-4 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500">
+                             class="px-4 py-4 bg-linear-to-r from-emerald-600 to-emerald-500">
                             <div class="flex items-center justify-between text-white">
                                 <span class="text-base font-bold">Grand Total</span>
                                 <span class="text-2xl font-extrabold" x-text="'Rp ' + formatCurrency(grandTotal())"></span>
@@ -760,7 +760,7 @@
                                     type="button"
                                     @click="showConfirmModal = true"
                                     :disabled="cart.length === 0 || paymentReceived < grandTotal() || isSubmitting"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
                                     <template x-if="!isSubmitting">
                                         <span class="inline-flex items-center gap-2">
                                             <i class="fas fa-check-circle"></i> 
@@ -837,7 +837,7 @@
                         </button>
                         <button type="button"
                                 @click="isSubmitting = true; showConfirmModal = false; $el.closest('form').submit()"
-                                class="flex-1 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
+                                class="flex-1 px-4 py-3 text-sm font-bold text-white bg-linear-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
                             Ya, Simpan
                         </button>
                     </div>

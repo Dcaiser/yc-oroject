@@ -72,16 +72,20 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// kategori
+// kategori & satuan
 Route::middleware('auth')->group(function () {
+    // Categories
     Route::get('/category', [Categorycontroller::class, 'index'])->name('category');
-    Route::get('/addcategory', [Categorycontroller::class, 'create'])->name('addcategory');
-    Route::post('/addcategory', [Categorycontroller::class, 'store'])->name('store');
-    Route::delete('/deletecategory{id}', [Categorycontroller::class, 'destroy'])->name('deletecategory');
+    Route::post('/categories', [Categorycontroller::class, 'store'])->name('categories.store');
+    Route::put('/categories/{id}', [Categorycontroller::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{id}', [Categorycontroller::class, 'destroy'])->name('categories.destroy');
+    Route::delete('/categories/bulk', [Categorycontroller::class, 'bulkDestroy'])->name('categories.bulk-destroy');
 
-    // units (satuan)
-    Route::get('/units/create', [UnitsController::class, 'create'])->name('addunit');
+    // Units (satuan)
     Route::post('/units', [UnitsController::class, 'store'])->name('units.store');
+    Route::put('/units/{id}', [UnitsController::class, 'update'])->name('units.update');
+    Route::delete('/units/{id}', [UnitsController::class, 'destroy'])->name('units.destroy');
+    Route::delete('/units/bulk', [UnitsController::class, 'bulkDestroy'])->name('units.bulk-destroy');
 
     // customers
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');

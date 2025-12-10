@@ -32,7 +32,7 @@
     $chipCurrent = $chipBase . ' text-slate-800 bg-slate-50 border border-slate-200';
 @endphp
 
-<nav aria-label="Breadcrumb" class="mb-6">
+<nav aria-label="Breadcrumb" class="mb-3">
     <ol class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
         <li>
             <a href="{{ $homeUrl }}" class="{{ $chipBase }} text-emerald-700 bg-emerald-50 border border-emerald-100 hover:bg-emerald-100">

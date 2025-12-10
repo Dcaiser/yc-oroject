@@ -9,7 +9,7 @@
             </h2>
             <div class="flex items-center gap-2">
                 <a href="{{ route('users.edit', $user) }}"
-                   class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-[1.02] transition">
+                   class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-blue-500 to-blue-600 hover:scale-[1.02] transition">
                     <i class="fas fa-edit"></i>Edit
                 </a>
                 <a href="{{ route('users.index') }}"
@@ -56,7 +56,7 @@
                             $roleClass = $roleClasses[$user->role] ?? 'from-teal-100 to-teal-200 text-teal-700 border border-teal-200';
                         @endphp
                         <div class="flex items-center justify-center gap-2 mt-1">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold border rounded-full bg-gradient-to-r {{ $roleClass }}">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold border rounded-full bg-linear-to-r {{ $roleClass }}">
                                 @if($user->role === 'admin')
                                     <i class="fas fa-user-gear text-[10px]"></i>
                                 @elseif($user->role === 'manager')
@@ -138,7 +138,7 @@
 
                         <div class="flex flex-col gap-2">
                             <a href="{{ route('users.edit', $user) }}"
-                               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-[1.02] transition w-full">
+                               class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-blue-500 to-blue-600 hover:scale-[1.02] transition w-full">
                                 <i class="fas fa-edit"></i>Edit User
                             </a>
 
@@ -150,7 +150,7 @@
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
-                                            class="inline-flex items-center justify-center w-full gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
+                                            class="inline-flex items-center justify-center w-full gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
                                         <i class="fas fa-trash"></i>Hapus User
                                     </button>
                                 </form>

@@ -40,7 +40,7 @@ class InventController extends Controller
         $inventoryStats = [
             'total_sku' => Produk::count(),
             'total_stock' => Produk::sum('stock_quantity') ?? 0,
-            'low_stock' => Produk::whereBetween('stock_quantity', [1, 10])->count(),
+            'low_stock' => Produk::whereBetween('stock_quantity', [1, 20])->count(),
             'out_of_stock' => Produk::where('stock_quantity', '<=', 0)->count(),
         ];
 

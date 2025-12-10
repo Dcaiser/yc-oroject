@@ -134,7 +134,7 @@
             @endif
 
             <button type="submit"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-emerald-600">
+                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-emerald-500 to-emerald-600">
                 <i class="fas fa-save"></i>
                 Simpan Perubahan
             </button>

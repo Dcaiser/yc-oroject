@@ -3,11 +3,12 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-4">
                 <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                    <i class="fas fa-gauge-high text-xl"></i>
+                    <i class="fas fa-house text-xl"></i>
                 </span>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Dashboard Utama</h1>
                     <p class="text-sm text-slate-500">Lihat sekilas kegiatan hari ini, stok, dan pesanan.</p>
+
                 </div>
             </div>
         </div>
@@ -106,14 +107,14 @@
         ];
     @endphp
 
-    <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 space-y-4 sm:space-y-6 md:space-y-8">
+    <div class="space-y-6 md:space-y-8 min-w-0 overflow-x-hidden">
         <!-- Hero -->
-        <section class="rounded-2xl sm:rounded-3xl border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/35 to-emerald-50/60 px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-8 shadow-[0_15px_35px_-22px_rgba(16,185,129,0.45)]">
-            <div class="flex flex-col gap-5 sm:gap-6 md:gap-8 lg:flex-row lg:items-start lg:justify-between">
-                <div class="flex-1 space-y-4 sm:space-y-6">
-                    <div class="space-y-1 sm:space-y-2">
-                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">Halo, {{ $user->name ?? 'Tim' }}</h1>
-                        <p class="text-sm sm:text-base text-slate-600">Anda masuk sebagai <span class="font-semibold text-emerald-700">{{ \Illuminate\Support\Str::title($user->role ?? '-') }}</span>.</p>
+        <section class="rounded-3xl border border-emerald-100 bg-linear-to-br from-white via-emerald-50/35 to-emerald-50/60 px-4 sm:px-6 py-8 shadow-[0_15px_35px_-22px_rgba(16,185,129,0.45)]">
+            <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between min-w-0">
+                <div class="flex-1 space-y-6 min-w-0">
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-bold text-slate-900 sm:text-4xl">Halo, {{ $user->name ?? 'Tim' }}</h1>
+                        <p class="text-base text-slate-600">Anda masuk sebagai <span class="font-semibold text-emerald-700">{{ \Illuminate\Support\Str::title($user->role ?? '-') }}</span>.</p>
                     </div>
 
                     @if(!empty($opsPulse))
@@ -159,19 +160,19 @@
                     @endif
                 </div>
 
-                <div class="w-full lg:max-w-sm lg:self-stretch">
-                    <div class="flex h-full flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-emerald-100 bg-gradient-to-br from-white via-emerald-50/60 to-emerald-100/40 text-center shadow-[0_18px_40px_-22px_rgba(16,185,129,0.55)]">
-                        <div class="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 space-y-3 sm:space-y-4">
+                <div class="w-full max-w-md lg:max-w-sm lg:self-stretch">
+                    <div class="flex h-full flex-col overflow-hidden rounded-3xl border border-emerald-100 bg-linear-to-br from-white via-emerald-50/60 to-emerald-100/40 text-center shadow-[0_18px_40px_-22px_rgba(16,185,129,0.55)]">
+                        <div class="px-8 py-10 space-y-4">
                             <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700/80">Jam Saat Ini</p>
-                            <div class="text-4xl sm:text-5xl font-black text-slate-900 tabular-nums" id="dashboard-clock">
+                            <div class="text-5xl font-black text-slate-900 tabular-nums" id="dashboard-clock">
                                 {{ now()->format('H:i') }}
                             </div>
                             <div class="space-y-1 text-slate-600">
-                                <p class="text-base sm:text-lg font-semibold">{{ now()->locale('id')->translatedFormat('l') }}</p>
-                                <p class="text-xs sm:text-sm">{{ now()->locale('id')->translatedFormat('d F Y') }}</p>
+                                <p class="text-lg font-semibold">{{ now()->locale('id')->translatedFormat('l') }}</p>
+                                <p class="text-sm">{{ now()->locale('id')->translatedFormat('d F Y') }}</p>
                             </div>
                         </div>
-                        <div class="mt-auto border-t border-emerald-100/60 bg-white/80 px-4 py-3 sm:px-6 sm:py-4 text-xs font-medium text-slate-500">
+                        <div class="mt-auto border-t border-emerald-100/60 bg-white/80 px-6 py-4 text-xs font-medium text-slate-500">
                             <p>Zona waktu: <span class="font-semibold text-slate-700">WIB</span></p>
                         </div>
                     </div>
@@ -180,45 +181,45 @@
         </section>
 
         <!-- KPI Cards -->
-        <section class="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
+        <section class="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 min-w-0">
             @foreach (array_slice($statCards, 0, 4) as $card)
                 @php $colors = $palette[$card['accent']] ?? $palette['emerald']; @endphp
-                <article class="relative overflow-hidden rounded-2xl sm:rounded-3xl border {{ $colors['border'] }} bg-white shadow-[0_15px_35px_-20px_rgba(16,185,129,0.45)]">
-                    <div class="flex flex-col items-start gap-2 sm:gap-3 px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8">
-                        <span class="inline-flex h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 items-center justify-center rounded-xl sm:rounded-2xl {{ $colors['iconBg'] }} {{ $colors['iconFg'] }}">
-                            <i class="fas {{ $card['icon'] }} text-base sm:text-lg md:text-2xl"></i>
+                <article class="relative overflow-hidden rounded-3xl border {{ $colors['border'] }} bg-white shadow-[0_15px_35px_-20px_rgba(16,185,129,0.45)]">
+                    <div class="flex flex-col items-start gap-3 px-4 sm:px-6 py-8 min-w-0">
+                        <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl {{ $colors['iconBg'] }} {{ $colors['iconFg'] }}">
+                            <i class="fas {{ $card['icon'] }} text-2xl"></i>
                         </span>
-                        <div class="space-y-0.5 sm:space-y-1">
-                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.08em] sm:tracking-[0.12em] text-slate-500">{{ $card['label'] }}</p>
-                            <p class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tabular-nums">{{ $card['value'] }}</p>
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{{ $card['label'] }}</p>
+                            <p class="text-4xl font-black text-slate-900 tabular-nums">{{ $card['value'] }}</p>
                         </div>
                     </div>
-                    <div class="h-1.5 sm:h-2 bg-gradient-to-r {{ $colors['glow'] }}"></div>
+                    <div class="h-2 bg-linear-to-r {{ $colors['glow'] }}"></div>
                 </article>
             @endforeach
         </section>
 
-        <section class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <section class="grid gap-6 lg:grid-cols-3">
             <!-- Quick Actions -->
-            <div class="md:col-span-2 rounded-2xl sm:rounded-3xl border border-slate-100 bg-white shadow-sm">
-                <div class="flex flex-col gap-2 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="lg:col-span-2 rounded-3xl border border-slate-100 bg-white shadow-sm">
+                <div class="flex flex-col gap-2 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Quick Menu</p>
-                        <h3 class="mt-1 text-lg sm:text-xl font-bold text-slate-900">Pintasan {{ \Illuminate\Support\Str::title($user->role ?? '-') }}</h3>
-                        <p class="mt-0.5 text-xs sm:text-sm text-slate-500">Beberapa pintasan yang mungkin berguna.</p>
+                        <h3 class="mt-1 text-xl font-bold text-slate-900">Pintasan {{ \Illuminate\Support\Str::title($user->role ?? '-') }}</h3>
+                        <p class="mt-0.5 text-sm text-slate-500">Beberapa pintasan yang mungkin berguna.</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 gap-3 p-4 sm:gap-4 sm:p-6 sm:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 min-w-0">
                     @forelse ($quickActions as $action)
-                        <a href="{{ $action['url'] }}" class="group flex items-start gap-3 sm:gap-4 rounded-xl sm:rounded-2xl border border-slate-100 bg-slate-50/50 px-3 py-3 sm:px-5 sm:py-5 shadow-sm transition transform hover:-translate-y-1 hover:border-emerald-200 hover:bg-emerald-50/50 hover:shadow-lg">
-                            <span class="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl {{ $action['style'] }} transition group-hover:scale-105">
-                                <i class="fas {{ $action['icon'] }} text-base sm:text-lg"></i>
+                        <a href="{{ $action['url'] }}" class="group flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 px-5 py-5 shadow-sm transition transform hover:-translate-y-1 hover:border-emerald-200 hover:bg-emerald-50/50 hover:shadow-lg min-w-0">
+                            <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl {{ $action['style'] }} transition group-hover:scale-105">
+                                <i class="fas {{ $action['icon'] }} text-lg"></i>
                             </span>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm sm:text-base font-bold text-slate-900">{{ $action['label'] }}</p>
-                                <p class="mt-0.5 text-xs sm:text-sm text-slate-500 line-clamp-2">{{ $action['description'] }}</p>
+                            <div class="flex-1">
+                                <p class="text-base font-bold text-slate-900">{{ $action['label'] }}</p>
+                                <p class="mt-0.5 text-sm text-slate-500">{{ $action['description'] }}</p>
                             </div>
-                            <i class="fas fa-arrow-right mt-1 flex-shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-600 hidden sm:block"></i>
+                            <i class="fas fa-arrow-right mt-1 shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-emerald-600"></i>
                         </a>
                     @empty
                         <p class="text-sm text-slate-500">Belum ada saran khusus untuk peran ini.</p>
@@ -227,26 +228,26 @@
             </div>
 
             <!-- Sales Summary -->
-            <div class="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white/95 shadow-sm">
-                <div class="flex items-start justify-between border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+            <div class="rounded-3xl border border-slate-100 bg-white/95 shadow-sm">
+                <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Penjualan Hari Ini</p>
-                        <h3 class="mt-1.5 sm:mt-2 text-2xl sm:text-3xl font-bold text-slate-900">Rp{{ number_format($salesSummary['total'] ?? 0, 0, ',', '.') }}</h3>
-                        <p class="mt-0.5 sm:mt-1 text-xs text-slate-500">Total pemasukan sampai sekarang</p>
+                        <h3 class="mt-2 text-3xl font-bold text-slate-900">Rp{{ number_format($salesSummary['total'] ?? 0, 0, ',', '.') }}</h3>
+                        <p class="mt-1 text-xs text-slate-500">Total pemasukan sampai sekarang</p>
                     </div>
-                    <span class="flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl sm:rounded-2xl border border-emerald-100 bg-emerald-500/10 text-emerald-600">
-                        <i class="fas fa-receipt text-base sm:text-lg"></i>
+                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-500/10 text-emerald-600">
+                        <i class="fas fa-receipt text-lg"></i>
                     </span>
                 </div>
-                <div class="px-4 py-4 sm:px-6 sm:py-5 space-y-4 sm:space-y-5">
-                    <div class="flex items-center justify-between gap-4">
+                <div class="px-6 py-5 space-y-5">
+                    <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase">Transaksi selesai</p>
-                            <p class="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold text-slate-900">{{ $salesSummary['orders'] ?? 0 }}</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">Transaksi selesai</p>
+                            <p class="mt-1 text-2xl font-bold text-slate-900">{{ $salesSummary['orders'] ?? 0 }}</p>
                         </div>
                         <div>
-                            <p class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase">Menunggu proses</p>
-                            <p class="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold text-slate-900">{{ $salesSummary['pending'] ?? 0 }}</p>
+                            <p class="text-xs font-semibold text-slate-400 uppercase">Menunggu proses</p>
+                            <p class="mt-1 text-2xl font-bold text-slate-900">{{ $salesSummary['pending'] ?? 0 }}</p>
                         </div>
                     </div>
                     <div>
@@ -254,22 +255,22 @@
                             <span>Pesanan lunas</span>
                             <span class="font-semibold">{{ $salesSummary['paid_rate'] ?? 0 }}%</span>
                         </div>
-                        <div class="mt-1.5 sm:mt-2 h-1.5 sm:h-2 rounded-full bg-slate-100">
-                            <div class="h-1.5 sm:h-2 rounded-full bg-emerald-500 transition-all" style="width: {{ $salesSummary['paid_rate'] ?? 0 }}%"></div>
+                        <div class="mt-2 h-2 rounded-full bg-slate-100">
+                            <div class="h-2 rounded-full bg-emerald-500 transition-all" style="width: {{ $salesSummary['paid_rate'] ?? 0 }}%"></div>
                         </div>
                     </div>
                     
                     <!-- Customer stat moved here -->
                     @php $customerCard = $statCards[4] ?? null; @endphp
                     @if($customerCard)
-                        <div class="rounded-xl sm:rounded-2xl border border-purple-100 bg-purple-50/30 px-3 py-3 sm:px-4 sm:py-4">
-                            <div class="flex items-center gap-2 sm:gap-3">
-                                <span class="inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-purple-100 text-purple-600">
-                                    <i class="fas {{ $customerCard['icon'] }} text-sm sm:text-base"></i>
+                        <div class="rounded-2xl border border-purple-100 bg-purple-50/30 px-4 py-4">
+                            <div class="flex items-center gap-3">
+                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                                    <i class="fas {{ $customerCard['icon'] }} text-base"></i>
                                 </span>
                                 <div>
-                                    <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $customerCard['label'] }}</p>
-                                    <p class="mt-0.5 text-xl sm:text-2xl font-bold text-slate-900">{{ $customerCard['value'] }}</p>
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{{ $customerCard['label'] }}</p>
+                                    <p class="mt-0.5 text-2xl font-bold text-slate-900">{{ $customerCard['value'] }}</p>
                                 </div>
                             </div>
                         </div>
@@ -278,24 +279,24 @@
             </div>
         </section>
 
-        <section class="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <section class="grid gap-6 lg:grid-cols-3">
             <!-- Recent Activity -->
-            <div class="md:col-span-1 lg:col-span-2 rounded-2xl sm:rounded-3xl border border-slate-100 bg-white/95 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
+            <div class="lg:col-span-2 rounded-3xl border border-slate-100 bg-white/95 shadow-sm">
+                <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Aktivitas Terbaru</p>
-                        <h3 class="mt-1 text-lg sm:text-xl font-bold text-slate-900">Catatan Aktivitas</h3>
+                        <h3 class="mt-1 text-xl font-bold text-slate-900">Catatan Aktivitas</h3>
                     </div>
                     <a href="{{ route('activities.index') }}" class="text-sm font-semibold text-emerald-600 underline hover:text-emerald-700 transition">Lihat selengkapnya</a>
                 </div>
                 <ul class="relative divide-y divide-slate-50">
                     @forelse ($recentActivities as $activity)
-                        <li class="relative px-4 py-3 pl-10 sm:px-6 sm:py-4 sm:pl-12 transition hover:bg-slate-50/60">
-                            <span class="absolute left-4 sm:left-6 top-4 sm:top-5 flex h-2.5 w-2.5 sm:h-3 sm:w-3 items-center justify-center">
+                        <li class="relative px-6 py-4 pl-12 transition hover:bg-slate-50/60">
+                            <span class="absolute left-6 top-5 flex h-3 w-3 items-center justify-center">
                                 <span class="absolute h-full w-full animate-ping rounded-full bg-emerald-300 opacity-60"></span>
-                                <span class="relative h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-500"></span>
+                                <span class="relative h-3 w-3 rounded-full bg-emerald-500"></span>
                             </span>
-                            <div class="flex items-start gap-3 sm:gap-4">
+                            <div class="flex items-start gap-4">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-slate-900 truncate">{{ $activity->action ?? 'Aktivitas' }}</p>
                                     <p class="mt-0.5 text-xs text-slate-500">{{ $activity->user ?? 'Sistem' }} • {{ optional($activity->created_at)->locale('id')->diffForHumans() ?? '-' }}</p>
@@ -303,9 +304,9 @@
                             </div>
                         </li>
                     @empty
-                        <li class="px-4 py-6 sm:px-6 sm:py-10 text-center">
-                            <div class="mx-auto flex max-w-xs flex-col items-center justify-center rounded-xl sm:rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-5 sm:p-8 text-sm text-slate-500">
-                                <i class="fas fa-clipboard-list mb-2 sm:mb-3 text-xl sm:text-2xl text-slate-300"></i>
+                        <li class="px-6 py-10 text-center">
+                            <div class="mx-auto flex max-w-xs flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-8 text-sm text-slate-500">
+                                <i class="fas fa-clipboard-list mb-3 text-2xl text-slate-300"></i>
                                 <p class="font-semibold text-slate-600">Tidak ada aktivitas baru.</p>
                                 <p class="mt-1 text-xs text-slate-400">Catatan baru muncul otomatis ketika ada aktivitas.</p>
                             </div>
@@ -315,38 +316,38 @@
             </div>
 
             <!-- Inventory Alerts -->
-            <div class="rounded-2xl sm:rounded-3xl border border-orange-100 bg-white/95 shadow-sm">
-                <div class="border-b border-orange-100 bg-orange-50/40 px-4 py-4 sm:px-6 sm:py-5">
+            <div class="rounded-3xl border border-orange-100 bg-white/95 shadow-sm">
+                <div class="border-b border-orange-100 bg-orange-50/40 px-6 py-5">
                     <p class="text-xs font-semibold uppercase tracking-wide text-orange-600">Peringatan stok</p>
-                    <h3 class="mt-1 text-lg sm:text-xl font-bold text-slate-900">Produk yang perlu direstock</h3>
-                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">Segera tambahkan stok untuk produk ini.</p>
+                    <h3 class="mt-1 text-xl font-bold text-slate-900">Produk yang perlu direstock</h3>
+                    <p class="mt-0.5 text-sm text-slate-500">Segera tambahkan stok untuk produk ini.</p>
                 </div>
-                <div class="p-4 sm:p-6 space-y-2 sm:space-y-3">
+                <div class="p-6 space-y-3">
                     @forelse ($inventoryAlerts as $item)
-                        <article class="group rounded-xl sm:rounded-2xl border border-orange-100 bg-white/80 p-3 sm:p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50">
-                            <div class="flex items-start justify-between gap-2 sm:gap-3">
-                                <div class="flex items-start gap-2 sm:gap-3 min-w-0">
-                                    <span class="inline-flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl bg-orange-100 text-orange-600">
-                                        <i class="fas {{ ($item->stock_quantity ?? 0) <= 0 ? 'fa-triangle-exclamation' : 'fa-box-open' }} text-sm sm:text-base"></i>
+                        <article class="group rounded-2xl border border-orange-100 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-orange-200 hover:bg-orange-50/50">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-3 min-w-0">
+                                    <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                                        <i class="fas {{ ($item->stock_quantity ?? 0) <= 0 ? 'fa-triangle-exclamation' : 'fa-box-open' }} text-base"></i>
                                     </span>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs sm:text-sm font-semibold text-slate-900 truncate">{{ $item->name }}</p>
-                                        <p class="mt-0.5 text-[10px] sm:text-xs text-slate-500">Satuan: {{ $item->satuan ?? '-' }}</p>
+                                        <p class="text-sm font-semibold text-slate-900 truncate">{{ $item->name }}</p>
+                                        <p class="mt-0.5 text-xs text-slate-500">Satuan: {{ $item->satuan ?? '-' }}</p>
                                     </div>
                                 </div>
-                                <span class="text-lg sm:text-xl font-bold {{ ($item->stock_quantity ?? 0) <= 0 ? 'text-rose-600' : 'text-orange-600' }}">{{ $item->stock_quantity ?? 0 }}</span>
+                                <span class="text-xl font-bold {{ ($item->stock_quantity ?? 0) <= 0 ? 'text-rose-600' : 'text-orange-600' }}">{{ $item->stock_quantity ?? 0 }}</span>
                             </div>
-                            <div class="mt-2 sm:mt-3 h-1 sm:h-1.5 rounded-full bg-slate-100">
+                            <div class="mt-3 h-1.5 rounded-full bg-slate-100">
                                 @php
                                     $alertPercentage = min(100, (($item->stock_quantity ?? 0) / max(1, $lowStockThreshold)) * 100);
                                 @endphp
-                                <div class="h-1 sm:h-1.5 rounded-full transition-all {{ ($item->stock_quantity ?? 0) <= 0 ? 'bg-rose-500' : 'bg-orange-500' }}" style="width: {{ $alertPercentage }}%"></div>
+                                <div class="h-1.5 rounded-full transition-all {{ ($item->stock_quantity ?? 0) <= 0 ? 'bg-rose-500' : 'bg-orange-500' }}" style="width: {{ $alertPercentage }}%"></div>
                             </div>
-                            <p class="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-slate-400">Batas stok aman: {{ $lowStockThreshold }} unit</p>
+                            <p class="mt-2 text-xs text-slate-400">Batas stok aman: {{ $lowStockThreshold }} unit</p>
                         </article>
                     @empty
-                        <div class="rounded-xl sm:rounded-2xl border border-dashed border-orange-200 bg-orange-50/30 px-4 py-6 sm:px-6 sm:py-8 text-center text-sm text-orange-600">
-                            <i class="fas fa-check-circle text-xl sm:text-2xl mb-2"></i>
+                        <div class="rounded-2xl border border-dashed border-orange-200 bg-orange-50/30 px-6 py-8 text-center text-sm text-orange-600">
+                            <i class="fas fa-check-circle text-2xl mb-2"></i>
                             <p class="font-semibold">Stok aman</p>
                             <p class="text-xs text-slate-500 mt-1">Belum ada produk yang mendekati batas stok.</p>
                         </div>

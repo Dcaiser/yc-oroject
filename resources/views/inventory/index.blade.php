@@ -20,7 +20,7 @@
             <div class="flex flex-wrap items-center justify-end gap-3" x-data="{ openQuick: false }">
                 @if(in_array(Auth::user()->role ?? '', ['manager', 'admin']))
                     <a href="{{ route('products.create') }}"
-                       class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-2xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
+                       class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-2xl shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
                         <i class="fas fa-plus"></i>
                         Produk Baru
                     </a>
@@ -153,7 +153,7 @@
                             <p class="text-3xl font-black text-slate-900">{{ $stat['value'] }}</p>
                         </div>
                     </div>
-                    <div class="h-2 rounded-b-3xl bg-gradient-to-r {{ $colors['glow'] }}"></div>
+                    <div class="h-2 rounded-b-3xl bg-linear-to-r {{ $colors['glow'] }}"></div>
                 </article>
             @endforeach
         </section>
@@ -209,7 +209,7 @@
 
                 <div class="flex flex-wrap items-end gap-2 md:col-span-2 xl:col-span-8">
                     <button type="submit"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
+                            class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
                         <i class="fas fa-filter"></i>
                         Terapkan Filter
                     </button>
@@ -276,7 +276,7 @@
                                 </label>
                                 <div class="flex justify-end gap-2">
                                     <button type="button" @click="manageModal = null" class="px-4 py-2 text-sm font-semibold text-slate-500">Batal</button>
-                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600">
+                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-emerald-500 to-emerald-600">
                                         <i class="fas fa-save"></i>
                                         Simpan Kategori
                                     </button>
@@ -300,7 +300,7 @@
                                 <div class="text-[11px] text-slate-400">Contoh: 12 untuk “Lusin” jika satuan dasar adalah pcs.</div>
                                 <div class="flex justify-end gap-2">
                                     <button type="button" @click="manageModal = null" class="px-4 py-2 text-sm font-semibold text-slate-500">Batal</button>
-                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-sky-500 to-sky-600">
+                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-sky-500 to-sky-600">
                                         <i class="fas fa-save"></i>
                                         Simpan Satuan
                                     </button>
@@ -348,7 +348,7 @@
                             $priceReseller = optional($product->prices->firstWhere('customer_type', 'reseller'))->price;
                             $priceCustomer = optional($product->prices->firstWhere('customer_type', 'pelanggan'))->price;
                             $stockQty = $product->stock_quantity ?? 0;
-                            $isLowStock = $stockQty > 0 && $stockQty <= 10;
+                            $isLowStock = $stockQty > 0 && $stockQty <= 20;
                             $isOutStock = $stockQty <= 0;
                             $stockFormatted = number_format(round($stockQty), 0, ',', '.');
                             $statusMeta = [
@@ -449,7 +449,7 @@
                                 </div>
 
                                 <div class="flex flex-col gap-3">
-                                    <div class="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-4 space-y-3">
+                                    <div class="rounded-3xl border border-slate-200 bg-linear-to-br from-slate-50 to-white p-4 space-y-3">
                                         <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                                             <div class="flex items-center gap-2">
                                                 <span>Stok tersedia</span>
@@ -579,7 +579,7 @@
                 <div class="rounded-3xl border border-slate-100 bg-white px-5 py-4 flex flex-col gap-4">
                     <div class="flex flex-wrap items-center gap-3 justify-between">
                         <button type="submit" onclick="return confirm('Simpan perubahan?')"
-                                class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-2xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
+                                class="inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white rounded-2xl shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02]">
                             <i class="fa-solid fa-floppy-disk"></i>
                             Simpan Perubahan
                         </button>
@@ -636,7 +636,7 @@
                             </div>
                         </div>
                         <button type="button" @click="confirmOpen = true"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white rounded-xl shadow bg-gradient-to-r from-rose-500 to-rose-600">
+                                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white rounded-xl shadow bg-linear-to-r from-rose-500 to-rose-600">
                             <i class="fa-solid fa-lock"></i>
                             Buka Modal Penghapusan
                         </button>
@@ -692,7 +692,7 @@
                                 <button type="button" @click="confirmOpen = false" class="px-4 py-2 text-sm font-semibold text-slate-500">Batalkan</button>
                                 <button type="submit"
                                         :disabled="keyword !== 'HAPUS' || password.length < 6 || !ack"
-                                        :class="keyword === 'HAPUS' && password.length >= 6 && ack ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow' : 'bg-rose-100 text-rose-400 cursor-not-allowed'"
+                                        :class="keyword === 'HAPUS' && password.length >= 6 && ack ? 'bg-linear-to-r from-rose-500 to-rose-600 text-white shadow' : 'bg-rose-100 text-rose-400 cursor-not-allowed'"
                                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl">
                                     <i class="fa-solid fa-trash"></i>
                                     Hapus Semua Data
@@ -709,7 +709,7 @@
                 </span>
                 <p class="text-lg font-semibold text-slate-800">Belum ada data inventori</p>
                 <p class="text-sm text-slate-500">Tambahkan produk baru atau import data untuk mulai mengelola stok.</p>
-                <a href="{{ route('products.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600">
+                <a href="{{ route('products.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-emerald-500 to-emerald-600">
                     <i class="fas fa-plus"></i>
                     Tambah Produk Pertama
                 </a>

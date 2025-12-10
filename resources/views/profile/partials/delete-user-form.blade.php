@@ -12,7 +12,7 @@
     </header>
 
     <button type="button"
-            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-red-500 to-rose-600"
+            class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-red-500 to-rose-600"
             x-data="{}"
             x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
         <i class="fas fa-trash"></i>
@@ -50,7 +50,7 @@
                     Batalkan
                 </button>
                 <button type="submit"
-                        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-gradient-to-r from-red-500 to-rose-600 hover:scale-[1.02]">
+                        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-linear-to-r from-red-500 to-rose-600 hover:scale-[1.02]">
                     <i class="fas fa-trash"></i>
                     Konfirmasi Hapus
                 </button>
