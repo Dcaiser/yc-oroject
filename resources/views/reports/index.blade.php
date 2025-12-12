@@ -1,15 +1,15 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h1 class="flex items-center gap-3 text-2xl font-extrabold text-green-900">
-                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-700">
-                    <i class="fas fa-chart-line"></i>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h1 class="flex items-center gap-2 sm:gap-3 text-lg sm:text-2xl font-extrabold text-green-900">
+                <span class="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-100 text-green-700">
+                    <i class="fas fa-chart-line text-sm sm:text-base"></i>
                 </span>
-                Laporan Inventori
+                <span class="truncate">Laporan Inventori</span>
             </h1>
-            <div class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition bg-linear-to-r from-green-500 to-green-700">
-                <i class="mr-2 fas fa-calendar-alt"></i>
-                <span class="text-sm font-semibold">{{ $periodDescription }}</span>
+            <div class="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 font-medium text-white rounded-lg shadow transition bg-linear-to-r from-green-500 to-green-700">
+                <i class="mr-1.5 sm:mr-2 fas fa-calendar-alt text-xs sm:text-sm"></i>
+                <span class="text-xs sm:text-sm font-semibold truncate max-w-[150px] sm:max-w-none">{{ $periodDescription }}</span>
             </div>
         </div>
     </x-slot>
@@ -686,7 +686,7 @@
             </form>
         </section>
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5 items-stretch">
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 items-stretch">
             @foreach($summaryCards as $card)
                 <div class="p-5 bg-white rounded-2xl shadow-sm ring-1 ring-emerald-100 h-full flex flex-col justify-center">
                     <div class="flex items-center gap-4">
@@ -702,7 +702,7 @@
             @endforeach
         </section>
 
-        <section class="grid gap-6 lg:grid-cols-3">
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div class="lg:col-span-2 overflow-hidden bg-white rounded-2xl shadow-md ring-1 ring-emerald-100">
                 <div class="flex flex-col gap-1 p-6 sm:flex-row sm:items-center sm:justify-between bg-emerald-50/40 border-b border-emerald-100">
                     <div>

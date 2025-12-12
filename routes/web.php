@@ -61,6 +61,7 @@ Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
     Route::delete('/deleteproducts{id}', [ProductController::class,'destroy'])->name('products.destroy');
     Route::put('/editproducts/{id}', [ProductController::class,'update'])->name('products.update');
     Route::delete('/deleteproducts', [ProductController::class,'deleteall'])->name('deleteall');
+    Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulkDelete');
 
 
 });

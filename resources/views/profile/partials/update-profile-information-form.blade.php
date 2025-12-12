@@ -1,10 +1,10 @@
-<section class="p-6 border border-emerald-100 rounded-2xl bg-white shadow-sm space-y-6">
+<section class="p-4 sm:p-6 border border-emerald-100 rounded-xl sm:rounded-2xl bg-white shadow-sm space-y-4 sm:space-y-6">
     @php
         $currentAvatarPath = $user->avatar ?? null;
-        if ($currentAvatarPath && !\Illuminate\Support\Str::startsWith($currentAvatarPath, ['http://', 'https://'])) {
+        if (!empty($currentAvatarPath) && !\Illuminate\Support\Str::startsWith($currentAvatarPath, ['http://', 'https://'])) {
             $originalAvatarUrl = \Illuminate\Support\Facades\Storage::url($currentAvatarPath);
         } else {
-            $originalAvatarUrl = $currentAvatarPath;
+            $originalAvatarUrl = !empty($currentAvatarPath) ? $currentAvatarPath : null;
         }
 
         $currentInitials = collect(explode(' ', $user->name))
@@ -18,12 +18,12 @@
             $currentAvatarUrl = null;
         }
     @endphp
-    <header class="flex items-start justify-between gap-4">
+    <header class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
-            <h2 class="text-sm font-semibold tracking-wide text-slate-900 uppercase">Informasi Profil</h2>
-            <p class="mt-1 text-sm text-slate-500">Perbarui nama dan alamat email yang digunakan untuk masuk ke sistem.</p>
+            <h2 class="text-xs sm:text-sm font-semibold tracking-wide text-slate-900 uppercase">Informasi Profil</h2>
+            <p class="mt-1 text-xs sm:text-sm text-slate-500">Perbarui nama dan alamat email yang digunakan untuk masuk ke sistem.</p>
         </div>
-        <span class="px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg">Wajib</span>
+        <span class="px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-md sm:rounded-lg w-fit">Wajib</span>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -66,7 +66,7 @@
                                     data-profile-avatar-remove
                                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-600 border border-emerald-200 rounded-xl transition hover:bg-emerald-50 {{ $originalAvatarUrl || $currentAvatarUrl ? '' : 'opacity-50 cursor-not-allowed pointer-events-none' }}"
                                     data-has-original="{{ $originalAvatarUrl ? 'true' : 'false' }}">
-                                <i class="fas {{ $shouldRemoveAvatar ? 'fa-rotate-left' : 'fa-trash' }}"></i>
+                                <i class="fas {{ $shouldRemoveAvatar ? 'fa-undo' : 'fa-trash' }}"></i>
                                 <span data-profile-avatar-remove-label>{{ $shouldRemoveAvatar ? 'Batalkan Penghapusan' : 'Hapus Foto' }}</span>
                             </button>
                         </div>

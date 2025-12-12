@@ -18,9 +18,11 @@ class Poscontroller extends Controller
     {
         $product = Produk::with(['prices', 'category:id,name', 'units'])
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->each(function ($p) {
+                $p->append('image_url');
+            });
 
-            
         $categories = Kategori::select('id', 'name')
             ->orderBy('name')
             ->get();

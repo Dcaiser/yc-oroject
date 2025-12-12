@@ -45,8 +45,9 @@
                  x-transition:leave-start="opacity-100 transform translate-y-0"
                  x-transition:leave-end="opacity-0 transform translate-y-2"
                  class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
-                <div class="flex items-center gap-3 px-5 py-3 bg-slate-900 text-white rounded-xl shadow-2xl">
-                    <i class="fas fa-check-circle text-emerald-400"></i>
+                <div class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl"
+                     :class="toastType === 'error' ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'">
+                    <i class="fas" :class="toastType === 'error' ? 'fa-exclamation-circle text-red-200' : 'fa-check-circle text-emerald-400'"></i>
                     <span class="font-medium" x-text="toastMessage"></span>
                 </div>
             </div>
@@ -73,14 +74,152 @@
                 </div>
             </div>
             
-            <!-- Floating Grand Total (Poin 15) - visible when scrolling cart -->
-            <div x-show="cart.length > 0" x-cloak
-                 class="fixed bottom-4 right-4 z-40 lg:hidden">
-                <div class="flex items-center gap-3 px-4 py-3 bg-emerald-600 text-white rounded-2xl shadow-xl">
-                    <i class="fas fa-shopping-cart"></i>
-                    <div class="text-right">
-                        <p class="text-[10px] uppercase tracking-wide opacity-80">Total</p>
-                        <p class="text-lg font-bold" x-text="'Rp ' + formatCurrency(grandTotal())"></p>
+            <!-- Mobile Cart Floating Button - Opens Cart Drawer -->
+            <div x-show="cart.length > 0" x-cloak class="fixed bottom-4 right-4 z-40 lg:hidden">
+                <button type="button" 
+                        @click="mobileCartOpen = true"
+                        class="relative flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all">
+                    <div class="relative">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        <span class="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-white text-emerald-600 rounded-full"
+                              x-text="cart.length"></span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[10px] uppercase tracking-wide opacity-80">Keranjang</p>
+                        <p class="text-base font-bold" x-text="'Rp ' + formatCurrency(grandTotal())"></p>
+                    </div>
+                    <i class="fas fa-chevron-up ml-2 text-sm opacity-70"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Cart Drawer/Modal -->
+            <div x-show="mobileCartOpen" x-cloak
+                 class="fixed inset-0 z-50 lg:hidden"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0">
+                <!-- Backdrop -->
+                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="mobileCartOpen = false"></div>
+                
+                <!-- Drawer Panel -->
+                <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden flex flex-col"
+                     x-transition:enter="ease-out duration-300"
+                     x-transition:enter-start="translate-y-full"
+                     x-transition:enter-end="translate-y-0"
+                     x-transition:leave="ease-in duration-200"
+                     x-transition:leave-start="translate-y-0"
+                     x-transition:leave-end="translate-y-full">
+                    
+                    <!-- Drawer Handle -->
+                    <div class="flex justify-center pt-3 pb-2">
+                        <div class="w-10 h-1 bg-slate-300 rounded-full"></div>
+                    </div>
+                    
+                    <!-- Header -->
+                    <div class="flex items-center justify-between px-5 pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Keranjang</h3>
+                            <p class="text-sm text-emerald-600" x-text="cart.length + ' produk • ' + getTotalUnits() + ' unit'"></p>
+                        </div>
+                        <button type="button" @click="mobileCartOpen = false" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Cart Items -->
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <template x-for="(item, index) in cart" :key="'mobile-cart-'+item.id">
+                            <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-semibold text-slate-900 truncate" x-text="item.name"></h4>
+                                    <p class="text-sm text-slate-500">
+                                        <span x-text="'Rp ' + formatCurrency(item.price)"></span>
+                                        <span class="mx-1">×</span>
+                                        <span class="font-semibold" x-text="item.qty"></span>
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" @click="decrementQty(index)" class="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="w-8 text-center font-bold text-slate-900" x-text="item.qty"></span>
+                                    <button type="button" @click="incrementQty(index)" :disabled="item.qty >= item.stock_quantity" class="w-8 h-8 flex items-center justify-center bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 transition">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-emerald-600" x-text="'Rp ' + formatCurrency(item.subtotal)"></p>
+                                </div>
+                                <button type="button" @click="removeProduct(index)" class="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Footer - Summary & Actions -->
+                    <div class="border-t border-slate-100 bg-white">
+                        <!-- Summary -->
+                        <div class="px-5 py-3 space-y-2 text-sm bg-slate-50">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Subtotal</span>
+                                <span class="font-semibold" x-text="'Rp ' + formatCurrency(total)"></span>
+                            </div>
+                            <div class="flex justify-between" x-show="shippingCost > 0">
+                                <span class="text-slate-500">Ongkir</span>
+                                <span class="font-semibold" x-text="'Rp ' + formatCurrency(shippingCost)"></span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-slate-200">
+                                <span class="font-bold text-slate-900">Grand Total</span>
+                                <span class="font-bold text-emerald-600 text-lg" x-text="'Rp ' + formatCurrency(grandTotal())"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment in Mobile Drawer -->
+                        <div class="px-5 py-4 space-y-3">
+                            <div>
+                                <label class="block mb-1.5 text-xs font-semibold text-slate-500 uppercase">Uang Diterima</label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-emerald-500 font-bold">Rp</span>
+                                    <input type="text" inputmode="numeric"
+                                           x-model="paymentReceivedFormatted"
+                                           @input="formatPaymentReceived"
+                                           placeholder="0"
+                                           class="w-full py-3 pl-10 pr-4 text-lg font-bold text-slate-900 bg-white border-2 border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400">
+                                </div>
+                                <!-- Quick Amount Grid - Mobile Optimized -->
+                                <div class="grid grid-cols-4 gap-2 mt-2">
+                                    <button type="button" @click="setPaymentExact()" class="col-span-2 px-3 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-100 rounded-xl hover:bg-emerald-200 transition">
+                                        <i class="fas fa-check mr-1"></i> Uang Pas
+                                    </button>
+                                    <button type="button" @click="addPaymentAmount(50000)" class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">+50rb</button>
+                                    <button type="button" @click="addPaymentAmount(100000)" class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition">+100rb</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Change/Balance Display -->
+                            <div x-show="paymentReceived > 0" class="p-3 rounded-xl"
+                                 :class="paymentReceived >= grandTotal() ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200'">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium" :class="paymentReceived >= grandTotal() ? 'text-emerald-700' : 'text-amber-700'"
+                                          x-text="paymentReceived >= grandTotal() ? 'Kembalian' : 'Kurang'"></span>
+                                    <span class="text-xl font-extrabold" :class="paymentReceived >= grandTotal() ? 'text-emerald-700' : 'text-red-600'"
+                                          x-text="'Rp ' + formatCurrency(Math.abs(paymentReceived - grandTotal()))"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Process Button -->
+                            <button type="button"
+                                    @click="mobileCartOpen = false; showConfirmModal = true"
+                                    :disabled="cart.length === 0 || paymentReceived < grandTotal()"
+                                    class="w-full py-4 text-base font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Proses Pembayaran
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,24 +257,53 @@
                     <div>
                         <label class="block mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">Jenis Pembeli</label>
                         <div class="flex flex-wrap gap-3">
-                            <template x-for="type in customertypes" :key="type">
-                                <button
-                                    type="button"
-                                    class="group inline-flex items-center gap-3 px-4 py-3 text-sm font-semibold transition border rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
-                                    :class="customerType === type
+                            <!-- Pelanggan -->
+                            <button type="button"
+                                    class="group inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition border rounded-xl focus:outline-none"
+                                    :class="customerType === 'pelanggan'
                                         ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg'
-                                        : 'bg-white border-emerald-100 text-slate-600 hover:border-emerald-300 hover:text-emerald-700'"
-                                    @click="cart.length === 0 ? customerType = type : null"
+                                        : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:text-emerald-600'"
+                                    @click="cart.length === 0 ? customerType = 'pelanggan' : null"
                                     :disabled="cart.length > 0"
-                                    :aria-pressed="customerType === type"
-                                    :title="cart.length > 0 ? 'Jenis pembeli tidak bisa diganti setelah menambahkan barang' : ''"
-                                    :style="cart.length > 0 ? 'opacity:0.5;cursor:not-allowed;' : ''">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 text-sm font-bold bg-emerald-50 text-emerald-600 rounded-lg group-[aria-pressed=true]:bg-white/20 group-[aria-pressed=true]:text-white capitalize">
-                                        <i class="fas" :class="getCustomerTypeIcon(type)"></i>
-                                    </span>
-                                    <span class="capitalize" x-text="type"></span>
-                                </button>
-                            </template>
+                                    :style="cart.length > 0 && customerType !== 'pelanggan' ? 'opacity:0.5;cursor:not-allowed;' : ''">
+                                <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-lg"
+                                      :class="customerType === 'pelanggan' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <span>Pelanggan</span>
+                            </button>
+                            
+                            <!-- Reseller -->
+                            <button type="button"
+                                    class="group inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition border rounded-xl focus:outline-none"
+                                    :class="customerType === 'reseller'
+                                        ? 'bg-red-500 border-red-500 text-white shadow-lg'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:border-red-300 hover:text-red-600'"
+                                    @click="cart.length === 0 ? customerType = 'reseller' : null"
+                                    :disabled="cart.length > 0"
+                                    :style="cart.length > 0 && customerType !== 'reseller' ? 'opacity:0.5;cursor:not-allowed;' : ''">
+                                <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-lg"
+                                      :class="customerType === 'reseller' ? 'bg-white/20 text-white' : 'bg-red-50 text-red-600'">
+                                    <i class="fas fa-store"></i>
+                                </span>
+                                <span>Reseller</span>
+                            </button>
+                            
+                            <!-- Agent -->
+                            <button type="button"
+                                    class="group inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition border rounded-xl focus:outline-none"
+                                    :class="customerType === 'agent'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-600'"
+                                    @click="cart.length === 0 ? customerType = 'agent' : null"
+                                    :disabled="cart.length > 0"
+                                    :style="cart.length > 0 && customerType !== 'agent' ? 'opacity:0.5;cursor:not-allowed;' : ''">
+                                <span class="inline-flex items-center justify-center w-7 h-7 text-xs rounded-lg"
+                                      :class="customerType === 'agent' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'">
+                                    <i class="fas fa-user-tie"></i>
+                                </span>
+                                <span>Agent</span>
+                            </button>
                         </div>
                         <p class="mt-2 text-xs text-slate-500" x-show="cart.length > 0" x-cloak>
                             <i class="fas fa-info-circle text-amber-500"></i> Jenis pembeli tidak bisa diganti setelah menambahkan barang.
@@ -218,8 +386,8 @@
                 </div>
             </section>
 
-            <div class="grid gap-6 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_420px] lg:items-start max-w-full overflow-hidden">
-                <div class="space-y-6 min-w-0 overflow-hidden">
+            <div class="grid gap-5 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_350px] 2xl:grid-cols-[1fr_380px] lg:items-start max-w-full overflow-hidden">
+                <div class="space-y-5 min-w-0 overflow-hidden">
                     <!-- Produk -->
                     <section class="overflow-hidden bg-white rounded-2xl shadow-md ring-1 ring-emerald-100">
                         <div class="flex flex-col gap-3 px-6 py-5 border-b border-emerald-100 bg-emerald-50/40 sm:flex-row sm:items-center sm:justify-between">
@@ -235,7 +403,7 @@
                             </div>
                         </div>
 
-                        <div class="p-6 space-y-6">
+                        <div class="p-5 space-y-5">
                             <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
                                 <div class="relative flex-1">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-400">
@@ -295,7 +463,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: -150, behavior: 'smooth' })"
                                                 x-show="categoryScrollLeft > 0"
-                                                class="absolute left-0 top-0 bottom-0 w-8 bg-linear-to-r from-white via-white/90 to-transparent z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
+                                                class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/90 to-transparent z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
                                                 :class="{ 'opacity-80': categoryScrollLeft > 0 }">
                                             <i class="fas fa-chevron-left text-emerald-600 text-sm"></i>
                                         </button>
@@ -326,7 +494,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: 150, behavior: 'smooth' })"
                                                 x-show="categoryScrollRight > 5"
-                                                class="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-white via-white/90 to-transparent z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                                                class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/90 to-transparent z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
                                                 :class="{ 'opacity-80': categoryScrollRight > 5 }">
                                             <i class="fas fa-chevron-right text-emerald-600 text-sm"></i>
                                         </button>
@@ -349,65 +517,85 @@
                                 </div>
                             </template>
 
-                            <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 max-w-full" x-show="filteredProducts().length > 0">
+                            <div class="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 max-w-full" x-show="filteredProducts().length > 0">
                                 <template x-for="product in paginatedProducts()" :key="product.id">
-                                    <div class="relative flex flex-col h-full gap-4 p-5 text-left transition border rounded-2xl shadow-sm bg-white border-emerald-100 hover:border-emerald-300 hover:shadow-lg focus-within:ring-2 focus-within:ring-emerald-400"
-                                         :class="[isOutOfStock(product) ? 'opacity-70' : '', getCartQty(product.id) > 0 ? 'ring-2 ring-emerald-400 border-emerald-400' : '']">
+                                    <div class="group relative flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-emerald-300"
+                                         :class="[isOutOfStock(product) ? 'opacity-60' : '', getCartQty(product.id) > 0 ? 'ring-2 ring-emerald-500 border-emerald-500' : '']">
                                         
-                                        <!-- Qty Badge di pojok kanan atas (Poin 1) -->
-                                        <span x-show="getCartQty(product.id) > 0" 
-                                              class="absolute -top-2 -right-2 inline-flex items-center justify-center w-8 h-8 text-sm font-bold text-white bg-emerald-600 rounded-full shadow-lg z-10 animate-bounce-once"
-                                              x-text="'x' + getCartQty(product.id)"></span>
-                                        
-                                        <!-- Badge Stok Habis -->
-                                        <span x-show="isOutOfStock(product)" 
-                                              class="absolute top-3 right-3 inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-lg">
-                                            <i class="fas fa-ban"></i> HABIS
-                                        </span>
-                                        
-                                        <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
-                                            <span class="inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100" x-text="categoryLabel(product)"></span>
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full border text-[10px]"
-                                                  :class="stockBadgeClass(product)">
-                                                <i class="mr-1 fas" :class="stockIconClass(product)"></i>
-                                                <span x-text="stockLabel(product)"></span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-1 cursor-pointer" @click="!isOutOfStock(product) && addToCart(product)">
-                                            <h3 class="text-base font-semibold text-slate-900 line-clamp-2" x-text="product.name"></h3>
-                                            <p class="text-xs text-slate-500">Kode: <span x-text="product.sku || '-'" class="font-semibold"></span></p>
-                                        </div>
-                                        <div class="mt-auto">
-                                            <p class="text-xl font-extrabold text-slate-900" x-text="'Rp ' + formatCurrency(getPrice(product))"></p>
+                                        <!-- Product Image Section - Fixed aspect ratio 4:3 for more compact look -->
+                                        <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden cursor-pointer"
+                                             @click="!isOutOfStock(product) && addToCart(product)">
+                                            <!-- Product Image -->
+                                            <template x-if="product.image_url">
+                                                <img :src="product.image_url" 
+                                                     :alt="product.name"
+                                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                     loading="lazy">
+                                            </template>
+                                            <!-- Placeholder when no image -->
+                                            <div x-show="!product.image_url" 
+                                                 class="absolute inset-0 flex flex-col items-center justify-center text-slate-300 bg-gradient-to-br from-slate-50 to-slate-100">
+                                                <i class="fas fa-box-open text-3xl"></i>
+                                            </div>
                                             
-                                            <!-- Quick Edit Qty langsung dari kartu produk (Poin 5) -->
-                                            <div class="mt-3" x-show="getCartQty(product.id) > 0" x-cloak>
-                                                <div class="flex items-center justify-between gap-2 p-2 bg-emerald-50 rounded-xl">
+                                            <!-- Qty Badge - Top Right Corner -->
+                                            <span x-show="getCartQty(product.id) > 0" 
+                                                  class="absolute top-1.5 right-1.5 inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold text-white bg-emerald-600 rounded-full shadow-lg z-10">
+                                                <span x-text="getCartQty(product.id)"></span>
+                                            </span>
+                                            
+                                            <!-- Out of Stock Badge - Centered -->
+                                            <div x-show="isOutOfStock(product)" 
+                                                 class="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                <span class="px-2 py-1 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                                                    HABIS
+                                                </span>
+                                            </div>
+                                            
+                                            <!-- Category Tag - Top Left -->
+                                            <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 bg-white/90 rounded"
+                                                  x-text="categoryLabel(product)"></span>
+                                        </div>
+                                        
+                                        <!-- Product Info Section - Fixed height -->
+                                        <div class="flex flex-col p-2 h-[88px]">
+                                            <!-- Product Name - Fixed 2 lines -->
+                                            <h3 class="text-xs font-medium text-slate-800 line-clamp-2 h-8 leading-4 cursor-pointer hover:text-emerald-600"
+                                                @click="!isOutOfStock(product) && addToCart(product)"
+                                                x-text="product.name"></h3>
+                                            
+                                            <!-- Price -->
+                                            <p class="text-sm font-bold text-emerald-600 mt-auto" x-text="'Rp ' + formatCurrency(getPrice(product))"></p>
+                                            
+                                            <!-- Action Button - Always at bottom -->
+                                            <div class="mt-1.5">
+                                                <!-- Qty Controls (when in cart) -->
+                                                <div x-show="getCartQty(product.id) > 0" class="flex items-center justify-center gap-2 py-1 bg-emerald-50 rounded">
                                                     <button type="button" 
                                                             @click.stop="decrementFromCard(product.id)"
-                                                            class="w-9 h-9 flex items-center justify-center bg-white border border-emerald-200 rounded-lg text-emerald-600 hover:bg-emerald-100 transition">
-                                                        <i class="fas fa-minus text-xs"></i>
+                                                            class="w-6 h-6 flex items-center justify-center bg-white border border-emerald-200 rounded text-emerald-600 hover:bg-red-50 hover:text-red-500 text-xs">
+                                                        <i class="fas fa-minus"></i>
                                                     </button>
-                                                    <span class="text-lg font-bold text-emerald-700" x-text="getCartQty(product.id)"></span>
+                                                    <span class="text-xs font-bold text-emerald-700 w-5 text-center" x-text="getCartQty(product.id)"></span>
                                                     <button type="button" 
                                                             @click.stop="addToCart(product)"
                                                             :disabled="getCartQty(product.id) >= (product.stock_quantity || 999)"
-                                                            class="w-9 h-9 flex items-center justify-center bg-white border border-emerald-200 rounded-lg text-emerald-600 hover:bg-emerald-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                                        <i class="fas fa-plus text-xs"></i>
+                                                            class="w-6 h-6 flex items-center justify-center bg-white border border-emerald-200 rounded text-emerald-600 hover:bg-emerald-100 text-xs disabled:opacity-50">
+                                                        <i class="fas fa-plus"></i>
                                                     </button>
                                                 </div>
+                                                
+                                                <!-- Add to Cart Button (when not in cart) -->
+                                                <button type="button"
+                                                        x-show="getCartQty(product.id) === 0"
+                                                        @click="addToCart(product)"
+                                                        :disabled="isOutOfStock(product)"
+                                                        class="w-full py-1.5 text-[11px] font-semibold rounded transition-all"
+                                                        :class="isOutOfStock(product) ? 'bg-slate-100 text-slate-400' : 'bg-emerald-500 text-white hover:bg-emerald-600'">
+                                                    <i class="fas fa-cart-plus mr-1"></i>
+                                                    <span>Tambah</span>
+                                                </button>
                                             </div>
-                                            
-                                            <!-- Tombol Add to Cart -->
-                                            <button type="button"
-                                                    x-show="getCartQty(product.id) === 0"
-                                                    @click="addToCart(product)"
-                                                    :disabled="isOutOfStock(product)"
-                                                    class="inline-flex items-center justify-center w-full h-11 mt-3 text-sm font-semibold text-white rounded-xl shadow transition"
-                                                    :class="isOutOfStock(product) ? 'bg-slate-300 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600'">
-                                                <i class="fas mr-2" :class="isOutOfStock(product) ? 'fa-lock' : 'fa-cart-plus'"></i>
-                                                <span x-text="isOutOfStock(product) ? 'Stok Habis' : 'Tambah'"></span>
-                                            </button>
                                         </div>
                                     </div>
                                 </template>
@@ -487,7 +675,7 @@
                                             <span>Tunda Transaksi</span>
                                         </button>
                                         <button type="button" 
-                                                @click="clearCart(); open = false"
+                                                @click="showClearCartModal = true; open = false"
                                                 class="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3">
                                             <i class="fas fa-trash-can w-4"></i>
                                             <span>Bersihkan Keranjang</span>
@@ -516,76 +704,68 @@
                         
                         <!-- Quick Total Bar - Always visible when cart has items -->
                         <div x-show="cart.length > 0" 
-                             class="px-4 py-3 bg-linear-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
+                             class="px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
                             <div class="text-white">
-                                <p class="text-xs opacity-80">Total Belanja</p>
-                                <p class="text-xl font-extrabold" x-text="'Rp ' + formatCurrency(total)"></p>
+                                <p class="text-[10px] uppercase tracking-wide opacity-80">Total Belanja</p>
+                                <p class="text-lg font-bold" x-text="'Rp ' + formatCurrency(total)"></p>
                             </div>
-                            <div class="text-right text-white">
-                                <p class="text-xs opacity-80" x-text="cart.length + ' produk'"></p>
-                                <p class="text-lg font-bold" x-text="getTotalUnits() + ' unit'"></p>
+                            <div class="text-white text-right">
+                                <span class="text-sm font-medium" x-text="cart.length + ' item'"></span>
                             </div>
                         </div>
 
-                        <div class="p-4 space-y-3 max-h-[50vh] overflow-y-auto" x-show="cart.length > 0" x-ref="cartContainer">
-                            <!-- Unified Card Layout for Desktop & Mobile - No horizontal scroll -->
+                        <div class="p-3 space-y-2 max-h-[50vh] overflow-y-auto" x-show="cart.length > 0" x-ref="cartContainer">
+                            <!-- Compact Card Layout -->
                             <template x-for="(item, index) in cart" :key="'cart-'+item.id">
-                                <div class="relative p-4 bg-linear-to-br from-slate-50 to-white rounded-2xl border-2 border-slate-100 hover:border-emerald-200 transition-all group">
+                                <div class="relative p-3 bg-white rounded-xl border border-slate-200 hover:border-emerald-200 transition-all group">
                                     <!-- Delete Button - Top Right -->
                                     <button type="button"
                                             @click="removeProduct(index)"
-                                            class="absolute -top-2 -right-2 w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-10">
-                                        <i class="fas fa-times text-sm"></i>
+                                            class="absolute -top-1.5 -right-1.5 w-6 h-6 flex items-center justify-center bg-red-500 text-white rounded-full shadow hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100 z-10">
+                                        <i class="fas fa-times text-xs"></i>
                                     </button>
                                     
-                                    <!-- Low Stock Warning Badge -->
-                                    <div x-show="item.stock_quantity && item.stock_quantity <= 5" 
-                                         class="absolute top-2 right-2 px-2 py-1 text-[10px] font-bold rounded-full"
-                                         :class="item.stock_quantity <= 2 ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                                        <span x-text="'Sisa ' + item.stock_quantity"></span>
-                                    </div>
-                                    
                                     <!-- Product Info Row -->
-                                    <div class="mb-3">
-                                        <h4 class="text-lg font-bold text-slate-900 leading-tight pr-8" x-text="item.name"></h4>
-                                        <p class="text-sm text-slate-500 mt-1">
-                                            <span class="font-semibold text-emerald-600" x-text="'Rp ' + formatCurrency(item.price)"></span>
-                                            <span class="mx-1">×</span>
-                                            <span class="font-bold" x-text="item.qty"></span>
-                                            <span class="text-xs" x-text="item.satuan || 'pcs'"></span>
-                                        </p>
+                                    <div class="flex items-start justify-between gap-3 mb-2">
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="text-sm font-semibold text-slate-800 leading-tight truncate" x-text="item.name"></h4>
+                                            <p class="text-xs text-slate-500 mt-0.5">
+                                                <span class="text-emerald-600 font-medium" x-text="'Rp ' + formatCurrency(item.price)"></span>
+                                                <span class="mx-1">×</span>
+                                                <span class="font-semibold" x-text="item.qty"></span>
+                                            </p>
+                                        </div>
+                                        <!-- Subtotal -->
+                                        <div class="text-right shrink-0">
+                                            <p class="text-sm font-bold text-emerald-600" x-text="'Rp ' + formatCurrency(item.subtotal)"></p>
+                                        </div>
                                     </div>
                                     
-                                    <!-- Qty Control & Subtotal Row -->
-                                    <div class="flex items-center justify-between gap-4">
-                                        <!-- Large Stepper Buttons -->
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" 
-                                                    @click="decrementQty(index)"
-                                                    class="w-12 h-12 flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl hover:bg-red-100 hover:text-red-600 active:scale-95 transition-all text-lg font-bold">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
-                                            <input type="number"
-                                                   inputmode="numeric"
-                                                   min="1"
-                                                   :max="item.stock_quantity"
-                                                   x-model.number="item.qty"
-                                                   @input="updateSubtotal(index)"
-                                                   class="w-16 h-12 text-xl font-bold text-center bg-white border-2 border-emerald-300 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200">
-                                            <button type="button" 
-                                                    @click="incrementQty(index)"
-                                                    :disabled="item.qty >= item.stock_quantity"
-                                                    class="w-12 h-12 flex items-center justify-center bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:scale-95 transition-all text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-300">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </div>
-                                        
-                                        <!-- Subtotal - Large & Prominent -->
-                                        <div class="text-right">
-                                            <p class="text-xs text-slate-400 uppercase tracking-wide">Subtotal</p>
-                                            <p class="text-xl font-extrabold text-emerald-600" x-text="'Rp ' + formatCurrency(item.subtotal)"></p>
-                                        </div>
+                                    <!-- Compact Qty Control -->
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" 
+                                                @click="decrementQty(index)"
+                                                class="w-8 h-8 flex items-center justify-center bg-slate-100 text-slate-600 rounded-lg hover:bg-red-100 hover:text-red-600 transition text-sm">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number"
+                                               inputmode="numeric"
+                                               min="1"
+                                               :max="item.stock_quantity"
+                                               x-model.number="item.qty"
+                                               @input="updateSubtotal(index)"
+                                               class="w-12 h-8 text-sm font-bold text-center bg-white border border-slate-200 rounded-lg focus:border-emerald-400 focus:ring-1 focus:ring-emerald-200">
+                                        <button type="button" 
+                                                @click="incrementQty(index)"
+                                                :disabled="item.qty >= item.stock_quantity"
+                                                class="w-8 h-8 flex items-center justify-center bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition text-sm disabled:opacity-50 disabled:bg-slate-300">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <!-- Stock warning -->
+                                        <span x-show="item.stock_quantity && item.stock_quantity <= 5" 
+                                              class="ml-auto text-[10px] font-medium"
+                                              :class="item.stock_quantity <= 2 ? 'text-red-500' : 'text-orange-500'"
+                                              x-text="'Sisa ' + item.stock_quantity"></span>
                                     </div>
                                 </div>
                             </template>
@@ -625,7 +805,7 @@
                         
                         <!-- Grand Total Bar - Prominent -->
                         <div x-show="cart.length > 0" 
-                             class="px-4 py-4 bg-linear-to-r from-emerald-600 to-emerald-500">
+                             class="px-4 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500">
                             <div class="flex items-center justify-between text-white">
                                 <span class="text-base font-bold">Grand Total</span>
                                 <span class="text-2xl font-extrabold" x-text="'Rp ' + formatCurrency(grandTotal())"></span>
@@ -708,34 +888,34 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Quick Amount Buttons - Compact Grid -->
-                                <div class="grid grid-cols-4 gap-1.5 mt-2">
+                                <!-- Quick Amount Buttons - Improved Size -->
+                                <div class="grid grid-cols-4 gap-2 mt-3">
                                     <button type="button" @click="setPaymentExact()"
-                                            class="px-2 py-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 rounded-lg hover:bg-emerald-200 transition col-span-2">
+                                            class="col-span-2 px-3 py-2.5 text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 rounded-xl hover:bg-emerald-200 active:scale-95 transition">
                                         <i class="fas fa-check mr-1"></i> Uang Pas
                                     </button>
                                     <button type="button" @click="addPaymentAmount(5000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +5rb
                                     </button>
                                     <button type="button" @click="addPaymentAmount(10000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +10rb
                                     </button>
                                     <button type="button" @click="addPaymentAmount(20000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +20rb
                                     </button>
                                     <button type="button" @click="addPaymentAmount(50000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +50rb
                                     </button>
                                     <button type="button" @click="addPaymentAmount(100000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +100rb
                                     </button>
                                     <button type="button" @click="addPaymentAmount(200000)"
-                                            class="px-2 py-1.5 text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition">
+                                            class="px-3 py-2.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 active:scale-95 transition">
                                         +200rb
                                     </button>
                                 </div>
@@ -743,13 +923,13 @@
                             
                             <!-- Kembalian Display - Compact -->
                             <div x-show="paymentReceived > 0" class="p-3 rounded-xl"
-                                 :class="paymentReceived >= grandTotal() ? 'bg-blue-50 border border-blue-200' : 'bg-amber-50 border border-amber-200'">
+                                 :class="paymentReceived >= grandTotal() ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200'">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm font-medium" 
-                                          :class="paymentReceived >= grandTotal() ? 'text-blue-700' : 'text-amber-700'"
+                                          :class="paymentReceived >= grandTotal() ? 'text-emerald-700' : 'text-amber-700'"
                                           x-text="paymentReceived >= grandTotal() ? 'Kembalian' : 'Kurang'"></span>
                                     <span class="text-lg font-extrabold" 
-                                          :class="paymentReceived >= grandTotal() ? 'text-blue-700' : 'text-red-600'"
+                                          :class="paymentReceived >= grandTotal() ? 'text-emerald-700' : 'text-red-600'"
                                           x-text="'Rp ' + formatCurrency(Math.abs(paymentReceived - grandTotal()))"></span>
                                 </div>
                             </div>
@@ -760,7 +940,7 @@
                                     type="button"
                                     @click="showConfirmModal = true"
                                     :disabled="cart.length === 0 || paymentReceived < grandTotal() || isSubmitting"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
                                     <template x-if="!isSubmitting">
                                         <span class="inline-flex items-center gap-2">
                                             <i class="fas fa-check-circle"></i> 
@@ -837,7 +1017,7 @@
                         </button>
                         <button type="button"
                                 @click="isSubmitting = true; showConfirmModal = false; $el.closest('form').submit()"
-                                class="flex-1 px-4 py-3 text-sm font-bold text-white bg-linear-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
+                                class="flex-1 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
                             Ya, Simpan
                         </button>
                     </div>
@@ -1005,6 +1185,55 @@
                 </div>
             </div>
         </div>
+
+        <!-- Clear Cart Confirmation Modal -->
+        <div x-show="showClearCartModal" 
+             x-cloak
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden"
+                 @click.away="showClearCartModal = false"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100">
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center bg-red-100 text-red-600 rounded-full">
+                        <i class="fas fa-trash-alt text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Bersihkan Keranjang?</h3>
+                    <p class="text-slate-600 mb-6">Semua item di keranjang akan dihapus. Tindakan ini tidak dapat dibatalkan.</p>
+                    
+                    <div class="bg-slate-50 rounded-xl p-4 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Total Item:</span>
+                            <span class="font-semibold" x-text="cart.length + ' produk'"></span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-2">
+                            <span class="text-slate-500">Total Nilai:</span>
+                            <span class="font-bold text-emerald-600" x-text="'Rp ' + formatCurrency(grandTotal())"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button type="button"
+                                @click="showClearCartModal = false"
+                                class="flex-1 px-4 py-3 text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                            Batal
+                        </button>
+                        <button type="button"
+                                @click="clearCart(); showClearCartModal = false"
+                                class="flex-1 px-4 py-3 text-sm font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition">
+                            Ya, Hapus Semua
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
     </form>
 
@@ -1041,8 +1270,8 @@
 
         function posApp(productsData, customerTypesData, regularCustomersData, categoriesData) {
             return {
-                customertypes: Array.isArray(customerTypesData) ? customerTypesData : [],
-                customerType: Array.isArray(customerTypesData) && customerTypesData.length ? customerTypesData[0] : null,
+                customertypes: ['pelanggan', 'reseller', 'agent'],
+                customerType: 'pelanggan',
                 products: Array.isArray(productsData) ? productsData : [],
                 regularCustomers: Array.isArray(regularCustomersData) ? regularCustomersData : [],
                 categories: Array.isArray(categoriesData) ? categoriesData : [],
@@ -1081,6 +1310,7 @@
                 summaryExpanded: true,
                 toastMessage: '',
                 toastVisible: false,
+                toastType: 'success',
                 draggedItem: null,
                 
                 // Third round features (Poin 3, 8, 10)
@@ -1089,10 +1319,17 @@
                 undoToastMessage: '',
                 undoTimeout: null,
                 audioEnabled: false,
+                
+                // Mobile cart drawer
+                mobileCartOpen: false,
+                
+                // Clear cart confirmation
+                showClearCartModal: false,
 
                 init() {
-                    if (!this.customerType && this.customertypes.length) {
-                        this.customerType = this.customertypes[0];
+                    // Default to 'pelanggan' as the first option
+                    if (!this.customerType) {
+                        this.customerType = 'pelanggan';
                     }
                     this.filteredCustomerResults = this.regularCustomers;
                     if (!this.perPageOptions.includes(this.perPage)) {
@@ -1115,6 +1352,35 @@
                     // Watch summary expanded state
                     this.$watch('summaryExpanded', (value) => {
                         localStorage.setItem('pos_summary_expanded', value.toString());
+                    });
+                    
+                    // Keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        // Skip if user is typing in an input
+                        const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
+                        
+                        // F2: Focus product search
+                        if (e.key === 'F2') {
+                            e.preventDefault();
+                            this.$refs.productSearch?.focus();
+                        }
+                        
+                        // F8: Process payment (if cart is not empty)
+                        if (e.key === 'F8' && !isTyping) {
+                            e.preventDefault();
+                            if (this.cart.length > 0 && this.paymentReceived >= this.grandTotal()) {
+                                this.showConfirmModal = true;
+                            }
+                        }
+                        
+                        // Escape: Close all modals
+                        if (e.key === 'Escape') {
+                            this.showConfirmModal = false;
+                            this.showReceiptPreview = false;
+                            this.showHeldTransactions = false;
+                            this.showClearCartModal = false;
+                            this.mobileCartOpen = false;
+                        }
                     });
                 },
 
@@ -1370,7 +1636,7 @@
                     // Validasi terhadap stok
                     if (item.stock_quantity && item.qty > item.stock_quantity) {
                         item.qty = item.stock_quantity;
-                        alert(`Stok tidak cukup! Maksimal ${item.stock_quantity} unit.`);
+                        this.showErrorToast(`Stok tidak cukup! Maksimal ${item.stock_quantity} unit.`);
                     }
                     item.subtotal = this.roundCurrency(item.price * item.qty);
                     this.calculateTotal();
@@ -1670,6 +1936,17 @@
                     return 'bg-slate-50 text-slate-600 border-slate-200';
                 },
                 
+                stockTextClass(product) {
+                    const qty = Number(product?.stock_quantity) || 0;
+                    if (qty === 0) {
+                        return 'text-red-500';
+                    }
+                    if (qty <= 5) {
+                        return 'text-orange-500';
+                    }
+                    return 'text-slate-400';
+                },
+                
                 stockIconClass(product) {
                     const qty = Number(product?.stock_quantity) || 0;
                     if (qty === 0) {
@@ -1767,6 +2044,17 @@
                     setTimeout(() => {
                         this.toastVisible = false;
                     }, 2000);
+                },
+
+                // Show error toast (red variant)
+                showErrorToast(message) {
+                    this.toastMessage = message;
+                    this.toastType = 'error';
+                    this.toastVisible = true;
+                    setTimeout(() => {
+                        this.toastVisible = false;
+                        this.toastType = 'success';
+                    }, 3000);
                 },
 
                 // (Poin 13) Group cart items by category

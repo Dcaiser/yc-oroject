@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h1 class="flex items-center gap-3 text-2xl font-extrabold text-green-900">
                 <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-700 rounded-full">
                     <i class="fas fa-users-cog"></i>
@@ -8,8 +8,9 @@
                 Manajemen User
             </h1>
             <a href="{{ route('users.create') }}"
-               class="flex items-center px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-linear-to-r from-green-500 to-green-700">
-                <i class="mr-2 fas fa-plus"></i>Tambah User
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-linear-to-r from-green-500 to-green-700">
+                <i class="fas fa-plus"></i>
+                <span>Tambah User</span>
             </a>
         </div>
     </x-slot>
@@ -39,48 +40,48 @@
             </div>
         @endif
 
-        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div class="p-5 bg-white rounded-2xl shadow-sm ring-1 ring-emerald-100">
-                <div class="flex items-center gap-4">
-                    <span class="inline-flex items-center justify-center w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl">
-                        <i class="text-lg fas fa-users"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div class="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-emerald-100">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 text-emerald-600 rounded-lg sm:rounded-xl">
+                        <i class="text-base sm:text-lg fas fa-users"></i>
                     </span>
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold tracking-wide text-emerald-500 uppercase">Total User</p>
-                        <p class="text-2xl font-bold text-slate-800">{{ $stats['total'] }}</p>
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <p class="text-[10px] sm:text-xs font-semibold tracking-wide text-emerald-500 uppercase">Total User</p>
+                        <p class="text-lg sm:text-2xl font-bold text-slate-800">{{ $stats['total'] }}</p>
                     </div>
                 </div>
             </div>
-            <div class="p-5 bg-white rounded-2xl shadow-sm ring-1 ring-emerald-100">
-                <div class="flex items-center gap-4">
-                    <span class="inline-flex items-center justify-center w-12 h-12 bg-slate-100 text-slate-600 rounded-xl">
-                        <i class="text-lg fas fa-user-gear"></i>
+            <div class="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-emerald-100">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 text-slate-600 rounded-lg sm:rounded-xl">
+                        <i class="text-base sm:text-lg fas fa-user-gear"></i>
                     </span>
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold tracking-wide text-slate-500 uppercase">Admin</p>
-                        <p class="text-2xl font-bold text-slate-800">{{ $stats['admin'] }}</p>
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <p class="text-[10px] sm:text-xs font-semibold tracking-wide text-slate-500 uppercase">Admin</p>
+                        <p class="text-lg sm:text-2xl font-bold text-slate-800">{{ $stats['admin'] }}</p>
                     </div>
                 </div>
             </div>
-            <div class="p-5 bg-white rounded-2xl shadow-sm ring-1 ring-emerald-100">
-                <div class="flex items-center gap-4">
-                    <span class="inline-flex items-center justify-center w-12 h-12 bg-sky-100 text-sky-600 rounded-xl">
-                        <i class="text-lg fas fa-user-tie"></i>
+            <div class="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-emerald-100">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-sky-100 text-sky-600 rounded-lg sm:rounded-xl">
+                        <i class="text-base sm:text-lg fas fa-user-tie"></i>
                     </span>
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold tracking-wide text-sky-500 uppercase">Manager</p>
-                        <p class="text-2xl font-bold text-slate-800">{{ $stats['manager'] }}</p>
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <p class="text-[10px] sm:text-xs font-semibold tracking-wide text-sky-500 uppercase">Manager</p>
+                        <p class="text-lg sm:text-2xl font-bold text-slate-800">{{ $stats['manager'] }}</p>
                     </div>
                 </div>
             </div>
-            <div class="p-5 bg-white rounded-2xl shadow-sm ring-1 ring-emerald-100">
-                <div class="flex items-center gap-4">
-                    <span class="inline-flex items-center justify-center w-12 h-12 bg-teal-100 text-teal-600 rounded-xl">
-                        <i class="text-lg fas fa-user"></i>
+            <div class="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-emerald-100">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-teal-100 text-teal-600 rounded-lg sm:rounded-xl">
+                        <i class="text-base sm:text-lg fas fa-user"></i>
                     </span>
-                    <div class="space-y-1">
-                        <p class="text-xs font-semibold tracking-wide text-teal-500 uppercase">Staff</p>
-                        <p class="text-2xl font-bold text-slate-800">{{ $stats['staff'] }}</p>
+                    <div class="space-y-0.5 sm:space-y-1">
+                        <p class="text-[10px] sm:text-xs font-semibold tracking-wide text-teal-500 uppercase">Staff</p>
+                        <p class="text-lg sm:text-2xl font-bold text-slate-800">{{ $stats['staff'] }}</p>
                     </div>
                 </div>
             </div>

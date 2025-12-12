@@ -1,10 +1,10 @@
-<section class="p-6 border border-emerald-100 rounded-2xl bg-white shadow-sm space-y-6">
-    <header class="flex items-start justify-between gap-4">
+<section class="p-4 sm:p-6 border border-emerald-100 rounded-xl sm:rounded-2xl bg-white shadow-sm space-y-4 sm:space-y-6">
+    <header class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
-            <h2 class="text-sm font-semibold tracking-wide text-slate-900 uppercase">Keamanan Password</h2>
-            <p class="mt-1 text-sm text-slate-500">Ganti password secara berkala untuk menjaga keamanan akun.</p>
+            <h2 class="text-xs sm:text-sm font-semibold tracking-wide text-slate-900 uppercase">Keamanan Password</h2>
+            <p class="mt-1 text-xs sm:text-sm text-slate-500">Ganti password secara berkala untuk menjaga keamanan akun.</p>
         </div>
-        <span class="px-3 py-1 text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-lg">Opsional</span>
+        <span class="px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 rounded-md sm:rounded-lg w-fit">Opsional</span>
     </header>
 
     <form method="post" action="{{ route('password.update') }}" class="space-y-5">

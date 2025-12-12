@@ -1,14 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-4">
-                <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                    <i class="fas fa-house text-xl"></i>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-3">
+                <span class="inline-flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600">
+                    <i class="fas fa-house text-lg sm:text-xl"></i>
                 </span>
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900">Dashboard Utama</h1>
-                    <p class="text-sm text-slate-500">Lihat sekilas kegiatan hari ini, stok, dan pesanan.</p>
-
+                    <h1 class="text-lg sm:text-2xl font-bold text-slate-900">Dashboard Utama</h1>
+                    <p class="text-xs sm:text-sm text-slate-500 hidden sm:block">Lihat sekilas kegiatan hari ini, stok, dan pesanan.</p>
                 </div>
             </div>
         </div>
@@ -107,14 +106,14 @@
         ];
     @endphp
 
-    <div class="space-y-6 md:space-y-8 min-w-0 overflow-x-hidden">
+    <div class="space-y-4 sm:space-y-6 md:space-y-8 min-w-0 overflow-x-hidden">
         <!-- Hero -->
-        <section class="rounded-3xl border border-emerald-100 bg-linear-to-br from-white via-emerald-50/35 to-emerald-50/60 px-4 sm:px-6 py-8 shadow-[0_15px_35px_-22px_rgba(16,185,129,0.45)]">
-            <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between min-w-0">
-                <div class="flex-1 space-y-6 min-w-0">
-                    <div class="space-y-2">
-                        <h1 class="text-3xl font-bold text-slate-900 sm:text-4xl">Halo, {{ $user->name ?? 'Tim' }}</h1>
-                        <p class="text-base text-slate-600">Anda masuk sebagai <span class="font-semibold text-emerald-700">{{ \Illuminate\Support\Str::title($user->role ?? '-') }}</span>.</p>
+        <section class="rounded-2xl sm:rounded-3xl border border-emerald-100 bg-linear-to-br from-white via-emerald-50/35 to-emerald-50/60 px-3 sm:px-4 md:px-6 py-5 sm:py-8 shadow-[0_15px_35px_-22px_rgba(16,185,129,0.45)]">
+            <div class="flex flex-col gap-5 sm:gap-8 lg:flex-row lg:items-start lg:justify-between min-w-0">
+                <div class="flex-1 space-y-4 sm:space-y-6 min-w-0">
+                    <div class="space-y-1 sm:space-y-2">
+                        <h1 class="text-xl sm:text-3xl lg:text-4xl font-bold text-slate-900">Halo, {{ $user->name ?? 'Tim' }}</h1>
+                        <p class="text-sm sm:text-base text-slate-600">Anda masuk sebagai <span class="font-semibold text-emerald-700">{{ \Illuminate\Support\Str::title($user->role ?? '-') }}</span>.</p>
                     </div>
 
                     @if(!empty($opsPulse))
@@ -181,25 +180,25 @@
         </section>
 
         <!-- KPI Cards -->
-        <section class="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 min-w-0">
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 min-w-0">
             @foreach (array_slice($statCards, 0, 4) as $card)
                 @php $colors = $palette[$card['accent']] ?? $palette['emerald']; @endphp
-                <article class="relative overflow-hidden rounded-3xl border {{ $colors['border'] }} bg-white shadow-[0_15px_35px_-20px_rgba(16,185,129,0.45)]">
-                    <div class="flex flex-col items-start gap-3 px-4 sm:px-6 py-8 min-w-0">
-                        <span class="inline-flex h-16 w-16 items-center justify-center rounded-2xl {{ $colors['iconBg'] }} {{ $colors['iconFg'] }}">
-                            <i class="fas {{ $card['icon'] }} text-2xl"></i>
+                <article class="relative overflow-hidden rounded-2xl sm:rounded-3xl border {{ $colors['border'] }} bg-white shadow-[0_15px_35px_-20px_rgba(16,185,129,0.45)]">
+                    <div class="flex flex-col items-start gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-4 sm:py-8 min-w-0">
+                        <span class="inline-flex h-10 w-10 sm:h-16 sm:w-16 items-center justify-center rounded-xl sm:rounded-2xl {{ $colors['iconBg'] }} {{ $colors['iconFg'] }}">
+                            <i class="fas {{ $card['icon'] }} text-base sm:text-2xl"></i>
                         </span>
-                        <div class="space-y-1">
-                            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{{ $card['label'] }}</p>
-                            <p class="text-4xl font-black text-slate-900 tabular-nums">{{ $card['value'] }}</p>
+                        <div class="space-y-0.5 sm:space-y-1">
+                            <p class="text-[10px] sm:text-xs font-semibold uppercase tracking-wide sm:tracking-[0.12em] text-slate-500">{{ $card['label'] }}</p>
+                            <p class="text-xl sm:text-4xl font-black text-slate-900 tabular-nums">{{ $card['value'] }}</p>
                         </div>
                     </div>
-                    <div class="h-2 bg-linear-to-r {{ $colors['glow'] }}"></div>
+                    <div class="h-1 sm:h-2 bg-linear-to-r {{ $colors['glow'] }}"></div>
                 </article>
             @endforeach
         </section>
 
-        <section class="grid gap-6 lg:grid-cols-3">
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <!-- Quick Actions -->
             <div class="lg:col-span-2 rounded-3xl border border-slate-100 bg-white shadow-sm">
                 <div class="flex flex-col gap-2 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
@@ -279,7 +278,7 @@
             </div>
         </section>
 
-        <section class="grid gap-6 lg:grid-cols-3">
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <!-- Recent Activity -->
             <div class="lg:col-span-2 rounded-3xl border border-slate-100 bg-white/95 shadow-sm">
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">

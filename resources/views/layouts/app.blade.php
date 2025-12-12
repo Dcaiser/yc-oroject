@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Al-Ruhamaa' | Inventory System</title>
+    <title>YC - Wakaf Produktif Bisto</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-green.png') }}">
@@ -25,13 +25,13 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Al-Ruhamaa' | Inventory System">
+    <meta property="og:title" content="YC - Wakaf Produktif Bisto">
     <meta property="og:description" content="Sistem Inventory Management Al-Ruhamaa'">
     <meta property="og:image" content="{{ asset('assets/logo/icon-green.png') }}">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Al-Ruhamaa' | Inventory System">
+    <meta property="twitter:title" content="YC - Wakaf Produktif Bisto">
     <meta property="twitter:description" content="Sistem Inventory Management Al-Ruhamaa'">
     <meta property="twitter:image" content="{{ asset('assets/logo/icon-green.png') }}">
 
@@ -88,10 +88,10 @@
             @php
                 $authUser = Auth::user();
                 $rawAvatarPath = $authUser->avatar ?? null;
-                if ($rawAvatarPath && !\Illuminate\Support\Str::startsWith($rawAvatarPath, ['http://', 'https://'])) {
+                if (!empty($rawAvatarPath) && !\Illuminate\Support\Str::startsWith($rawAvatarPath, ['http://', 'https://'])) {
                     $sidebarAvatarUrl = \Illuminate\Support\Facades\Storage::url($rawAvatarPath);
                 } else {
-                    $sidebarAvatarUrl = $rawAvatarPath;
+                    $sidebarAvatarUrl = !empty($rawAvatarPath) ? $rawAvatarPath : null;
                 }
                 $userInitials = collect(explode(' ', $authUser->name))
                     ->filter()
@@ -112,14 +112,15 @@
                         </div>
                         <div class="sidebar-label">
                             <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
-                            <p class="text-xs text-emerald-100/80">Inventory System</p>
+                            <p class="text-xs text-emerald-100/80">Wakaf Produktif Bisto</p>
                         </div>
                     </div>
-            <button type="button"
-                class="hidden lg:flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition"
+                    <button type="button"
+                            class="hidden lg:flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition-all duration-300"
                             @click="sidebarCollapsed = !sidebarCollapsed"
                             :title="sidebarCollapsed ? 'Perluas sidebar' : 'Perkecil sidebar'">
-                        <i class="text-base fas" :class="sidebarCollapsed ? 'fa-caret-right' : 'fa-caret-left'"></i>
+                                <i class="text-base fas transition-transform duration-300"
+                                   :class="sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
                     </button>
                 </div>
             </div>
@@ -284,87 +285,78 @@
 
             <!-- User Profile Section -->
             <div class="mt-auto w-full">
-                <div class="mb-4 bg-black/20 backdrop-blur-xl rounded-2xl border border-white/10"
-                     :class="sidebarCollapsed ? 'mx-2 p-1.5' : 'mx-4 px-3 py-2'">
+                <div class="mb-4 rounded-xl"
+                     :class="sidebarCollapsed ? 'mx-2' : 'mx-3'">
                     <div x-data="{ userMenuOpen: false }" class="relative" @click.away="userMenuOpen = false">
                         <button @click="userMenuOpen = !userMenuOpen"
-                            class="flex items-center w-full transition-all duration-200 hover:bg-white/[0.08] rounded-xl group"
-                            :class="sidebarCollapsed ? 'justify-center p-2' : 'justify-between py-2.5 px-3'">
+                            class="flex items-center w-full transition-all duration-200 bg-white/10 hover:bg-white/15 rounded-xl border border-white/10"
+                            :class="sidebarCollapsed ? 'justify-center p-2' : 'justify-between py-2 px-3'">
                             <div class="flex items-center flex-1 min-w-0"
-                                 :class="sidebarCollapsed ? '' : 'gap-3'">
-                                <!-- Avatar - Simplified -->
+                                 :class="sidebarCollapsed ? '' : 'gap-2.5'">
+                                <!-- Avatar -->
                                 <div class="relative shrink-0"
-                                     :class="sidebarCollapsed ? 'w-10 h-10' : 'w-9 h-9'">
-                                    <div class="flex items-center justify-center w-full h-full overflow-hidden bg-white/15 rounded-full ring-1 ring-white/10">
+                                     :class="sidebarCollapsed ? 'w-9 h-9' : 'w-8 h-8'">
+                                    <div class="flex items-center justify-center w-full h-full overflow-hidden bg-emerald-500 rounded-lg">
                                         @if ($sidebarAvatarUrl)
                                             <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
                                         @else
-                                            <span class="text-xs font-semibold text-white">{{ $userInitials }}</span>
+                                            <span class="text-xs font-bold text-white">{{ $userInitials }}</span>
                                         @endif
                                     </div>
-                                    <span class="absolute -bottom-0.5 -right-0.5 block w-3 h-3 bg-emerald-400 border-2 border-emerald-800 rounded-full"></span>
+                                    <span class="absolute -bottom-0.5 -right-0.5 block w-2.5 h-2.5 bg-green-400 border-2 border-emerald-800 rounded-full"></span>
                                 </div>
-                                <!-- User Info - Simplified -->
+                                <!-- User Info -->
                                 <div x-show="!sidebarCollapsed" x-cloak class="flex-1 min-w-0 text-left">
-                                    <p class="text-sm font-semibold text-white truncate">{{ $authUser->name }}</p>
-                                    <span class="block text-[10px] font-semibold text-emerald-200/80 uppercase tracking-[0.1em]">{{ strtoupper($authUser->role) }}</span>
+                                    <p class="text-sm font-semibold text-white truncate leading-tight">{{ $authUser->name }}</p>
+                                    <span class="text-[10px] font-medium text-emerald-300/90 uppercase">{{ $authUser->role }}</span>
                                 </div>
                             </div>
-                            <div x-show="!sidebarCollapsed" x-cloak class="flex items-center justify-center w-5 h-5 text-white/60 group-hover:text-white transition-colors">
-                                <i class="text-[10px] fas fa-chevron-up transition-transform duration-200"
-                                   :class="{ 'rotate-180': userMenuOpen }"></i>
+                            <div x-show="!sidebarCollapsed" x-cloak class="flex items-center justify-center w-6 h-6 text-white/50 hover:text-white transition-colors">
+                                <i class="text-xs fas fa-chevron-up transition-transform duration-200"
+                                   x-bind:class="userMenuOpen && 'rotate-180'"></i>
                             </div>
                         </button>
 
                         <!-- User Dropdown Menu -->
                         <div x-cloak x-show="userMenuOpen"
                              x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="transform scale-95 opacity-0"
-                             x-transition:enter-end="transform scale-100 opacity-100"
+                             x-transition:enter-start="opacity-0 translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
                              x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="transform scale-100 opacity-100"
-                             x-transition:leave-end="transform scale-95 opacity-0"
-                             class="absolute bottom-full mb-3 w-60 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 z-[9999] overflow-hidden"
-                             :class="sidebarCollapsed ? 'left-full ml-4 bottom-0 mb-0' : 'left-1/2 -translate-x-1/2'">
-                            <div class="px-4 pt-4 pb-3 border-b border-emerald-100/60 bg-linear-to-br from-emerald-50/80 via-white to-white/80">
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-2"
+                             class="absolute bottom-full mb-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden"
+                             :class="sidebarCollapsed ? 'left-full ml-3 bottom-0 mb-0' : 'left-0 right-0'">
+                            <!-- User Info Header -->
+                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
                                 <div class="flex items-center gap-3">
-                                    <div class="relative flex items-center justify-center w-12 h-12 overflow-hidden rounded-full bg-emerald-100">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-emerald-500 flex items-center justify-center">
                                         @if ($sidebarAvatarUrl)
                                             <img src="{{ $sidebarAvatarUrl }}" alt="{{ $authUser->name }}" class="object-cover w-full h-full">
                                         @else
-                                            <span class="text-base font-semibold text-emerald-700">{{ $userInitials }}</span>
+                                            <span class="text-sm font-bold text-white">{{ $userInitials }}</span>
                                         @endif
                                     </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-emerald-900">{{ $authUser->name }}</p>
-                                        <p class="text-xs text-emerald-600/80">{{ $authUser->email }}</p>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-semibold text-slate-800 truncate">{{ $authUser->name }}</p>
+                                        <p class="text-xs text-slate-500 truncate">{{ $authUser->email }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="py-2 bg-white/70">
+                            <!-- Menu Items -->
+                            <div class="py-1">
                                 <a href="{{ route('profile.edit') }}"
-                                   class="group flex items-center px-4 py-3 text-sm text-emerald-700 hover:bg-emerald-50/80 transition-all">
-                                    <div class="w-9 h-9 flex items-center justify-center bg-emerald-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
-                                        <i class="fas fa-user-edit text-sm text-emerald-600"></i>
-                                    </div>
-                                    <div class="flex-1 text-left">
-                                        <p class="font-semibold leading-none">Edit Profil</p>
-                                        <p class="text-[11px] text-emerald-500 mt-1">Perbarui informasi akun Anda</p>
-                                    </div>
-                                    <i class="fas fa-chevron-right text-xs text-emerald-400 group-hover:translate-x-1 transition-transform"></i>
+                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+                                    <i class="fas fa-user-edit w-4 text-slate-400"></i>
+                                    <span class="font-medium">Edit Profil</span>
                                 </a>
+                                <div class="my-1 border-t border-slate-100"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <button type="submit"
-                                            class="group flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50/80 transition-all">
-                                        <div class="w-9 h-9 flex items-center justify-center bg-red-100 rounded-xl mr-3 shrink-0 transition-transform group-hover:scale-105">
-                                            <i class="fas fa-sign-out-alt text-sm text-red-600"></i>
-                                        </div>
-                                        <div class="flex-1 text-left">
-                                            <p class="font-semibold leading-none">Keluar</p>
-                                            <p class="text-[11px] text-red-500 mt-1">Akhiri sesi aplikasi</p>
-                                        </div>
-                                        <i class="fas fa-chevron-right text-xs text-red-400 group-hover:translate-x-1 transition-transform"></i>
+                                            class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                        <i class="fas fa-sign-out-alt w-4"></i>
+                                        <span class="font-medium">Keluar</span>
                                     </button>
                                 </form>
                             </div>
@@ -377,22 +369,22 @@
         <!-- Mobile Sidebar -->
         <div x-data="{ sidebarOpen: false }" class="lg:hidden">
             <!-- Mobile Header -->
-            <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-lg lg:hidden">
-                <div class="flex items-center justify-between px-4 py-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-linear-to-r from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center shadow-lg">
+            <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md lg:hidden">
+                <div class="flex items-center justify-between px-3 py-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-linear-to-r from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center shadow">
                             <img src="{{ asset('assets/logo/icon-white.png') }}"
                                 alt="Al-Ruhamaa Logo"
-                                class="object-contain w-6 h-6">
+                                class="object-contain w-5 h-5">
                         </div>
                         <div>
-                            <h1 class="font-bold text-gray-900">Al-Ruhamaa'</h1>
-                            <p class="text-xs text-gray-500">Inventory System</p>
+                            <h1 class="text-sm font-bold text-gray-900">Al-Ruhamaa'</h1>
+                            <p class="text-[10px] text-gray-500">Wakaf Produktif Bisto</p>
                         </div>
                     </div>
                     <button @click="sidebarOpen = !sidebarOpen" 
-                            class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                        <i class="text-xl fas fa-bars"></i>
+                            class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
+                        <i class="text-lg fas fa-bars"></i>
                     </button>
                 </div>
             </div>
@@ -440,7 +432,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
-                                <p class="text-xs text-emerald-100/80">Inventory System</p>
+                                <p class="text-xs text-emerald-100/80">Wakaf Produktif Bisto</p>
                             </div>
                         </div>
                     </div>
@@ -644,7 +636,7 @@
 
         <!-- Main Content Area -->
     <main class="flex-1 min-w-0 overflow-x-hidden" :class="sidebarCollapsed ? 'lg:ml-24' : 'lg:ml-64'">
-            <div class="h-16 lg:hidden"></div>
+            <div class="h-12 lg:hidden"></div>
 
             @isset($header)
             <header class="bg-white border-b border-gray-200 shadow-sm">
@@ -661,6 +653,7 @@
         </main>
     </div>
 
+    @stack('modals')
     @stack('scripts')
 </body>
 

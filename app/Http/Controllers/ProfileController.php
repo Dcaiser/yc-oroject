@@ -31,26 +31,43 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
+        // Remove avatar from validated data - we'll handle it separately
+        unset($validated['avatar']);
+        unset($validated['remove_avatar']);
+
         $avatarFile = $request->file('avatar');
         $removeAvatar = $request->boolean('remove_avatar');
 
         $deleteExistingAvatar = function () use ($user): void {
-            if ($user->avatar && !Str::startsWith($user->avatar, ['http://', 'https://']) && Storage::disk('public')->exists($user->avatar)) {
-                Storage::disk('public')->delete($user->avatar);
+            $currentAvatar = $user->avatar;
+            if (!empty($currentAvatar) && !Str::startsWith($currentAvatar, ['http://', 'https://', 'C:\\', 'D:\\'])) {
+                if (Storage::disk('public')->exists($currentAvatar)) {
+                    Storage::disk('public')->delete($currentAvatar);
+                }
             }
         };
 
-        if ($avatarFile) {
-            $deleteExistingAvatar();
-            $validated['avatar'] = $avatarFile->store('avatars', 'public');
+        if ($avatarFile && $avatarFile->isValid()) {
+            $realPath = $avatarFile->getRealPath();
+            if ($realPath && file_exists($realPath)) {
+                $deleteExistingAvatar();
+                
+                // Generate unique filename
+                $extension = $avatarFile->getClientOriginalExtension() ?: 'jpg';
+                $filename = Str::uuid() . '.' . $extension;
+                
+                // Store file
+                $storedPath = $avatarFile->storeAs('avatars', $filename, 'public');
+                
+                if ($storedPath) {
+                    $validated['avatar'] = $storedPath;
+                }
+            }
         } elseif ($removeAvatar) {
             $deleteExistingAvatar();
             $validated['avatar'] = null;
-        } else {
-            unset($validated['avatar']);
         }
-
-        unset($validated['remove_avatar']);
+        // If neither upload nor remove, don't touch avatar field
 
         $user->fill($validated);
 

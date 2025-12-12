@@ -1,23 +1,23 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center gap-3">
-            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                <i class="fas fa-warehouse"></i>
+        <div class="flex items-center gap-2 sm:gap-3">
+            <span class="inline-flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-emerald-100 text-emerald-600">
+                <i class="fas fa-warehouse text-sm sm:text-base"></i>
             </span>
-            <h2 class="text-xl font-semibold leading-tight text-slate-700">Inventori Produk</h2>
+            <h2 class="text-base sm:text-xl font-semibold leading-tight text-slate-700">Inventori Produk</h2>
         </div>
     </x-slot>
 
-    <div class="space-y-6">
+    <div class="space-y-4 sm:space-y-6">
         <!-- Breadcrumb -->
         <x-breadcrumb :items="[['title' => 'Inventori']]" />
 
         <!-- Header Section with Quick Actions -->
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/50">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div class="max-w-xl space-y-2">
-                    <h1 class="text-2xl font-semibold tracking-tight text-slate-800 lg:text-[1.8rem]">Inventori Produk</h1>
-                    <p class="text-sm text-slate-500">
+        <div class="rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 shadow-sm shadow-slate-200/50">
+            <div class="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="space-y-1 sm:space-y-2">
+                    <h1 class="text-lg sm:text-2xl font-semibold tracking-tight text-slate-800 lg:text-[1.8rem]">Inventori Produk</h1>
+                    <p class="text-xs sm:text-sm text-slate-500">
                         Pantau stok, harga, dan kategori produk dalam satu tampilan.
                     </p>
                 </div>
@@ -25,9 +25,9 @@
                 <div class="flex flex-wrap items-center gap-2">
                     @if(in_array(Auth::user()->role ?? '', ['manager', 'admin']))
                         <a href="{{ route('products.create') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-emerald-500 hover:bg-emerald-600 transition">
+                           class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow bg-emerald-500 hover:bg-emerald-600 transition">
                             <i class="fas fa-plus"></i>
-                            Produk Baru
+                            <span>Produk Baru</span>
                         </a>
                     @endif
                 </div>
@@ -100,19 +100,19 @@
         @endphp
 
         <!-- Stats Cards -->
-        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
             @foreach($statCards as $card)
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/50">
+                <div class="rounded-xl sm:rounded-2xl border border-slate-200/80 bg-white p-3 sm:p-5 shadow-sm shadow-slate-200/50">
                     <div class="flex items-start justify-between">
-                        <div class="space-y-1">
-                            <p class="text-sm font-medium text-slate-500">{{ $card['label'] }}</p>
-                            <p class="text-2xl font-semibold text-slate-900">{{ $card['value'] }}</p>
+                        <div class="space-y-0.5 sm:space-y-1">
+                            <p class="text-[10px] sm:text-sm font-medium text-slate-500">{{ $card['label'] }}</p>
+                            <p class="text-lg sm:text-2xl font-semibold text-slate-900">{{ $card['value'] }}</p>
                         </div>
-                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl {{ $card['accent'] }}">
-                            <i class="fas {{ $card['icon'] }} text-lg"></i>
+                        <span class="inline-flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl {{ $card['accent'] }}">
+                            <i class="fas {{ $card['icon'] }} text-sm sm:text-lg"></i>
                         </span>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500">{{ $card['sub'] }}</p>
+                    <p class="mt-2 sm:mt-3 text-[10px] sm:text-sm text-slate-500">{{ $card['sub'] }}</p>
                 </div>
             @endforeach
         </div>
@@ -358,7 +358,7 @@
 
                 <div class="space-y-4">
                     <!-- Select All Header with View Toggle -->
-                    <div class="flex items-center justify-between gap-4 px-4 py-2 rounded-xl bg-slate-50/80 border border-slate-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 px-4 py-2 rounded-xl bg-slate-50/80 border border-slate-100">
                         <div class="flex items-center gap-4">
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" x-model="selectAll" @change="toggleSelectAll()" class="sr-only peer">
@@ -515,14 +515,14 @@
                                 ];
                             }
                         @endphp
-                        <div class="p-6 border border-emerald-100 rounded-3xl bg-white shadow-sm transition-all" 
+                        <div class="p-6 border border-emerald-100 rounded-3xl bg-white shadow-sm transition-all overflow-hidden" 
                              :class="{ 
                                  'border-amber-300 ring-2 ring-amber-100/80': dirtyRows[{{ $product->id }}],
                                  'border-emerald-400 ring-2 ring-emerald-100 bg-emerald-50/30': selectedItems.includes({{ $product->id }})
                              }">
-                            <div class="flex gap-4">
+                            <div class="flex flex-col gap-4 sm:flex-row">
                                 <!-- Checkbox -->
-                                <div class="shrink-0 pt-1">
+                                <div class="shrink-0 sm:pt-1">
                                     <label class="relative inline-flex items-center cursor-pointer">
                                         <input type="checkbox" 
                                                :checked="selectedItems.includes({{ $product->id }})"
@@ -535,7 +535,7 @@
                                 </div>
                                 <!-- Content -->
                                 <div class="flex-1 min-w-0">
-                            <div class="grid gap-6 lg:grid-cols-3">
+                            <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                                 <div class="space-y-3">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0 flex-1">
@@ -577,7 +577,7 @@
                          <label class="flex items-center justify-between gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-3 py-2 text-xs font-semibold text-blue-700"
                              x-data="currencyField({ initial: @js($priceAgent ?? 0), name: 'produk[{{ $product->id }}][prices][agent]' })">
                                             <span class="flex items-center gap-2"><i class="fa-solid fa-user-tie text-xs"></i> Agent</span>
-                                            <div class="relative w-32">
+                                            <div class="relative w-full sm:w-32">
                                                 <span class="absolute inset-y-0 left-2 flex items-center text-[10px] font-bold text-slate-400">Rp</span>
                                                 <input type="text" inputmode="numeric" x-model="display"
                                                        @focus="selectAll" @input="handleInput($event); dirtyRows[{{ $product->id }}] = true"
@@ -589,7 +589,7 @@
                          <label class="flex items-center justify-between gap-3 rounded-2xl border border-rose-100 bg-rose-50/70 px-3 py-2 text-xs font-semibold text-rose-700"
                              x-data="currencyField({ initial: @js($priceReseller ?? 0), name: 'produk[{{ $product->id }}][prices][reseller]' })">
                                             <span class="flex items-center gap-2"><i class="fa-solid fa-store text-xs"></i> Reseller</span>
-                                            <div class="relative w-32">
+                                            <div class="relative w-full sm:w-32">
                                                 <span class="absolute inset-y-0 left-2 flex items-center text-[10px] font-bold text-slate-400">Rp</span>
                                                 <input type="text" inputmode="numeric" x-model="display"
                                                        @focus="selectAll" @input="handleInput($event); dirtyRows[{{ $product->id }}] = true"
@@ -601,7 +601,7 @@
                          <label class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-3 py-2 text-xs font-semibold text-emerald-700"
                              x-data="currencyField({ initial: @js($priceCustomer ?? 0), name: 'produk[{{ $product->id }}][prices][pelanggan]' })">
                                             <span class="flex items-center gap-2"><i class="fa-solid fa-users text-xs"></i> Pelanggan</span>
-                                            <div class="relative w-32">
+                                            <div class="relative w-full sm:w-32">
                                                 <span class="absolute inset-y-0 left-2 flex items-center text-[10px] font-bold text-slate-400">Rp</span>
                                                 <input type="text" inputmode="numeric" x-model="display"
                                                        @focus="selectAll" @input="handleInput($event); dirtyRows[{{ $product->id }}] = true"
@@ -637,12 +637,14 @@
                                                 {{ $product->units?->name ?? '-' }}
                                             </span>
                                         </div>
-                                        <div class="flex flex-wrap items-center justify-between gap-3">
+                                        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                                             <span class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold border {{ $statusMeta['wrapper'] }}">
                                                 <i class="fa-solid {{ $statusMeta['icon'] }}"></i>
                                                 {{ $statusMeta['label'] }}
                                             </span>
-                                            <span class="text-3xl font-black text-slate-900 tracking-tight">{{ $stockFormatted }}</span>
+                                            <span class="text-3xl font-black text-slate-900 tracking-tight">
+                                                {{ $stockFormatted }}
+                                            </span>
                                         </div>
                                     </div>
                                     <button type="button"

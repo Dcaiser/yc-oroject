@@ -4,7 +4,7 @@
             <!-- Hero / Highlight (hidden on mobile, show on lg+) -->
             <aside class="relative hidden lg:flex w-full flex-col overflow-hidden bg-black/20 py-10 px-6 text-white sm:py-12 sm:px-7 lg:w-5/12 lg:flex-none lg:py-14 lg:px-8">
                 <div class="absolute inset-0">
-                    <img src="{{ asset('assets/images/login-hero.jpeg') }}" alt="Yatim Center Al-Ruhamaa'" class="h-full w-full object-cover" />
+                    <img src="{{ asset('assets/images/login-hero.png') }}" alt="Yatim Center Al-Ruhamaa'" class="h-full w-full object-cover" />
                     <div class="absolute inset-0 bg-emerald-900/60 mix-blend-multiply"></div>
                     <div class="absolute inset-0 bg-linear-to-b from-black/40 via-emerald-900/40 to-emerald-950/80"></div>
                 </div>
@@ -14,12 +14,12 @@
                         <img src="{{ asset('assets/logo/icon-white.png') }}" alt="Al-Ruhamaa Logo" class="h-10 w-10 object-contain" />
                         <div class="flex flex-col gap-0">
                             <span class="text-sm font-bold uppercase tracking-wide text-white leading-tight">Yatim Center Al - Ruhamaa'</span>
-                            <span class="text-xs font-medium uppercase tracking-wide text-emerald-100">Sistem Wakaf</span>
+                            <span class="text-xs font-medium uppercase tracking-wide text-emerald-100">Wakaf Produktif Bisto</span>
                         </div>
                     </div>
                     <div class="w-12 border-t border-emerald-200/60"></div>
 
-                    <p class="text-xs uppercase tracking-[0.3em] text-emerald-100/70">Platform Manajemen Stok</p>
+                    <p class="text-xs uppercase tracking-[0.3em] text-emerald-100/70">Platform Wakaf Produktif Bisto</p>
 
                     <h1 class="text-3xl font-bold leading-tight text-white sm:text-[34px] text-left">
                         Kelola penjualan, laporan keuangan, dan stok lebih mudah.

@@ -1,42 +1,45 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
-            <h1 class="flex items-center gap-3 text-2xl font-extrabold text-green-900">
-                <span class="inline-flex items-center justify-center w-10 h-10 bg-green-100 text-green-700 rounded-full">
-                    <i class="fas fa-id-card"></i>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 text-emerald-700 rounded-lg sm:rounded-xl">
+                    <i class="fas fa-user-cog text-sm sm:text-base"></i>
                 </span>
-                Pengaturan Profil
-            </h1>
+                <div>
+                    <h1 class="text-base sm:text-xl font-bold text-slate-800">Pengaturan Profil</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Kelola informasi dan keamanan akun Anda</p>
+                </div>
+            </div>
             <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
+               class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg sm:rounded-xl hover:bg-emerald-100 transition">
                 <i class="fas fa-arrow-left"></i>
-                Kembali ke Dashboard
+                <span>Kembali</span>
             </a>
         </div>
     </x-slot>
 
-    <div class="space-y-6">
-        <div class="flex flex-col gap-3 p-4 text-sm border rounded-2xl bg-emerald-50/60 border-emerald-100 text-emerald-800 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center justify-center w-10 h-10 text-emerald-600 bg-white border border-emerald-100 rounded-xl">
-                    <i class="fas fa-shield-alt"></i>
+    <div class="space-y-4 sm:space-y-6">
+        <div class="flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 text-xs sm:text-sm border rounded-xl sm:rounded-2xl bg-emerald-50/60 border-emerald-100 text-emerald-800 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <span class="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-emerald-600 bg-white border border-emerald-100 rounded-lg sm:rounded-xl shrink-0">
+                    <i class="fas fa-id-card-alt text-sm"></i>
                 </span>
                 <div>
-                    <p class="text-sm font-semibold">Kelola identitas dan keamanan akun Anda</p>
-                    <p class="text-xs text-emerald-700">Perbarui informasi personal, ubah password, dan atur keamanan akun dari satu halaman.</p>
+                    <p class="text-xs sm:text-sm font-semibold">Kelola identitas dan keamanan akun Anda</p>
+                    <p class="text-[10px] sm:text-xs text-emerald-700 hidden sm:block">Perbarui informasi personal, ubah password, dan atur keamanan akun dari satu halaman.</p>
                 </div>
             </div>
-            <div class="px-3 py-2 text-xs font-semibold text-emerald-700 bg-white border border-emerald-100 rounded-xl">
-                Tip: Gunakan password unik dan perbarui secara berkala.
+            <div class="hidden lg:block px-3 py-2 text-xs font-medium text-emerald-700 bg-white border border-emerald-100 rounded-lg">
+                <i class="fas fa-lightbulb mr-1 text-amber-500"></i> Gunakan password unik
             </div>
         </div>
 
         @php
             $profileAvatarPath = $user->avatar ?? null;
-            if ($profileAvatarPath && !\Illuminate\Support\Str::startsWith($profileAvatarPath, ['http://', 'https://'])) {
+            if (!empty($profileAvatarPath) && !\Illuminate\Support\Str::startsWith($profileAvatarPath, ['http://', 'https://'])) {
                 $profileAvatarUrl = \Illuminate\Support\Facades\Storage::url($profileAvatarPath);
             } else {
-                $profileAvatarUrl = $profileAvatarPath;
+                $profileAvatarUrl = !empty($profileAvatarPath) ? $profileAvatarPath : null;
             }
             $profileInitials = collect(explode(' ', $user->name))
                 ->filter()
@@ -47,86 +50,80 @@
             }
         @endphp
 
-        <div class="grid gap-6 xl:grid-cols-[1fr,1.5fr]">
-            <div class="space-y-6">
-                <section class="p-6 border border-emerald-100 rounded-2xl bg-white/90 shadow-sm">
-                    <div class="flex flex-col items-center gap-4 text-center">
+        <div class="grid gap-4 sm:gap-6 lg:grid-cols-[1fr,1.5fr]">
+            <div class="space-y-4 sm:space-y-6">
+                <section class="p-4 sm:p-6 border border-emerald-100 rounded-xl sm:rounded-2xl bg-white/90 shadow-sm">
+                    <div class="flex flex-col items-center gap-3 sm:gap-4 text-center">
                         <button type="button"
-                                class="relative w-28 h-28 overflow-hidden rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 ring-4 ring-emerald-100 shadow-lg cursor-zoom-in focus:outline-none focus:ring-4 focus:ring-emerald-300/60"
+                                class="relative w-20 h-20 sm:w-28 sm:h-28 overflow-hidden rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 ring-4 ring-emerald-100 shadow-lg cursor-zoom-in focus:outline-none focus:ring-4 focus:ring-emerald-300/60"
                                 x-data="{}"
                                 x-on:click.prevent="$dispatch('open-modal', 'profile-avatar-preview')">
                             @if ($profileAvatarUrl)
                                 <img src="{{ $profileAvatarUrl }}" alt="{{ $user->name }}" class="object-cover w-full h-full">
                             @else
-                                <div class="flex items-center justify-center w-full h-full text-3xl font-semibold text-white">
+                                <div class="flex items-center justify-center w-full h-full text-2xl sm:text-3xl font-semibold text-white">
                                     {{ $profileInitials }}
                                 </div>
                             @endif
-                            <span class="absolute bottom-3 right-3 inline-flex items-center justify-center w-7 h-7 text-emerald-600 bg-white rounded-full shadow">
-                                <i class="fas fa-circle-user"></i>
+                            <span class="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 text-emerald-600 bg-white rounded-full shadow">
+                                  <i class="fas fa-user-circle text-xs sm:text-sm"></i>
                             </span>
                         </button>
                         <div>
-                            <h2 class="text-xl font-semibold text-emerald-900">{{ $user->name }}</h2>
-                            <p class="text-sm text-emerald-600">{{ $user->email }}</p>
+                            <h2 class="text-lg sm:text-xl font-semibold text-emerald-900">{{ $user->name }}</h2>
+                            <p class="text-xs sm:text-sm text-emerald-600">{{ $user->email }}</p>
                         </div>
-                        <div class="grid w-full gap-3 text-sm text-slate-600">
-                            <div class="flex items-center justify-between px-4 py-2 rounded-xl bg-emerald-50">
+                        <div class="grid w-full gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600">
+                            <div class="flex items-center justify-between px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl bg-emerald-50">
                                 <span class="font-medium text-emerald-800">Role</span>
-                                <span class="px-3 py-1 text-xs font-semibold text-emerald-700 uppercase bg-white border border-emerald-100 rounded-lg">{{ $user->role }}</span>
+                                <span class="px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-emerald-700 uppercase bg-white border border-emerald-100 rounded-md sm:rounded-lg">{{ $user->role }}</span>
                             </div>
-                            <div class="flex items-center justify-between px-4 py-2 rounded-xl bg-slate-50">
+                            <div class="flex items-center justify-between px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl bg-slate-50">
                                 <span class="text-slate-500">Bergabung</span>
                                 <span class="font-semibold text-slate-700">{{ $user->created_at?->format('d M Y') }}</span>
                             </div>
-                            <div class="flex items-center justify-between px-4 py-2 rounded-xl bg-slate-50">
-                                <span class="text-slate-500">Terakhir diperbarui</span>
-                                <span class="font-semibold text-slate-700">{{ $user->updated_at?->format('d M Y H:i') }}</span>
+                            <div class="flex items-center justify-between px-3 sm:px-4 py-2 rounded-lg sm:rounded-xl bg-slate-50">
+                                <span class="text-slate-500">Diperbarui</span>
+                                <span class="font-semibold text-slate-700">{{ $user->updated_at?->format('d M Y') }}</span>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="p-6 border border-emerald-100 rounded-2xl bg-emerald-50/60 shadow-sm space-y-4">
-                    <div class="flex items-center gap-3">
-                        <span class="inline-flex items-center justify-center w-10 h-10 text-emerald-700 bg-white rounded-xl">
-                            <i class="fas fa-lock"></i>
+                <section class="hidden sm:block p-4 sm:p-6 border border-emerald-100 rounded-xl sm:rounded-2xl bg-emerald-50/60 shadow-sm space-y-3 sm:space-y-4">
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <span class="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-emerald-700 bg-white rounded-lg sm:rounded-xl">
+                            <i class="fas fa-lock text-sm"></i>
                         </span>
                         <div>
-                            <h3 class="text-sm font-semibold text-emerald-900 uppercase tracking-wide">Langkah Keamanan</h3>
-                            <p class="text-xs text-emerald-700">Ikuti langkah sederhana ini untuk menjaga akun tetap aman.</p>
+                            <h3 class="text-xs sm:text-sm font-semibold text-emerald-900 uppercase tracking-wide">Langkah Keamanan</h3>
+                            <p class="text-[10px] sm:text-xs text-emerald-700">Tips menjaga akun tetap aman.</p>
                         </div>
                     </div>
-                    <ul class="space-y-4 text-sm leading-relaxed text-emerald-800">
-                        <li class="flex items-start gap-3">
-                            <span class="inline-flex items-center justify-center w-6 h-6 text-white bg-emerald-500 rounded-full">
-                                <i class="fas fa-check text-[10px]"></i>
+                    <ul class="space-y-3 text-xs sm:text-sm leading-relaxed text-emerald-800">
+                        <li class="flex items-start gap-2 sm:gap-3">
+                            <span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-white bg-emerald-500 rounded-full shrink-0 mt-0.5">
+                                <i class="fas fa-check text-[8px] sm:text-[10px]"></i>
                             </span>
-                            <div class="flex-1 text-left">
-                                <p>Gunakan password minimal 8 karakter dengan kombinasi huruf <span class="font-semibold italic">capital</span>, angka, dan simbol.</p>
-                            </div>
+                            <p>Password minimal 8 karakter dengan huruf, angka, dan simbol.</p>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="inline-flex items-center justify-center w-6 h-6 text-white bg-emerald-500 rounded-full">
-                                <i class="fas fa-check text-[10px]"></i>
+                        <li class="flex items-start gap-2 sm:gap-3">
+                            <span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-white bg-emerald-500 rounded-full shrink-0 mt-0.5">
+                                <i class="fas fa-check text-[8px] sm:text-[10px]"></i>
                             </span>
-                            <div class="flex-1 text-left">
-                                <p>Periksa email Anda secara berkala untuk verifikasi dan notifikasi penting.</p>
-                            </div>
+                            <p>Periksa email secara berkala untuk notifikasi penting.</p>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="inline-flex items-center justify-center w-6 h-6 text-white bg-emerald-500 rounded-full">
-                                <i class="fas fa-check text-[10px]"></i>
+                        <li class="flex items-start gap-2 sm:gap-3">
+                            <span class="inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 text-white bg-emerald-500 rounded-full shrink-0 mt-0.5">
+                                <i class="fas fa-check text-[8px] sm:text-[10px]"></i>
                             </span>
-                            <div class="flex-1 text-left">
-                                <p>Perbarui data profil ketika terjadi perubahan kepemilikan atau kontak.</p>
-                            </div>
+                            <p>Perbarui data profil saat ada perubahan.</p>
                         </li>
                     </ul>
                 </section>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-4 sm:space-y-6">
                 @include('profile.partials.update-profile-information-form')
                 @include('profile.partials.update-password-form')
                 @include('profile.partials.delete-user-form')
@@ -134,31 +131,33 @@
         </div>
     </div>
 
-    <x-modal name="profile-avatar-preview" focusable>
-        <div class="p-6 space-y-6">
-            <div class="flex items-start justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-emerald-900">Pratinjau Foto Profil</h2>
-                    <p class="text-sm text-emerald-600/80">Klik tutup untuk kembali ke pengaturan profil.</p>
-                </div>
-                <button type="button" class="text-emerald-500 hover:text-emerald-700 transition"
+    <x-modal name="profile-avatar-preview" focusable maxWidth="sm">
+        <div class="relative overflow-hidden">
+            <div class="px-5 sm:px-6 py-4 bg-white/85 backdrop-blur rounded-t-3xl border-b border-emerald-100 flex items-center justify-between">
+                <h2 class="text-base sm:text-lg font-semibold text-emerald-900">Foto Profil</h2>
+                <button type="button"
+                        class="inline-flex items-center justify-center w-8 h-8 text-emerald-500 hover:text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full transition"
                         x-on:click="$dispatch('close')">
-                    <i class="fas fa-times text-lg"></i>
+                    <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
 
-            @if ($profileAvatarUrl)
-                <div class="overflow-hidden rounded-3xl border-2 border-emerald-100 shadow-xl">
-                    <img src="{{ $profileAvatarUrl }}" alt="{{ $user->name }}" class="object-contain w-full max-h-[70vh] bg-white">
-                </div>
-            @else
-                <div class="p-6 text-center border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/60">
-                    <p class="text-sm font-medium text-emerald-700">Belum ada foto profil yang diunggah.</p>
-                    <p class="text-xs text-emerald-500 mt-1">Unggah foto melalui formulir "Informasi Profil" untuk melihat pratinjau di sini.</p>
-                </div>
-            @endif
+            <div class="px-5 sm:px-6 py-5 bg-white/95">
+                @if ($profileAvatarUrl)
+                    <div class="flex justify-center">
+                        <div class="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-emerald-100 shadow bg-white overflow-hidden">
+                            <img src="{{ $profileAvatarUrl }}" alt="{{ $user->name }}" class="object-cover w-full h-full">
+                        </div>
+                    </div>
+                @else
+                    <div class="p-5 text-center border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/70">
+                        <p class="text-sm font-semibold text-emerald-700">Belum ada foto profil.</p>
+                        <p class="mt-1 text-xs text-emerald-500">Unggah foto melalui formulir profil terlebih dahulu.</p>
+                    </div>
+                @endif
+            </div>
 
-            <div class="flex justify-end">
+            <div class="px-5 sm:px-6 py-3 bg-emerald-50/80 border-t border-emerald-100 rounded-b-3xl flex justify-end">
                 <button type="button"
                         class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-linear-to-r from-emerald-500 to-teal-500 hover:scale-[1.02]"
                         x-on:click="$dispatch('close')">
@@ -240,7 +239,7 @@
                     const icon = removeButton?.querySelector('i');
                     if (icon) {
                         icon.classList.toggle('fa-trash', !isRemoving);
-                        icon.classList.toggle('fa-rotate-left', isRemoving);
+                        icon.classList.toggle('fa-undo', isRemoving);
                     }
                 };
 

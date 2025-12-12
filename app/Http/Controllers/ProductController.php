@@ -356,6 +356,37 @@ Activity::create([
      return redirect()->back()->with('success', 'berhasil menambahkan produk');
 
     }
+
+    /**
+     * Bulk delete products
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:products,id',
+        ]);
+
+        $ids = $request->input('ids', []);
+        $count = count($ids);
+
+        // Delete related prices first
+        Price::whereIn('product_id', $ids)->delete();
+        
+        // Delete products
+        Produk::whereIn('id', $ids)->delete();
+
+        // Log activity
+        Activity::create([
+            'user' => Auth::check() ? Auth::user()->name : 'Guest',
+            'action' => "Menghapus {$count} produk secara massal",
+            'model' => 'Produk',
+            'record_id' => null,
+        ]);
+
+        return redirect()->route('invent')->with('success', "{$count} produk berhasil dihapus!");
+    }
+
     public function deleteall()
     {
 
