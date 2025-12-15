@@ -32,11 +32,10 @@ class ResetPasswordNotification extends Notification
 
         return (new MailMessage)
             ->subject('Reset Password - Yatim Center Al-Ruhamaa')
-            ->greeting('Halo!')
-            ->line('Anda menerima email ini karena kami menerima permintaan reset password untuk akun Anda.')
-            ->action('Reset Password', $url)
-            ->line('Link reset password ini akan kedaluwarsa dalam 60 menit.')
-            ->line('Jika Anda tidak meminta reset password, abaikan email ini.')
-            ->salutation('Salam hangat, Yatim Center Al-Ruhamaa');
+            ->view('emails.auth.reset-password', [
+                'appName' => config('app.name', 'Yatim Center Al-Ruhamaa'),
+                'resetUrl' => $url,
+                'userName' => $notifiable->name ?? 'Pengguna',
+            ]);
     }
 }
