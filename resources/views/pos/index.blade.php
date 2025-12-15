@@ -404,7 +404,7 @@
                         </div>
 
                         <div class="p-5 space-y-5">
-                            <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                            <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
                                 <div class="relative flex-1">
                                     <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-emerald-400">
                                         <i class="fas fa-search"></i>
@@ -415,96 +415,97 @@
                                         x-model.debounce.300ms="searchQuery"
                                         @input="currentPage = 1"
                                         placeholder="Cari nama produk, kode, atau deskripsi…"
-                                        class="w-full py-3 pl-12 pr-4 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 placeholder:font-normal placeholder:text-slate-400">
+                                        class="w-full py-2.5 pl-11 pr-3 text-[13px] font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 placeholder:font-normal placeholder:text-slate-400">
                                 </div>
                                 <button
                                     type="button"
                                     @click="resetFilters()"
-                                    class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-emerald-600 transition border border-slate-200 rounded-xl hover:border-emerald-300 hover:bg-emerald-50">
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-emerald-600 transition border border-slate-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50">
                                     <i class="fas fa-rotate-left"></i> <span>Bersihkan filter</span>
                                 </button>
                             </div>
 
-                            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                <div>
-                                    <label class="block mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Urutkan</label>
+                            <div class="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-4">
+                                <div class="h-full rounded-[10px] border border-slate-200 bg-white p-2">
+                                    <p class="mb-1 text-[10px] font-semibold tracking-[0.08em] text-slate-500 uppercase">Urutkan</p>
                                     <div class="relative">
                                         <select
                                             x-model="sortBy"
                                             @change="currentPage = 1"
-                                            class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 appearance-none">
+                                            class="w-full h-9 rounded-lg border border-slate-200 bg-white pl-3 pr-7 text-[12px] font-semibold text-slate-800 appearance-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100">
                                             <option value="name_asc">Nama A-Z</option>
                                             <option value="price_asc">Harga terendah</option>
                                             <option value="price_desc">Harga tertinggi</option>
                                         </select>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400"><i class="fas fa-chevron-down text-[10px]"></i></span>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label class="block mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Jumlah per halaman</label>
+                                <div class="h-full rounded-[10px] border border-slate-200 bg-white p-2">
+                                    <p class="mb-1 text-[10px] font-semibold tracking-[0.08em] text-slate-500 uppercase">Jumlah halaman</p>
                                     <div class="relative">
                                         <select
                                             x-model.number="perPage"
                                             @change="currentPage = 1"
-                                            class="w-full px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 appearance-none">
+                                            class="w-full h-9 rounded-lg border border-slate-200 bg-white pl-3 pr-7 text-[12px] font-semibold text-slate-800 appearance-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100">
                                             <template x-for="size in perPageOptions" :key="'per-page-' + size">
                                                 <option :value="size" x-text="size + ' produk'"></option>
                                             </template>
                                         </select>
-                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 pointer-events-none"><i class="fas fa-chevron-down text-xs"></i></span>
+                                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-slate-400"><i class="fas fa-chevron-down text-[10px]"></i></span>
                                     </div>
                                 </div>
 
-                                <div class="sm:col-span-2 lg:col-span-1">
-                                    <label class="block mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Kategori</label>
+                                <div class="h-full rounded-[10px] border border-slate-200 bg-white p-2 sm:col-span-2 xl:col-span-1">
+                                    <p class="mb-1 text-[10px] font-semibold tracking-[0.08em] text-slate-500 uppercase">Kategori</p>
                                     <div class="relative overflow-hidden">
-                                        <!-- Clickable scroll arrow left (Poin 12) -->
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: -150, behavior: 'smooth' })"
                                                 x-show="categoryScrollLeft > 0"
-                                                class="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white via-white/90 to-transparent z-10 flex items-center justify-start pl-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer" 
+                                                class="absolute left-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-start bg-gradient-to-r from-white via-white/95 to-transparent pl-1 opacity-0 transition-opacity hover:opacity-100"
                                                 :class="{ 'opacity-80': categoryScrollLeft > 0 }">
-                                            <i class="fas fa-chevron-left text-emerald-600 text-sm"></i>
+                                            <i class="fas fa-chevron-left text-xs text-emerald-600"></i>
                                         </button>
-                                        
-                                        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide scroll-smooth px-2"
+
+                                        <div class="scrollbar-hide flex gap-1.5 overflow-x-auto px-1 pb-1 scroll-smooth"
                                              x-ref="categoryScroller"
                                              @scroll="categoryScrollLeft = $refs.categoryScroller.scrollLeft; categoryScrollRight = $refs.categoryScroller.scrollWidth - $refs.categoryScroller.clientWidth - $refs.categoryScroller.scrollLeft">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl border whitespace-nowrap transition"
-                                                :class="selectedCategory === 'all' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'text-slate-600 bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50'"
+                                                class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[12px] font-semibold transition"
+                                                :class="selectedCategory === 'all' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50'"
                                                 @click="selectedCategory = 'all'; currentPage = 1">
-                                                <i class="fas fa-layer-group mr-2"></i> Semua
+                                                <i class="fas fa-layer-group mr-2 text-[11px]"></i> Semua
                                             </button>
                                             <template x-for="category in categories" :key="'chip-'+category.id">
                                                 <button
                                                     type="button"
-                                                    class="inline-flex items-center px-4 py-2.5 text-xs font-semibold rounded-xl border whitespace-nowrap transition"
+                                                    class="inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-1 text-[12px] font-semibold transition"
                                                     :class="String(selectedCategory) === String(category.id)
                                                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                                                        : 'text-slate-600 bg-white border-slate-200 hover:border-emerald-300 hover:bg-emerald-50'"
+                                                        : 'bg-white text-slate-700 border-slate-200 hover:border-emerald-300 hover:bg-emerald-50'"
                                                     @click="selectedCategory = category.id; currentPage = 1"
                                                     x-text="category.name"></button>
                                             </template>
                                         </div>
-                                        
-                                        <!-- Clickable scroll arrow right (Poin 12) -->
+
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: 150, behavior: 'smooth' })"
                                                 x-show="categoryScrollRight > 5"
-                                                class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white via-white/90 to-transparent z-10 flex items-center justify-end pr-1 opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+                                                class="absolute right-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-end bg-gradient-to-l from-white via-white/95 to-transparent pr-1 opacity-0 transition-opacity hover:opacity-100"
                                                 :class="{ 'opacity-80': categoryScrollRight > 5 }">
-                                            <i class="fas fa-chevron-right text-emerald-600 text-sm"></i>
+                                            <i class="fas fa-chevron-right text-xs text-emerald-600"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="flex items-end">
-                                    <label class="inline-flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl w-full cursor-pointer hover:border-emerald-300 hover:bg-emerald-50 transition">
-                                        <input type="checkbox" class="w-4 h-4 text-emerald-600 border-emerald-300 rounded focus:ring-emerald-500" x-model="showInStockOnly" @change="currentPage = 1">
-                                        <span class="text-xs">Stok tersedia saja</span>
+                                <div class="h-full">
+                                    <label class="flex h-full items-start gap-2 rounded-[10px] border border-slate-200 bg-white px-2.5 py-1.5 text-[12px] font-semibold text-slate-800 transition hover:border-emerald-300 hover:bg-emerald-50">
+                                        <input type="checkbox" class="mt-0.5 h-3.5 w-3.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500" x-model="showInStockOnly" @change="currentPage = 1">
+                                        <div class="leading-tight">
+                                            <span class="block text-[12.5px] font-semibold text-slate-900">Stok tersedia saja</span>
+                                            <span class="text-[10.5px] font-normal text-slate-500">Sembunyikan produk stok habis</span>
+                                        </div>
                                     </label>
                                 </div>
                             </div>
