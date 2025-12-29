@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Produk;
 use App\Models\Kategori;
 use App\Models\Stockin;
+use App\Models\Stockout;
 use App\Models\Units;
 
 use App\Models\Supplier;
@@ -132,7 +133,7 @@ class InventController extends Controller
             'stok'     => 'required|integer|min:1',
             'satuan'   => 'required|exists:units,id',
             'harga_t'  => 'required|numeric|min:0',
-            'bukti'    => 'nullable|image|max:2048',
+            'bukti'    => 'nullable|image|max:5120',
         ]);
 
         // Ambil produk dan satuan
@@ -183,6 +184,54 @@ class InventController extends Controller
         ]);
 
         return redirect()->route('invent')->with('success', 'Berhasil menambahkan stok');
+    }
+
+    public function createStockOut()
+    {
+        $produk = Produk::with('units')->where('stock_quantity', '>', 0)->get();
+        return view('inventory.create_stock_out', compact('produk'));
+    }
+
+    public function storeStockOut(Request $request)
+    {
+        $validated = $request->validate([
+            'name_p' => 'required|exists:products,id',
+            'stok' => 'required|integer|min:1',
+            'note' => 'required|string|max:255',
+        ]);
+
+        $produk = Produk::findOrFail($validated['name_p']);
+
+        if ($produk->stock_quantity < $validated['stok']) {
+            return back()->withErrors(['stok' => 'Stok tidak mencukupi. Stok saat ini: ' . $produk->stock_quantity]);
+        }
+
+        // Kurangi stok
+        $produk->decrement('stock_quantity', $validated['stok']);
+
+        // Catat di Stockout (Manual)
+        Stockout::create([
+            'product_name' => $produk->name,
+            'customer_name' => 'Manual Adjustment',
+            'costumer_type' => 'internal',
+            'stock_qty' => $validated['stok'],
+            'prices' => 0,
+            'satuan' => $produk->units->name ?? 'pcs',
+            'shipping_cost' => 0,
+            'total_price' => 0,
+            'payment_received' => 0,
+            'note' => $validated['note'],
+        ]);
+
+        // Catat aktivitas
+        Activity::create([
+            'user'      => Auth::check() ? Auth::user()->name : 'Guest',
+            'action'    => 'Mengurangi stok',
+            'model'     => 'inventori',
+            'record_id' => $produk->id,
+        ]);
+
+        return redirect()->route('invent')->with('success', 'Berhasil mengurangi stok');
     }
 
     public function export(Request $request)
