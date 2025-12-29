@@ -24,6 +24,16 @@
 
                 <div class="flex flex-wrap items-center gap-2">
                     @if(in_array(Auth::user()->role ?? '', ['manager', 'admin']))
+                        <a href="{{ route('stock.create') }}"
+                           class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow bg-green-500 hover:bg-green-600 transition">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Tambah Stok</span>
+                        </a>
+                        <a href="{{ route('stock.create_out') }}"
+                           class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow bg-red-500 hover:bg-red-600 transition">
+                            <i class="fas fa-minus-circle"></i>
+                            <span>Kurangi Stok</span>
+                        </a>
                         <a href="{{ route('products.create') }}"
                            class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow bg-emerald-500 hover:bg-emerald-600 transition">
                             <i class="fas fa-plus"></i>
@@ -815,7 +825,7 @@
                 </span>
                 <p class="text-lg font-semibold text-slate-800">Belum ada data inventori</p>
                 <p class="text-sm text-slate-500">Tambahkan produk baru atau import data untuk mulai mengelola stok.</p>
-                <a href="{{ route('products.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-emerald-500 to-emerald-600">
+                <a href="{{ route('products.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-emerald-500 to-emerald-600">
                     <i class="fas fa-plus"></i>
                     Tambah Produk Pertama
                 </a>

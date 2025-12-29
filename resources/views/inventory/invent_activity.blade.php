@@ -12,7 +12,11 @@
         </div>
     </x-slot>
 
-
+    <div class="space-y-6">
+        <x-breadcrumb :items="[
+            ['title' => 'Inventori', 'url' => route('invent')],
+            ['title' => 'Riwayat Stok Masuk']
+        ]" />
 
 
 <div class="p-6 bg-white shadow-lg rounded-2xl">
@@ -30,7 +34,7 @@
             <form action="" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data stok masuk?');">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-linear-to-r from-red-500 to-red-700 hover:scale-[1.02]">
+                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-red-500 to-red-700 hover:scale-[1.02]">
                     <i class="mr-2 fa-solid fa-trash"></i>Hapus Semua
                 </button>
             </form>
@@ -103,5 +107,6 @@
             </table>
         </div>
     @endif
-</div>
+    </div>
+    </div>
 </x-app-layout>

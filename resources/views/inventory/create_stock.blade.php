@@ -6,11 +6,17 @@
                 {{ __('Tambah Stok Produk Baru') }}
             </h2>
             <a href="{{ route('invent') }}"
-                class="px-4 py-2 font-medium text-white transition rounded-lg shadow bg-linear-to-r from-green-500 to-green-700 hover:scale-105">
+                class="px-4 py-2 font-medium text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
                 <i class="mr-2 fas fa-arrow-left"></i>Kembali
             </a>
         </div>
     </x-slot>
+
+    <div class="space-y-6">
+        <x-breadcrumb :items="[
+            ['title' => 'Inventori', 'url' => route('invent')],
+            ['title' => 'Tambah Stok']
+        ]" />
 
     <div class="mt-8 overflow-hidden bg-white shadow-lg rounded-2xl">
         <div class="p-8">
@@ -153,11 +159,12 @@
             Batal
         </a>
         <button type="submit"
-            class="px-6 py-2 font-medium text-white transition rounded-lg shadow bg-linear-to-r from-green-500 to-green-700 hover:scale-105">
+            class="px-6 py-2 font-medium text-white transition rounded-lg shadow bg-gradient-to-r from-green-500 to-green-700 hover:scale-105">
             <i class="mr-2 fas fa-save"></i>Simpan
         </button>
     </div>
 </form>
         </div>
+    </div>
     </div>
 </x-app-layout>
