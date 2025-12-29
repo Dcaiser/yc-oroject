@@ -47,29 +47,34 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show'); // Route yang hilang
     Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
     Route::patch('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+    
+    // Bulk delete route (must be before destroy to avoid conflict with {user} parameter)
+    Route::delete('/users/bulk-delete', [UserManagementController::class, 'bulkDelete'])->name('users.bulk-delete');
+    
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/export', [UserManagementController::class, 'export'])->name('users.export');
-
-    // Bulk delete route
-    Route::delete('/users/bulk-delete', [UserManagementController::class, 'bulkDelete'])->name('users.bulk-delete');
 });
 // Product Management - untuk Manager dan Admin
 Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
     Route::get('/products', [ProductController::class,'index'])->name('products.index');
     Route::get('/addproducts', [ProductController::class,'create'])->name('products.create');
     Route::post('/addproducts', [ProductController::class,'store'])->name('products.store');
-    Route::delete('/deleteproducts{id}', [ProductController::class,'destroy'])->name('products.destroy');
-    Route::put('/editproducts/{id}', [ProductController::class,'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductController::class,'destroy'])->name('products.destroy');
+    Route::put('/products/{id}', [ProductController::class,'update'])->name('products.update');
     Route::delete('/deleteproducts', [ProductController::class,'deleteall'])->name('deleteall');
     Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulkDelete');
 
 
 });
+
 Route::middleware('auth')->group(function () {
     Route::get('/pos', [Poscontroller::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [Poscontroller::class, 'checkout'])->name('pos.checkout');
+
     Route::get('/pos/status', [Poscontroller::class, 'status'])->name('pos.payments');
     Route::post('/pos/status/{transaction}/pay', [Poscontroller::class, 'applyPayment'])->name('pos.payments.pay');
+    Route::patch('/pos/status/{transaction}/status', [Poscontroller::class, 'updateStatus'])->name('pos.payments.status');
 });
 
 
@@ -104,6 +109,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/inventdelete', [InventController::class, 'deleteall'])->name('deleteallinvent');
     Route::get('/inventory/create-stock', [InventController::class, 'createStock'])->name('stock.create');
     Route::post('/inventory/create-stock', [InventController::class, 'updateStock'])->name('addstock');
+    Route::get('/inventory/create-stock-out', [InventController::class, 'createStockOut'])->name('stock.create_out');
+    Route::post('/inventory/create-stock-out', [InventController::class, 'storeStockOut'])->name('storeStockOut');
     Route::get('/inventory/notes', [InventController::class, 'create'])->name('invent_notes');
 
 
@@ -135,6 +142,8 @@ Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-sales', [ReportController::class, 'exportSales'])->name('reports.export-sales');
     Route::get('/reports/export-stock', [ReportController::class, 'exportStock'])->name('reports.export-stock');
+    Route::get('/reports/sales/{stockout}/edit', [ReportController::class, 'editSale'])->name('reports.sales.edit');
+    Route::put('/reports/sales/{stockout}', [ReportController::class, 'updateSale'])->name('reports.sales.update');
 
     // Generic Export Routes (untuk dashboard reports)
     Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.export-pdf');
