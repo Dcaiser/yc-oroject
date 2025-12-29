@@ -1,6 +1,6 @@
 <x-guest-layout>
     <div class="bg-slate-50 h-screen flex items-center justify-center px-4 overflow-hidden">
-        <div class="mx-auto flex w-full max-w-4xl flex-col gap-0 rounded-2xl bg-white shadow-xl shadow-emerald-500/10 ring-1 ring-slate-200/50 lg:flex-row lg:overflow-hidden max-h-[95vh]">
+        <div class="mx-auto flex w-full max-w-4xl flex-col gap-0 rounded-2xl bg-white shadow-xl shadow-emerald-500/10 ring-1 ring-slate-200/50 lg:flex-row lg:overflow-hidden">
             <!-- Hero / Highlight (hidden on mobile, show on lg+) -->
             <aside class="relative hidden lg:flex w-full flex-col overflow-hidden bg-black/20 py-10 px-6 text-white sm:py-12 sm:px-7 lg:w-5/12 lg:flex-none lg:py-14 lg:px-8">
                 <div class="absolute inset-0">
@@ -14,12 +14,12 @@
                         <img src="{{ asset('assets/logo/icon-white.png') }}" alt="Al-Ruhamaa Logo" class="h-10 w-10 object-contain" />
                         <div class="flex flex-col gap-0">
                             <span class="text-sm font-bold uppercase tracking-wide text-white leading-tight">Yatim Center Al - Ruhamaa'</span>
-                            <span class="text-xs font-medium uppercase tracking-wide text-emerald-100">Wakaf Produktif Bisto</span>
+                            <span class="text-xs font-medium uppercase tracking-wide text-emerald-100">Distributor Bisto Al-Ruhamaa'</span>
                         </div>
                     </div>
                     <div class="w-12 border-t border-emerald-200/60"></div>
 
-                    <p class="text-xs uppercase tracking-[0.3em] text-emerald-100/70">Platform Wakaf Produktif Bisto</p>
+                    <p class="text-xs uppercase tracking-[0.3em] text-emerald-100/70">Platform Distributor Bisto Al-Ruhamaa'</p>
 
                     <h1 class="text-3xl font-bold leading-tight text-white sm:text-[34px] text-left">
                         Kelola penjualan, laporan keuangan, dan stok lebih mudah.
@@ -27,7 +27,7 @@
 
                     <div class="mt-auto space-y-2 pt-6">
                         <p class="text-[13px] leading-relaxed tracking-tight text-emerald-50">
-                            Pantau Stok Barang <br /> 
+                            Pantau Stok Barang <br />
                             dan Laporan Transaksi dalam satu sistem.
                         </p>
                     </div>
@@ -107,7 +107,7 @@
 
                     <div class="flex flex-row items-center justify-between">
                         <label for="remember_me" class="inline-flex items-center gap-1.5 text-sm leading-tight text-slate-600">
-                            <input id="remember_me" name="remember" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 transition focus:ring-green-500">
+                            <input id="remember_me" name="remember" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 transition focus:ring-green-500" checked>
                             <span>Ingat saya</span>
                         </label>
 
