@@ -26,17 +26,30 @@ class SalesTransactionExport implements FromArray, WithHeadings, WithStyles, Wit
     public function array(): array
     {
         return array_map(function ($row, $index) {
+            $entryType = $row['entry_type'] ?? 'sale';
+            $isExpense = $entryType === 'expense';
+
+            $qtyLabel = $isExpense ? '' : (($row['qty'] ?? 0) . ' ' . ($row['satuan'] ?? ''));
+            $price = $isExpense ? null : ($row['price_per_unit'] ?? null);
+            $total = $isExpense ? null : ($row['total_price'] ?? null);
+            $shipping = $isExpense ? null : ($row['shipping_cost'] ?? null);
+            $expenseAmount = $isExpense ? ($row['expense_amount'] ?? null) : null;
+
             return [
                 'no' => $index + 1,
-                'date' => $row['date'],
-                'customer_name' => $row['customer_name'],
-                'customer_type' => $row['customer_type'],
-                'product_name' => $row['product_name'],
-                'qty' => $row['qty'],
-                'price_per_unit' => $row['price_per_unit'],
-                'total_price' => $row['total_price'],
-                'shipping_cost' => $row['shipping_cost'],
-                'grand_total' => $row['grand_total'],
+                'date' => $row['date'] ?? '',
+                'customer_name' => $isExpense ? '' : ($row['customer_name'] ?? ''),
+                'customer_type' => $isExpense ? 'Pengeluaran' : ucfirst($row['customer_type'] ?? ''),
+                'product_name' => $isExpense ? '' : ($row['product_name'] ?? ''),
+                'qty' => $qtyLabel,
+                'price_per_unit' => $price,
+                'total_price' => $total,
+                'shipping_cost' => $shipping,
+                'expense_label' => $isExpense ? ($row['expense_label'] ?? '') : '',
+                'expense_amount' => $expenseAmount,
+                'grand_total' => $isExpense
+                    ? -1 * ($expenseAmount ?? 0)
+                    : (($total ?? 0) + ($shipping ?? 0)),
             ];
         }, $this->data, array_keys($this->data));
     }
@@ -53,6 +66,8 @@ class SalesTransactionExport implements FromArray, WithHeadings, WithStyles, Wit
             'Harga Satuan',
             'Total Harga',
             'Ongkir',
+            'Pengeluaran',
+            'Nominal Pengeluaran',
             'Grand Total',
         ];
     }
@@ -86,7 +101,9 @@ class SalesTransactionExport implements FromArray, WithHeadings, WithStyles, Wit
             'G' => 18, // Harga Satuan
             'H' => 18, // Total Harga
             'I' => 15, // Ongkir
-            'J' => 18, // Grand Total
+            'J' => 22, // Pengeluaran
+            'K' => 20, // Nominal Pengeluaran
+            'L' => 18, // Grand Total
         ];
     }
 

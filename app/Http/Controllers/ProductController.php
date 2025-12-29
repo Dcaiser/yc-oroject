@@ -40,7 +40,7 @@ class ProductController extends Controller
         $lowStockCount = Produk::where('stock_quantity', '<=', 20)->where('stock_quantity', '>', 0)->count();
         $outOfStockCount = Produk::where('stock_quantity', '<=', 0)->count();
         $totalCategories = Kategori::whereHas('products')->count();
-        
+
         $stats = [
             'total' => $totalProducts,
             'low_stock' => $lowStockCount,
@@ -49,22 +49,22 @@ class ProductController extends Controller
         ];
 
         $units = Units::all();
-        $supplier = Supplier::all();
+        $suppliers = Supplier::all();
         $category = Kategori::all();
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        
+
         return view('products.index', compact([
-            'products', 'category', 'customertypes', 'supplier', 'units', 'stats', 'search', 'categoryFilter'
+            'products', 'category', 'customertypes', 'suppliers', 'units', 'stats', 'search', 'categoryFilter'
         ]));
     }
 
     public function create()
     {
         $units = Units::all();
-        $supplier = Supplier::all();
+        $suppliers = Supplier::all();
         $category = Kategori::paginate(5);
         $customertypes = ['agent', 'reseller', 'pelanggan'];
-        return view('products.create', compact(['category','customertypes','supplier','units']));
+        return view('products.create', compact(['category','customertypes','suppliers','units']));
     }
 
     public function store(Request $request)
@@ -72,11 +72,11 @@ class ProductController extends Controller
         $validated = $request->validate([
             'nama'         => 'required|string|max:255',
             'deskripsi'    => 'nullable|string',
-            'supplier_id'  => 'required|int',
+            'supplier_id'  => 'required|exists:suppliers,id',
             'kategori_id'  => 'required|int',
-            'stok_user'    => 'required|numeric|min:0.0001',
+            'stok_user'    => 'required|numeric|min:0',
             'satuan'       => 'required|exists:units,id',
-            'gambar'       => 'nullable|image|max:2048',
+            'gambar'       => 'nullable|image|max:5120',
             'prices'       => 'required|array',
             'prices.*'     => 'required|numeric|min:0',
         ]);
@@ -178,14 +178,13 @@ Activity::create([
             'price1' => 'nullable|numeric',
             'stock1'  => 'required|numeric|min:0',
             'satuan1' => 'required|exists:units,id',
-            'description1' => 'required|string',
+            'description1' => 'nullable|string',
             'sku1' => 'required|string',
-            'description1' => 'required|string',
-            'kategori_id1' => 'required|string',
-            'supplier_id1' => 'required|int',
+            'kategori_id1' => 'required|int',
+            'supplier_id1' => 'required|exists:suppliers,id',
             'prices' => 'sometimes|array',
             'prices.*' => 'nullable|numeric|min:0',
-            'gambar_edit' => 'nullable|image|max:2048',
+            'gambar_edit' => 'nullable|image|max:5120',
 
 
         ]);
@@ -207,11 +206,15 @@ Activity::create([
             'sku'            => $request->sku1,
             'stock_quantity' => $request->stock1,
             'description'    => $request->description1,
-            'supplier_id'    => $request->supplier_id1,
+            'supplier_id'    => $request->supplier_id1 ?? $product->supplier_id,
         ];
 
         if ($newImagePath) {
             $updateData['image_path'] = $newImagePath;
+        }
+
+        if (empty($updateData['supplier_id'])) {
+            unset($updateData['supplier_id']);
         }
 
         $product->update($updateData);
@@ -372,7 +375,7 @@ Activity::create([
 
         // Delete related prices first
         Price::whereIn('product_id', $ids)->delete();
-        
+
         // Delete products
         Produk::whereIn('id', $ids)->delete();
 

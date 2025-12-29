@@ -8,7 +8,7 @@
                 Tambah User Baru
             </h1>
             <a href="{{ route('users.index') }}"
-               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
+               class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-teal-500 to-emerald-600">
                 <i class="fas fa-arrow-left"></i>
                 Kembali
             </a>
@@ -103,18 +103,28 @@
                                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
                                         <label for="password" class="text-xs font-semibold tracking-wide text-emerald-600 uppercase">Password<span class="text-red-500"> *</span></label>
-                                        <div class="relative mt-2">
-                                            <input type="password"
+                                        <div class="relative mt-2" x-data="{ show: false }">
+                                            <input :type="show ? 'text' : 'password'"
                                                    id="password"
                                                    name="password"
                                                    required
                                                    placeholder="Minimal 8 karakter"
                                                    class="w-full px-4 py-2.5 text-sm text-slate-800 bg-white border-2 border-emerald-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 placeholder:text-slate-400">
                                             <button type="button"
-                                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-400 hover:text-emerald-600"
-                                                    data-password-toggle
-                                                    data-target="#password">
-                                                <i class="fas fa-eye-slash"></i>
+                                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-400 transition hover:text-emerald-600"
+                                                    :aria-label="show ? 'Sembunyikan password' : 'Tampilkan password'"
+                                                    :aria-pressed="show"
+                                                    @click.prevent="show = !show">
+                                                <svg x-show="!show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                                </svg>
+                                                <svg x-show="show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.18 6.18A18.5 18.5 0 0 0 2 12s3 7 10 7a9.8 9.8 0 0 0 2.12-.22" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 4.12A10 10 0 0 1 12 4c7 0 10 8 10 8a18.7 18.7 0 0 1-1.67 2.68" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.58 10.58a3 3 0 0 0 4.24 4.24" />
+                                                </svg>
                                             </button>
                                         </div>
                                         @error('password')
@@ -123,18 +133,28 @@
                                     </div>
                                     <div>
                                         <label for="password_confirmation" class="text-xs font-semibold tracking-wide text-emerald-600 uppercase">Konfirmasi Password<span class="text-red-500"> *</span></label>
-                                        <div class="relative mt-2">
-                                            <input type="password"
+                                        <div class="relative mt-2" x-data="{ show: false }">
+                                            <input :type="show ? 'text' : 'password'"
                                                    id="password_confirmation"
                                                    name="password_confirmation"
                                                    required
                                                    placeholder="Ulangi password"
                                                    class="w-full px-4 py-2.5 text-sm text-slate-800 bg-white border-2 border-emerald-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 placeholder:text-slate-400">
                                             <button type="button"
-                                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-400 hover:text-emerald-600"
-                                                    data-password-toggle
-                                                    data-target="#password_confirmation">
-                                                <i class="fas fa-eye-slash"></i>
+                                                    class="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-400 transition hover:text-emerald-600"
+                                                    :aria-label="show ? 'Sembunyikan password' : 'Tampilkan password'"
+                                                    :aria-pressed="show"
+                                                    @click.prevent="show = !show">
+                                                <svg x-show="!show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                                </svg>
+                                                <svg x-show="show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.18 6.18A18.5 18.5 0 0 0 2 12s3 7 10 7a9.8 9.8 0 0 0 2.12-.22" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 4.12A10 10 0 0 1 12 4c7 0 10 8 10 8a18.7 18.7 0 0 1-1.67 2.68" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.58 10.58a3 3 0 0 0 4.24 4.24" />
+                                                </svg>
                                             </button>
                                         </div>
                                         @error('password_confirmation')
@@ -189,7 +209,7 @@
                                             <p><strong>Drag &amp; drop</strong> file ke sini</p>
                                             <p class="text-xs text-slate-500">atau pilih dari perangkat</p>
                                         </div>
-                                        <button type="button" data-trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-teal-500 to-emerald-600">
+                                        <button type="button" data-trigger class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-teal-500 to-emerald-600">
                                             <i class="fas fa-upload"></i>Pilih Avatar
                                         </button>
                                     </div>
@@ -200,7 +220,7 @@
                                 <input type="file"
                                        name="avatar"
                                        accept="image/*"
-                                       data-max-size="2048"
+                                       data-max-size="5120"
                                        class="hidden"
                                        data-file-input>
                                 <p class="mt-3 text-xs text-slate-500" data-helper>Pakai gambar berbentuk persegi agar hasil lebih rapi.</p>
@@ -242,7 +262,7 @@
                                 Batal
                             </a>
                             <button type="submit"
-                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-emerald-500 to-emerald-600">
+                                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-emerald-500 to-emerald-600">
                                 <i class="fas fa-save"></i>
                                 Simpan User
                             </button>
@@ -256,25 +276,6 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('[data-password-toggle]').forEach((button) => {
-                    const targetSelector = button.dataset.target;
-                    const target = document.querySelector(targetSelector);
-                    if (!target) {
-                        return;
-                    }
-
-                    const icon = button.querySelector('i');
-                    button.addEventListener('click', () => {
-                        if (target.type === 'password') {
-                            target.type = 'text';
-                            icon?.classList.replace('fa-eye-slash', 'fa-eye');
-                        } else {
-                            target.type = 'password';
-                            icon?.classList.replace('fa-eye', 'fa-eye-slash');
-                        }
-                    });
-                });
-
                 const avatarSection = document.querySelector('[data-avatar-uploader]');
                 if (!avatarSection) {
                     return;
@@ -289,7 +290,7 @@
                 const removeButton = avatarSection.querySelector('[data-remove]');
                 const errorText = avatarSection.querySelector('[data-error]');
                 const helperText = avatarSection.querySelector('[data-helper]');
-                const maxSizeKb = parseInt(fileInput?.dataset.maxSize ?? '2048', 10);
+                const maxSizeKb = parseInt(fileInput?.dataset.maxSize ?? '5120', 10);
                 const maxSizeBytes = maxSizeKb * 1024;
                 const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
                 let objectUrl = null;

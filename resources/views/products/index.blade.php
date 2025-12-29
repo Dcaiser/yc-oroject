@@ -290,11 +290,11 @@
                                             <td class="px-3 py-3 text-center">
                                                 @php
                                                     $stock = $product->stock_quantity ?? 0;
-                                                    $stockFormatted = fmod($stock, 1) === 0.0 
-                                                        ? number_format($stock, 0, ',', '.') 
+                                                    $stockFormatted = fmod($stock, 1) === 0.0
+                                                        ? number_format($stock, 0, ',', '.')
                                                         : rtrim(rtrim(number_format($stock, 2, ',', '.'), '0'), ',');
                                                     $unitName = $product->units?->name ?? 'unit';
-                                                    
+
                                                     if ($stock <= 0) {
                                                         $stockClass = 'bg-rose-50 text-rose-600 border-rose-100';
                                                         $stockIcon = 'fa-circle-xmark';
@@ -374,11 +374,11 @@
                                             </span>
                                             @php
                                                 $stock = $product->stock_quantity ?? 0;
-                                                $stockFormatted = fmod($stock, 1) === 0.0 
-                                                    ? number_format($stock, 0, ',', '.') 
+                                                $stockFormatted = fmod($stock, 1) === 0.0
+                                                    ? number_format($stock, 0, ',', '.')
                                                     : rtrim(rtrim(number_format($stock, 2, ',', '.'), '0'), ',');
                                                 $unitName = $product->units?->name ?? 'pcs';
-                                                
+
                                                 if ($stock <= 0) {
                                                     $stockClass = 'bg-rose-500/10 text-rose-700';
                                                 } elseif ($stock <= 20) {
@@ -504,7 +504,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
@@ -513,7 +513,7 @@
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.away="showDetailModal = false">
-                
+
                 <!-- Header -->
                 <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4 rounded-t-3xl">
                     <div class="flex items-center gap-3">
@@ -617,7 +617,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
@@ -626,7 +626,7 @@
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.away="showEditModal = false">
-                
+
                 <!-- Header -->
                 <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4 rounded-t-3xl">
                     <div class="flex items-center gap-3">
@@ -644,7 +644,7 @@
                 <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
                     @method('PUT')
-                    
+
                     <div class="space-y-5">
                         <!-- Name -->
                         <div>
@@ -663,12 +663,22 @@
                         <!-- Image Upload -->
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1.5">Gambar Produk</label>
-                            <input type="file" name="gambar-edit" accept="image/*"
+                            <input type="file" name="gambar_edit" accept="image/*"
                                 class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100">
                             <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF. Maksimal 2MB.</p>
                         </div>
 
-                        <input type="hidden" name="supplier_id1" :value="editForm.supplier_id">
+                        <!-- Supplier -->
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Supplier <span class="text-rose-500">*</span></label>
+                            <select name="supplier_id1" x-model="editForm.supplier_id" required
+                                class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                                <option value="">Pilih supplier</option>
+                                @foreach($suppliers as $sup)
+                                    <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <!-- Prices -->
                         <div>
@@ -679,7 +689,7 @@
                                         <label class="block text-xs font-medium text-slate-600 mb-1">{{ ucfirst($type) }}</label>
                                         <div class="relative">
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Rp</span>
-                                            <input type="text" 
+                                            <input type="text"
                                                 x-model="editForm.prices['{{ $type }}']"
                                                 @input="editForm.prices['{{ $type }}'] = formatInputPrice($event.target.value)"
                                                 class="w-full rounded-xl border-slate-200 pl-10 pr-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-emerald-500">
@@ -752,13 +762,13 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl text-center"
                 x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
                 @click.away="showDeleteModal = false">
-                
+
                 <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-600">
                     <i class="fas fa-triangle-exclamation text-2xl"></i>
                 </div>
@@ -842,7 +852,7 @@
                     this.editForm.stock_quantity = product.stock_quantity;
                     this.editForm.satuan = product.satuan;
                     this.editForm.supplier_id = product.supplier_id;
-                    
+
                     // Format prices
                     this.editForm.prices = {};
                     if (product.prices) {
@@ -850,7 +860,7 @@
                             this.editForm.prices[p.customer_type] = this.formatPrice(p.price);
                         });
                     }
-                    
+
                     this.showEditModal = true;
                 },
 

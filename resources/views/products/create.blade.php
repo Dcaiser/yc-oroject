@@ -20,7 +20,7 @@
                         Lengkapi form di bawah untuk menambahkan produk baru ke dalam inventori sistem.
                     </p>
                 </div>
-                <a href="{{ route('products.index') }}" 
+                <a href="{{ route('products.index') }}"
                     class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800">
                     <i class="fas fa-arrow-left me-2"></i>
                     Kembali ke Daftar
@@ -32,7 +32,7 @@
         <div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/50">
             <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
                 @csrf
-                
+
                 <div class="grid grid-cols-1 gap-0 lg:grid-cols-2 lg:divide-x lg:divide-slate-100">
                     <!-- Left Column - Product Info -->
                     <div class="p-6 space-y-5">
@@ -69,8 +69,24 @@
                             @enderror
                         </div>
 
-                        <!-- Supplier (hidden) -->
-                        <input type="hidden" name="supplier_id" value="{{ $supplier->first()?->id }}">
+                        <!-- Supplier -->
+                        <div>
+                            <label for="supplier_id" class="block text-sm font-semibold text-slate-700 mb-1.5">
+                                Supplier <span class="text-rose-500">*</span>
+                            </label>
+                            <select id="supplier_id" name="supplier_id" required
+                                class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm focus:border-emerald-500 focus:ring-emerald-500">
+                                <option value="">Pilih supplier</option>
+                                @foreach($suppliers as $sup)
+                                    <option value="{{ $sup->id }}" {{ old('supplier_id') == $sup->id ? 'selected' : '' }}>
+                                        {{ $sup->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('supplier_id')
+                                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
                         <!-- Category -->
                         <div>
@@ -90,7 +106,7 @@
                         </div>
 
                         <!-- Stock & Unit -->
-                        <div class="grid grid-cols-2 gap-4" x-data="{ 
+                        <div class="grid grid-cols-2 gap-4" x-data="{
                             units: {{ Js::from($units->map(fn($u)=>['id'=>$u->id,'name'=>$u->name,'conversion'=>$u->conversion_to_base])) }},
                             selectedUnit: '{{ old('satuan') }}'
                         }">
@@ -144,7 +160,7 @@
                                 @dragover.prevent="dragging = true"
                                 @dragleave.prevent="dragging = false"
                                 @drop.prevent="handleDrop($event)">
-                                
+
                                 <template x-if="!preview">
                                     <div>
                                         <div class="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
@@ -159,7 +175,7 @@
                                         </button>
                                     </div>
                                 </template>
-                                
+
                                 <template x-if="preview">
                                     <div class="relative inline-block">
                                         <img :src="preview" alt="Preview" class="h-40 max-w-full rounded-xl object-cover mx-auto">
@@ -172,14 +188,14 @@
                             </div>
 
                             <input type="file" x-ref="fileInput" name="gambar" accept="image/*" @change="updatePreview($event.target.files[0])" class="hidden">
-                            
+
                             <template x-if="fileName">
                                 <p class="text-xs text-slate-600" x-text="fileName"></p>
                             </template>
                             <template x-if="errorMessage">
                                 <p class="text-xs text-rose-600" x-text="errorMessage"></p>
                             </template>
-                            
+
                             <p class="text-xs text-slate-500">Format: JPG, PNG, GIF. Maksimal 2MB.</p>
                         </div>
 

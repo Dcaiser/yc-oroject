@@ -55,11 +55,18 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Check credentials and active status
+        $credentials = $this->only('email', 'password');
+        $credentials['is_active'] = true;
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            // Check if user exists but is inactive to give specific message (optional)
+            // For now, we keep it generic or we can check manually
+            
             throw ValidationException::withMessages([
-                'email' => 'Email atau password yang Anda masukkan salah. Silakan periksa kembali.',
+                'email' => 'Email atau password salah, atau akun Anda dinonaktifkan.',
             ]);
         }
 

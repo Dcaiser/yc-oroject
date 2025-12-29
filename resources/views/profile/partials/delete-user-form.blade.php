@@ -12,7 +12,7 @@
     </header>
 
     <button type="button"
-            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow transition hover:scale-[1.02] bg-linear-to-r from-red-500 to-rose-600"
+            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white rounded-lg sm:rounded-xl shadow transition hover:scale-[1.02] bg-gradient-to-r from-red-500 to-rose-600"
             x-data="{}"
             x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
         <i class="fas fa-trash"></i>
@@ -47,12 +47,24 @@
             <div class="px-5 sm:px-7 py-6 bg-white/90 space-y-4">
                 <div>
                     <label for="password" class="text-xs font-semibold tracking-wide text-red-600 uppercase">Password</label>
-                    <div class="relative mt-2">
-                        <input id="password" name="password" type="password" placeholder="Masukkan password Anda"
+                    <div class="relative mt-2" x-data="{ show: false }">
+                        <input id="password" name="password" :type="show ? 'text' : 'password'" placeholder="Masukkan password Anda"
                                class="w-full px-4 py-2.5 text-sm text-red-900 bg-white border-2 border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 placeholder:text-red-300">
-                        <button type="button" data-password-toggle data-target="#password"
-                                class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-300 hover:text-red-500 transition">
-                            <i class="fas fa-eye-slash"></i>
+                        <button type="button"
+                                class="absolute inset-y-0 right-0 flex items-center pr-4 text-red-300 transition hover:text-red-500"
+                                :aria-label="show ? 'Sembunyikan password' : 'Tampilkan password'"
+                                :aria-pressed="show"
+                                @click.prevent="show = !show">
+                            <svg x-show="!show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            </svg>
+                            <svg x-show="show" x-cloak aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.18 6.18A18.5 18.5 0 0 0 2 12s3 7 10 7a9.8 9.8 0 0 0 2.12-.22" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.88 4.12A10 10 0 0 1 12 4c7 0 10 8 10 8a18.7 18.7 0 0 1-1.67 2.68" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.58 10.58a3 3 0 0 0 4.24 4.24" />
+                            </svg>
                         </button>
                     </div>
                     @error('password', 'userDeletion')
@@ -73,7 +85,7 @@
                     Batalkan
                 </button>
                 <button type="submit"
-                        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-linear-to-r from-red-500 to-rose-600 hover:scale-[1.02]">
+                        class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-gradient-to-r from-red-500 to-rose-600 hover:scale-[1.02]">
                     <i class="fas fa-trash"></i>
                     Konfirmasi Hapus
                 </button>

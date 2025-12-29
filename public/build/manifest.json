@@ -1,6 +1,6 @@
 {
-  "_vendor-alpine-S4M4TpEG.js": {
-    "file": "assets/vendor-alpine-S4M4TpEG.js",
+  "_vendor-alpine-Bq2KT4vH.js": {
+    "file": "assets/vendor-alpine-Bq2KT4vH.js",
     "name": "vendor-alpine"
   },
   "_vendor-chart-Bcjh2pZL.js": {
@@ -44,7 +44,7 @@
     "src": "node_modules/@fontsource/manrope/files/manrope-latin-700-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-yFabCWjr.css",
+    "file": "assets/app-caFPlTLE.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -53,13 +53,13 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CP5mop5o.js",
+    "file": "assets/app-C2mWOjSq.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
       "_vendor-chart-Bcjh2pZL.js",
-      "_vendor-alpine-S4M4TpEG.js",
+      "_vendor-alpine-Bq2KT4vH.js",
       "_vendor-flatpickr-B_JH6AFf.js"
     ],
     "css": [

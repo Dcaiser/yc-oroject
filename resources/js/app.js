@@ -1,18 +1,24 @@
 import './bootstrap';
 import Chart from 'chart.js/auto';
-import { icons } from 'lucide';
+import {
+    Activity, AlignLeft, ArrowDown, ArrowDownAZ, ArrowLeft, ArrowRight, ArrowUp, ArrowUpAZ, ArrowUpDown, BadgeCheck, Banknote, Ban, Barcode, BatteryLow, BookOpen, Box, Boxes, Briefcase, Calculator, Calendar, CalendarCheck, CalendarDays, CalendarMinus, CalendarRange, Camera, ChartLine, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, CircleAlert, CircleCheck, CirclePause, CirclePlus, CircleUser, CircleX, ClipboardCheck, ClipboardList, Clock, CloudUpload, Contact, Crown, Database, EllipsisVertical, Eye, EyeOff, FileDown, FileInput, FileSpreadsheet, FileText, Filter, Flame, Folder, FolderOpen, Gauge, Grip, History, Home, IdCard, Image, Inbox, Info, KeyRound, Layers, Lightbulb, List, ListOrdered, LoaderCircle, Lock, LogIn, LogOut, Mail, MailOpen, Menu, Minus, PackageOpen, Pencil, Phone, PhoneOff, Play, Plus, Printer, Receipt, RefreshCw, RotateCcw, RotateCw, Ruler, Save, Scale, Search, Send, Settings, Shield, ShieldCheck, ShoppingCart, SlidersHorizontal, Sprout, Star, StickyNote, Store, Tag, Tags, ToggleLeft, ToggleRight, Trash2, TrendingDown, TrendingUp, TriangleAlert, Truck, Type, Upload, User, UserCog, UserPen, UserPlus, Users, Wallet, Warehouse, Weight, X, Zap, ZoomOut
+} from 'lucide';
+
+const icons = {
+    Activity, AlignLeft, ArrowDown, ArrowDownAZ, ArrowLeft, ArrowRight, ArrowUp, ArrowUpAZ, ArrowUpDown, BadgeCheck, Banknote, Ban, Barcode, BatteryLow, BookOpen, Box, Boxes, Briefcase, Calculator, Calendar, CalendarCheck, CalendarDays, CalendarMinus, CalendarRange, Camera, ChartLine, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, CircleAlert, CircleCheck, CirclePause, CirclePlus, CircleUser, CircleX, ClipboardCheck, ClipboardList, Clock, CloudUpload, Contact, Crown, Database, EllipsisVertical, Eye, EyeOff, FileDown, FileInput, FileSpreadsheet, FileText, Filter, Flame, Folder, FolderOpen, Gauge, Grip, History, Home, IdCard, Image, Inbox, Info, KeyRound, Layers, Lightbulb, List, ListOrdered, LoaderCircle, Lock, LogIn, LogOut, Mail, MailOpen, Menu, Minus, PackageOpen, Pencil, Phone, PhoneOff, Play, Plus, Printer, Receipt, RefreshCw, RotateCcw, RotateCw, Ruler, Save, Scale, Search, Send, Settings, Shield, ShieldCheck, ShoppingCart, SlidersHorizontal, Sprout, Star, StickyNote, Store, Tag, Tags, ToggleLeft, ToggleRight, Trash2, TrendingDown, TrendingUp, TriangleAlert, Truck, Type, Upload, User, UserCog, UserPen, UserPlus, Users, Wallet, Warehouse, Weight, X, Zap, ZoomOut
+};
 
 import Alpine from 'alpinejs';
 import flatpickr from 'flatpickr';
 import { Indonesian } from 'flatpickr/dist/l10n/id.js';
 import 'flatpickr/dist/flatpickr.css';
 
-// Expose Chart.js globally for blade templates
-window.Chart = Chart;
-
 // Expose Alpine globally
 window.Alpine = Alpine;
 Alpine.start();
+
+// Expose Chart.js globally for blade templates
+window.Chart = Chart;
 
 // Font Awesome to Lucide PascalCase mapping
 const faToLucide = {
@@ -70,6 +76,7 @@ const faToLucide = {
 	'fa-clock': 'Clock',
 	'fa-cloud-arrow-up': 'CloudUpload',
 	'fa-cloud-upload-alt': 'CloudUpload',
+	'fa-cog': 'Settings',
 	'fa-database': 'Database',
 	'fa-edit': 'Pencil',
 	'fa-pen-to-square': 'Pencil',
@@ -88,7 +95,7 @@ const faToLucide = {
 	'fa-file-invoice-dollar': 'FileText',
 	'fa-file-pdf': 'FileText',
 	'fa-filter': 'Filter',
-	'fa-filter-circle-xmark': 'FilterX',
+	'fa-filter-circle-xmark': 'Filter',
 	'fa-fire': 'Flame',
 	'fa-floppy-disk': 'Save',
 	'fa-folder': 'Folder',
@@ -97,9 +104,11 @@ const faToLucide = {
 	'fa-align-left': 'AlignLeft',
 	'fa-calculator': 'Calculator',
 	'fa-gauge-high': 'Gauge',
+	'fa-grip': 'Grip',
 	'fa-history': 'History',
 	'fa-house': 'Home',
 	'fa-id-card': 'IdCard',
+	'fa-id-card-alt': 'IdCard',
 	'fa-image': 'Image',
 	'fa-inbox': 'Inbox',
 	'fa-info': 'Info',
@@ -111,6 +120,7 @@ const faToLucide = {
 	'fa-list-numbers': 'ListOrdered',
 	'fa-lock': 'Lock',
 	'fa-minus': 'Minus',
+    'fa-money-bill-wave': 'Banknote',
 	'fa-note-sticky': 'StickyNote',
 	'fa-paper-plane': 'Send',
 	'fa-pause-circle': 'CirclePause',
@@ -121,7 +131,7 @@ const faToLucide = {
 	'fa-plus': 'Plus',
 	'fa-plus-circle': 'CirclePlus',
 	'fa-print': 'Printer',
-	'fa-question-circle': 'CircleHelp',
+	'fa-question-circle': 'CircleAlert',
 	'fa-receipt': 'Receipt',
 	'fa-rotate-left': 'RotateCcw',
 	'fa-rotate-right': 'RotateCw',
@@ -141,6 +151,7 @@ const faToLucide = {
 	'fa-spinner': 'LoaderCircle',
 	'fa-star': 'Star',
 	'fa-store': 'Store',
+	'fa-sync': 'RefreshCw',
 	'fa-crown': 'Crown',
 	'fa-arrows-sort': 'ArrowUpDown',
 	'fa-checks': 'CheckCheck',
@@ -149,15 +160,18 @@ const faToLucide = {
 	'fa-tags': 'Tags',
 	'fa-times': 'X',
 	'fa-times-circle': 'CircleX',
+	'fa-toggle-off': 'ToggleLeft',
+	'fa-toggle-on': 'ToggleRight',
 	'fa-trash': 'Trash2',
 	'fa-trash-alt': 'Trash2',
 	'fa-trash-can': 'Trash2',
 	'fa-triangle-exclamation': 'TriangleAlert',
 	'fa-truck-fast': 'Truck',
+    'fa-university': 'Wallet',
 	'fa-upload': 'Upload',
 	'fa-user': 'User',
 	'fa-user-circle': 'CircleUser',
-	'fa-user-clock': 'UserClock',
+	'fa-user-clock': 'UserCog',
 	'fa-user-edit': 'UserPen',
 	'fa-user-gear': 'UserCog',
 	'fa-user-plus': 'UserPlus',
@@ -167,16 +181,22 @@ const faToLucide = {
 	'fa-users-slash': 'Users',
 	'fa-user-tag': 'BadgeCheck',
 	'fa-user-tie': 'User',
+	'fa-wallet': 'Wallet',
 	'fa-warehouse': 'Warehouse',
 	'fa-wave-square': 'Activity',
 	'fa-weight': 'Weight',
 	'fa-weight-hanging': 'Scale',
 	'fa-xmark': 'X',
-	'fa-x': 'X'
+	'fa-x': 'X',
+    'fa-arrow-trend-up': 'TrendingUp',
+    'fa-arrow-trend-down': 'TrendingDown',
 };
 
 // Classes to ignore when looking for icon name
 const faIgnoreClasses = new Set(['fa', 'fas', 'far', 'fab', 'fa-solid', 'fa-regular', 'fa-brands', 'fa-spin', 'fa-fw', 'fa-lg', 'fa-2x', 'fa-3x']);
+const LUCIDE_SKIP_ATTR = 'data-lucide-skip';
+
+const shouldSkipLucide = (element) => !!element?.closest?.(`[${LUCIDE_SKIP_ATTR}]`);
 
 /**
  * Convert FA class to Lucide PascalCase icon name
@@ -193,7 +213,7 @@ function getLucideIconName(classList) {
 			return iconName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 		}
 	}
-	return 'CircleHelp'; // fallback
+	return 'CircleAlert'; // fallback
 }
 
 /**
@@ -211,7 +231,7 @@ function createSvgIcon(iconData, classes, size = '1.25em') {
 	svg.setAttribute('stroke-linecap', 'round');
 	svg.setAttribute('stroke-linejoin', 'round');
 	svg.setAttribute('class', classes);
-	
+
 	// Add icon paths
 	iconData.forEach(([tag, attrs]) => {
 		const child = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -220,7 +240,7 @@ function createSvgIcon(iconData, classes, size = '1.25em') {
 		});
 		svg.appendChild(child);
 	});
-	
+
 	return svg;
 }
 
@@ -228,31 +248,32 @@ function createSvgIcon(iconData, classes, size = '1.25em') {
  * Convert Font Awesome icons to Lucide SVG icons
  */
 function convertFaToLucide() {
-	const faIcons = document.querySelectorAll('i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands, i[class*="fa-"]');
-	
+	const faIcons = Array.from(document.querySelectorAll('i.fas, i.far, i.fab, i.fa-solid, i.fa-regular, i.fa-brands, i[class*="fa-"]'))
+		.filter((el) => !shouldSkipLucide(el));
+
 	faIcons.forEach((el) => {
 		// Skip if already processed
 		if (el.dataset.lucideConverted === 'true') return;
 		el.dataset.lucideConverted = 'true';
-		
+
 		const classList = Array.from(el.classList);
 		const lucideIconName = getLucideIconName(classList);
-		
+
 		// Get icon data from Lucide
-		const iconData = icons[lucideIconName] || icons['CircleHelp'];
-		
+		const iconData = icons[lucideIconName] || icons['CircleAlert'];
+
 		if (!iconData) {
 			console.warn('Icon not found:', lucideIconName);
 			return;
 		}
-		
+
 		// Preserve non-FA classes
-		const preservedClasses = classList.filter(cls => 
-			!cls.startsWith('fa-') && 
+		const preservedClasses = classList.filter(cls =>
+			!cls.startsWith('fa-') &&
 			!['fa', 'fas', 'far', 'fab'].includes(cls)
 		);
 		preservedClasses.push('lucide');
-		
+
 		// Check for size classes and determine size - use 1em for consistent sizing with text
 		let size = '1em';
 		if (classList.some(c => c.includes('text-xs'))) size = '0.75rem';
@@ -261,15 +282,15 @@ function convertFaToLucide() {
 		else if (classList.some(c => c.includes('text-lg'))) size = '1.125rem';
 		else if (classList.some(c => c.includes('text-xl'))) size = '1.25rem';
 		else if (classList.some(c => c.includes('text-2xl'))) size = '1.5rem';
-		
+
 		// Create SVG
 		const svg = createSvgIcon(iconData, preservedClasses.join(' '), size);
-		
+
 		// Handle spin animation
 		if (classList.includes('fa-spin')) {
 			svg.classList.add('animate-spin');
 		}
-		
+
 		// Replace the <i> with <svg>
 		if (el.parentNode) {
 			el.parentNode.replaceChild(svg, el);
@@ -326,22 +347,27 @@ document.addEventListener('DOMContentLoaded', () => {
 // Watch for dynamically added content
 const observer = new MutationObserver((mutations) => {
 	let hasNewIcons = false;
-	
+
 	mutations.forEach(({ addedNodes }) => {
 		addedNodes.forEach((node) => {
 			if (node.nodeType !== 1) return;
-			
-			if (node.matches?.('i[class*="fa-"], i.fas, i.far, i.fab') ||
-				node.querySelector?.('i[class*="fa-"], i.fas, i.far, i.fab')) {
+
+			if (shouldSkipLucide(node)) {
+				return;
+			}
+
+			const hasFaIcon = node.matches?.('i[class*="fa-"], i.fas, i.far, i.fab') ||
+				node.querySelector?.('i[class*="fa-"], i.fas, i.far, i.fab');
+			if (hasFaIcon) {
 				hasNewIcons = true;
 			}
 		});
 	});
-	
+
 	if (hasNewIcons) {
 		convertFaToLucide();
 	}
-	
+
 	scheduleDatepickerInit();
 });
 

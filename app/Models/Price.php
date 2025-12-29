@@ -12,5 +12,4 @@ class Price extends Model
         'customer_type',
         'price',
         ];
-
 }

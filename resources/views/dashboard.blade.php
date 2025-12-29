@@ -193,7 +193,7 @@
                             <p class="text-xl sm:text-4xl font-black text-slate-900 tabular-nums">{{ $card['value'] }}</p>
                         </div>
                     </div>
-                    <div class="h-1 sm:h-2 bg-linear-to-r {{ $colors['glow'] }}"></div>
+                    <div class="h-1 sm:h-2 bg-gradient-to-r {{ $colors['glow'] }}"></div>
                 </article>
             @endforeach
         </section>

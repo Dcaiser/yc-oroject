@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -62,5 +63,13 @@ class User extends Authenticatable
     public function canAccessStaff()
     {
         return in_array($this->role, ['staff', 'manager', 'admin']);
+    }
+
+    /**
+     * Check if user is online
+     */
+    public function isOnline()
+    {
+        return \Illuminate\Support\Facades\Cache::has('user-is-online-' . $this->id);
     }
 }

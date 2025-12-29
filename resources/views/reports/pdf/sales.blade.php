@@ -48,7 +48,7 @@
 <body>
     <h1>Laporan Transaksi Penjualan</h1>
     <div class="period">Periode: {{ $start }} - {{ $end }}</div>
-    
+
     <table>
         <thead>
             <tr>
@@ -61,6 +61,8 @@
                 <th class="text-right" width="12%">Harga Satuan</th>
                 <th class="text-right" width="12%">Total</th>
                 <th class="text-right" width="10%">Ongkir</th>
+                <th width="15%">Pengeluaran</th>
+                <th class="text-right" width="12%">Nominal</th>
                 <th class="text-right" width="12%">Grand Total</th>
             </tr>
         </thead>
@@ -76,11 +78,13 @@
                     <td class="text-right">{{ $row['price_per_unit'] }}</td>
                     <td class="text-right">{{ $row['total_price'] }}</td>
                     <td class="text-right">{{ $row['shipping_cost'] }}</td>
+                    <td>{{ $row['expense_label'] }}</td>
+                    <td class="text-right">{{ $row['expense_amount'] }}</td>
                     <td class="text-right">{{ $row['grand_total'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center">Tidak ada data transaksi</td>
+                    <td colspan="12" class="text-center">Tidak ada data transaksi</td>
                 </tr>
             @endforelse
         </tbody>

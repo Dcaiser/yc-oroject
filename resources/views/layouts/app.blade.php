@@ -6,32 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>YC - Wakaf Produktif Bisto</title>
+    <title>Distributor Bisto Al-Ruhamaa'</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/logo/icon-green.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/logo/icon-green.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/logo/icon-green.png') }}">
     <link rel="shortcut icon" href="{{ asset('assets/logo/icon-green.png') }}">
-    
+
     <!-- Web App Manifest -->
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#047857">
-    
+
     <!-- SEO Meta Tags -->
     <meta name="description" content="Sistem Inventory Management Al-Ruhamaa' - Pengelolaan stok, produk, dan laporan yang efisien">
     <meta name="keywords" content="inventory, management, al-ruhamaa, sistem, stok, produk">
     <meta name="author" content="Al-Ruhamaa'">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="YC - Wakaf Produktif Bisto">
+    <meta property="og:title" content="Distributor Bisto Al-Ruhamaa'">
     <meta property="og:description" content="Sistem Inventory Management Al-Ruhamaa'">
     <meta property="og:image" content="{{ asset('assets/logo/icon-green.png') }}">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="YC - Wakaf Produktif Bisto">
+    <meta property="twitter:title" content="Distributor Bisto Al-Ruhamaa'">
     <meta property="twitter:description" content="Sistem Inventory Management Al-Ruhamaa'">
     <meta property="twitter:image" content="{{ asset('assets/logo/icon-green.png') }}">
 
@@ -39,6 +39,11 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Critical CSS for Alpine.js to prevent FOUC -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 
     <!-- AlpineJS Component Definition -->
     <script>
@@ -81,9 +86,15 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-100 overflow-x-hidden">
-    <div x-data="{ sidebarCollapsed: false }" class="flex min-h-screen">
+    <div x-data="{
+        sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+        toggleSidebar() {
+            this.sidebarCollapsed = !this.sidebarCollapsed;
+            localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
+        }
+    }" class="flex min-h-screen">
         <!-- Sidebar -->
-     <aside class="fixed z-30 hidden h-screen pt-6 shadow-2xl bg-linear-to-br from-emerald-700 to-emerald-950 lg:flex lg:flex-col"
+     <aside class="fixed z-30 hidden h-screen pt-6 shadow-2xl bg-linear-to-br from-emerald-700 to-emerald-950 lg:flex lg:flex-col transition-all duration-300 ease-in-out"
          :class="sidebarCollapsed ? 'sidebar-collapsed w-24' : 'w-64'">
             @php
                 $authUser = Auth::user();
@@ -102,32 +113,32 @@
                 }
             @endphp
             <!-- Logo & Brand -->
-            <div class="px-4 pb-4 border-b border-emerald-400/20" :class="sidebarCollapsed ? 'px-3' : 'px-4'">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'gap-2 justify-center' : 'gap-3'">
+            <div class="px-4 pb-4 border-b border-emerald-400/20" :class="sidebarCollapsed ? 'px-2' : 'px-4'">
+                <div class="flex items-center justify-between gap-3" :class="sidebarCollapsed ? 'flex-col justify-center gap-4' : ''">
+                    <div class="flex items-center gap-3" :class="sidebarCollapsed ? 'justify-center' : ''">
                         <div class="flex items-center justify-center w-10 h-10 bg-white/10 rounded-lg backdrop-blur-sm shadow-lg">
                             <img src="{{ asset('assets/logo/icon-white.png') }}"
                                 alt="Al-Ruhamaa Logo"
                                 class="object-contain w-7 h-7">
                         </div>
-                        <div class="sidebar-label">
+                        <div class="sidebar-label" x-show="!sidebarCollapsed" x-cloak>
                             <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
-                            <p class="text-xs text-emerald-100/80">Wakaf Produktif Bisto</p>
+                            <p class="text-xs text-emerald-100/80">Distributor Bisto</p>
                         </div>
                     </div>
                     <button type="button"
-                            class="hidden lg:flex items-center justify-center w-9 h-9 text-white/80 hover:text-white transition-all duration-300"
-                            @click="sidebarCollapsed = !sidebarCollapsed"
+                            class="hidden lg:flex items-center justify-center w-8 h-8 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300"
+                            @click="toggleSidebar()"
                             :title="sidebarCollapsed ? 'Perluas sidebar' : 'Perkecil sidebar'">
-                                <i class="text-base fas transition-transform duration-300"
+                                <i class="text-sm fas transition-transform duration-300"
                                    :class="sidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Navigation -->
-          <nav class="py-4 space-y-1 overflow-y-auto flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-              :class="sidebarCollapsed ? 'px-2 pb-6' : 'px-4 pb-8'">
+          <nav class="py-4 space-y-1 flex-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              :class="sidebarCollapsed ? 'px-2 pb-6 overflow-visible' : 'px-4 pb-8 overflow-y-auto'">
                 <!-- Dashboard - Semua user yang login -->
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center text-white text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-white/[0.14] ring-1 ring-inset ring-white/[0.18]' : 'hover:bg-white/[0.08] hover:ring-1 hover:ring-inset hover:ring-white/[0.12]' }}"
@@ -142,7 +153,7 @@
 
                 <!-- Point of Sale Dropdown -->
                 <div x-data="{ open: {{ request()->routeIs('pos') || request()->routeIs('pos.payments*') ? 'true' : 'false' }} }"
-                     class="relative mb-3">
+                     class="relative">
                     <button type="button"
                         class="flex items-center w-full text-white text-sm font-medium rounded-xl {{ request()->routeIs('pos') || request()->routeIs('pos.payments*') ? 'bg-white/14 ring-1 ring-inset ring-white/18' : 'hover:bg-white/8 hover:ring-1 hover:ring-inset hover:ring-white/12' }}"
                         :class="sidebarCollapsed ? 'w-14 h-14 justify-center mx-auto rounded-[1.25rem]' : 'py-2.5 px-3'"
@@ -273,7 +284,7 @@
                 <!-- Staff Create Report Button -->
                 @if(in_array(Auth::user()->role, ['staff']))
                 <div class="mt-4 px-4">
-                          <a href="#" 
+                          <a href="#"
                               class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-all duration-200 shadow text-sm"
                               :title="sidebarCollapsed ? 'Buat Laporan' : null">
                         <i class="fas fa-plus"></i>
@@ -372,17 +383,17 @@
             <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md lg:hidden">
                 <div class="flex items-center justify-between px-3 py-2">
                     <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-linear-to-r from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center shadow">
+                        <div class="w-8 h-8 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-lg flex items-center justify-center shadow">
                             <img src="{{ asset('assets/logo/icon-white.png') }}"
                                 alt="Al-Ruhamaa Logo"
                                 class="object-contain w-5 h-5">
                         </div>
                         <div>
                             <h1 class="text-sm font-bold text-gray-900">Al-Ruhamaa'</h1>
-                            <p class="text-[10px] text-gray-500">Wakaf Produktif Bisto</p>
+                            <p class="text-[10px] text-gray-500">Distributor Bisto Al-Ruhamaa'</p>
                         </div>
                     </div>
-                    <button @click="sidebarOpen = !sidebarOpen" 
+                    <button @click="sidebarOpen = !sidebarOpen"
                             class="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200">
                         <i class="text-lg fas fa-bars"></i>
                     </button>
@@ -412,7 +423,7 @@
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
                 class="fixed inset-0 z-40 bg-transparent">
-                
+
                 <aside x-show="sidebarOpen"
                     x-transition:enter="transition ease-in-out duration-300 transform"
                     x-transition:enter-start="-translate-x-full"
@@ -421,7 +432,7 @@
                     x-transition:leave-start="translate-x-0"
                     x-transition:leave-end="-translate-x-full"
                     class="w-72 max-w-[85vw] h-full shadow-2xl bg-linear-to-br from-emerald-700 to-emerald-950">
-                    
+
                     <!-- Mobile Logo & Brand -->
                     <div class="p-4 border-b border-emerald-400/20">
                         <div class="flex items-center gap-3">
@@ -432,7 +443,7 @@
                             </div>
                             <div>
                                 <h1 class="text-lg font-bold text-white">Al-Ruhamaa'</h1>
-                                <p class="text-xs text-emerald-100/80">Wakaf Produktif Bisto</p>
+                                <p class="text-xs text-emerald-100/80">Distributor Bisto Al-Ruhamaa'</p>
                             </div>
                         </div>
                     </div>
@@ -552,8 +563,9 @@
                         <div class="pt-6 mt-6 border-t border-white/10">
                             <div x-data="{ mobileUserMenuOpen: false }" class="relative">
                                 <button @click="mobileUserMenuOpen = !mobileUserMenuOpen"
-                                        class="w-full flex items-center justify-between transition-all duration-200 bg-black/20 backdrop-blur-xl hover:bg-white/[0.08] rounded-xl px-3 py-2.5 border border-white/10 group">
-                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        class="w-full flex items-center transition-all duration-200 bg-black/20 backdrop-blur-xl hover:bg-white/[0.08] rounded-xl border border-white/10 group"
+                                        :class="sidebarCollapsed ? 'justify-center p-2 h-14 w-14 mx-auto' : 'justify-between px-3 py-2.5'">
+                                    <div class="flex items-center gap-3 flex-1 min-w-0" :class="sidebarCollapsed ? 'justify-center' : ''">
                                         <div class="relative w-9 h-9 shrink-0">
                                             <div class="flex items-center justify-center w-full h-full overflow-hidden bg-white/15 rounded-full ring-1 ring-white/10">
                                                 @if ($sidebarAvatarUrl)
@@ -564,12 +576,12 @@
                                             </div>
                                             <span class="absolute -bottom-0.5 -right-0.5 block w-3 h-3 bg-emerald-400 border-2 border-emerald-800 rounded-full"></span>
                                         </div>
-                                        <div class="flex-1 min-w-0 text-left">
+                                        <div class="flex-1 min-w-0 text-left" x-show="!sidebarCollapsed" x-cloak>
                                             <p class="text-sm font-semibold text-white truncate">{{ $authUser->name }}</p>
                                             <span class="block text-[10px] font-semibold text-emerald-200/80 uppercase tracking-[0.1em]">{{ strtoupper($authUser->role) }}</span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center justify-center w-5 h-5 text-white/60 group-hover:text-white transition-colors">
+                                    <div class="flex items-center justify-center w-5 h-5 text-white/60 group-hover:text-white transition-colors" x-show="!sidebarCollapsed" x-cloak>
                                         <i class="text-[10px] fas fa-chevron-up transition-transform duration-200"
                                            :class="{ 'rotate-180': mobileUserMenuOpen }"></i>
                                     </div>
@@ -583,7 +595,8 @@
                                      x-transition:leave="transition ease-in duration-150"
                                      x-transition:leave-start="transform scale-100 opacity-100"
                                      x-transition:leave-end="transform scale-95 opacity-0"
-                                    class="absolute left-0 right-0 bottom-full mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 z-50 overflow-hidden">
+                                    class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 z-50 overflow-hidden"
+                                    :class="sidebarCollapsed ? 'absolute left-full bottom-0 ml-4 w-72' : 'absolute left-0 right-0 bottom-full mb-2'">
                                     <div class="px-4 pt-4 pb-3 border-b border-emerald-100/60 bg-linear-to-br from-emerald-50/80 via-white to-white/80">
                                         <div class="flex items-center gap-3">
                                             <div class="relative flex items-center justify-center w-11 h-11 overflow-hidden rounded-full bg-emerald-100">

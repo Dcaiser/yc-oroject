@@ -7,7 +7,7 @@
                 </span>
                 <span class="truncate">Laporan Inventori</span>
             </h1>
-            <div class="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 font-medium text-white rounded-lg shadow transition bg-linear-to-r from-green-500 to-green-700">
+            <div class="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 font-medium text-white rounded-lg shadow transition bg-gradient-to-r from-green-500 to-green-700">
                 <i class="mr-1.5 sm:mr-2 fas fa-calendar-alt text-xs sm:text-sm"></i>
                 <span class="text-xs sm:text-sm font-semibold truncate max-w-[150px] sm:max-w-none">{{ $periodDescription }}</span>
             </div>
@@ -179,6 +179,10 @@
 
         $activePeriodKey = $filters['mode'] ?? 'range';
         $activePeriod = $periodOptions[$activePeriodKey] ?? reset($periodOptions);
+
+        $filterQueryParams = collect($filterQuery ?? [])
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->all();
     @endphp
 
     <div class="space-y-6" x-data="{
@@ -757,7 +761,7 @@
                         week_year: selectedWeekYear,
                         year: '{{ $filters['year'] }}',
                         format: 'excel'
-                    }).toString()" 
+                    }).toString()"
                     x-show="activeTab === 'sales'"
                     class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-sm">
                         <i class="fas fa-file-excel"></i>
@@ -778,7 +782,7 @@
                         <i class="fas fa-file-pdf"></i>
                         PDF
                     </a>
-                    
+
                     <a :href="`{{ route('reports.export-stock') }}?` + new URLSearchParams({
                         mode: mode,
                         date_from: '{{ $filters['date_from'] }}',
@@ -833,70 +837,157 @@
                  x-transition:leave="transform transition ease-in duration-300"
                  x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                  x-transition:leave-end="opacity-0 translate-y-3 scale-95">
-                <div class="px-6 py-4">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm text-left text-slate-700">
-                            <thead class="text-xs font-semibold tracking-wide uppercase bg-slate-50 text-slate-600 ring-1 ring-slate-100">
-                                <tr>
-                                    <th class="px-3 py-4 w-16">No.</th>
-                                    <th class="px-4 py-4">Tanggal</th>
-                                    <th class="px-4 py-4">Customer</th>
-                                    <th class="px-4 py-4">Tipe</th>
-                                    <th class="px-4 py-4">Produk</th>
-                                    <th class="px-4 py-4 text-right">Qty</th>
-                                    <th class="px-4 py-4 text-right">Harga Satuan</th>
-                                    <th class="px-4 py-4 text-right">Total Harga</th>
-                                    <th class="px-4 py-4 text-right">Ongkir</th>
-                                    <th class="px-4 py-4 text-right">Grand Total</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-emerald-100">
-                                @forelse($salesData as $index => $sale)
-                                    @php $chunkIndex = (int) floor($index / $chunkSize); @endphp
-                                    <tr x-show="hasSalesData && salesSlide === {{ $chunkIndex }}" x-transition x-cloak class="transition hover:bg-emerald-50/70">
-                                        <td class="px-3 py-3 font-semibold text-slate-600">{{ $index + 1 }}</td>
-                                        <td class="px-4 py-3 text-slate-800">{{ $sale['date'] }}</td>
-                                        <td class="px-4 py-3 font-semibold text-slate-900">{{ $sale['customer_name'] }}</td>
-                                        <td class="px-4 py-3">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $sale['customer_type'] === 'agent' ? 'bg-blue-100 text-blue-700' : ($sale['customer_type'] === 'reseller' ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700') }}">
-                                                {{ ucfirst($sale['customer_type']) }}
+                <div class="px-4 sm:px-6 py-6">
+                    <!-- Desktop Header -->
+                    <div class="hidden md:grid grid-cols-12 gap-4 px-4 py-3 mb-4 text-xs font-bold tracking-wider text-slate-400 uppercase bg-slate-50/50 rounded-xl border border-slate-100">
+                        <div class="col-span-1 text-center">#</div>
+                        <div class="col-span-2">Waktu</div>
+                        <div class="col-span-3">Pihak Terkait</div>
+                        <div class="col-span-3">Detail Transaksi</div>
+                        <div class="col-span-3 text-right">Nilai Total</div>
+                    </div>
+
+                    <div class="space-y-3">
+                        @forelse($salesData as $index => $sale)
+                            @php
+                                $chunkIndex = (int) floor($index / $chunkSize);
+                                $isExpense = ($sale['entry_type'] ?? 'sale') === 'expense';
+                                $badgeClass = match ($sale['customer_type'] ?? '') {
+                                    'agent' => 'bg-blue-50 text-blue-600 border-blue-100',
+                                    'reseller' => 'bg-rose-50 text-rose-600 border-rose-100',
+                                    'pelanggan' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                                    'expense' => 'bg-amber-50 text-amber-600 border-amber-100',
+                                    default => 'bg-slate-50 text-slate-600 border-slate-100',
+                                };
+                                $badgeLabel = $isExpense ? 'Pengeluaran' : ucfirst($sale['customer_type'] ?? 'Umum');
+                            @endphp
+                            <div
+                                x-show="hasSalesData && salesSlide === {{ $chunkIndex }}"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 scale-95"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                class="group relative bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-lg hover:border-emerald-200 transition-all duration-300">
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                                    <!-- Mobile Top Row -->
+                                    <div class="md:hidden flex justify-between items-center pb-3 border-b border-slate-50 mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-bold text-slate-300">#{{ $index + 1 }}</span>
+                                            <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border {{ $badgeClass }}">
+                                                {{ $badgeLabel }}
                                             </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-slate-800">{{ $sale['product_name'] }}</td>
-                                        <td class="px-4 py-3 text-right">{{ number_format($sale['qty']) }} {{ $sale['satuan'] }}</td>
-                                        <td class="px-4 py-3 text-right">Rp {{ number_format($sale['price_per_unit'], 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-right font-semibold text-slate-900">Rp {{ number_format($sale['total_price'], 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-right">Rp {{ number_format($sale['shipping_cost'], 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 text-right font-bold text-emerald-700">Rp {{ number_format($sale['grand_total'], 0, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="10" class="px-6 py-12 text-center">
-                                            <div class="flex flex-col items-center gap-3 text-emerald-600">
-                                                <span class="text-4xl"><i class="fas fa-shopping-cart"></i></span>
-                                                <h3 class="text-lg font-semibold text-slate-800">Tidak ada transaksi penjualan</h3>
-                                                <p class="text-sm text-slate-500">Belum ada transaksi pada periode ini.</p>
+                                        </div>
+                                        <span class="text-xs font-medium text-slate-500">{{ $sale['date'] }}</span>
+                                    </div>
+
+                                    <!-- Icon / Index (Desktop) -->
+                                    <div class="col-span-1 hidden md:flex justify-center">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors {{ $isExpense ? 'bg-red-50 text-red-500 group-hover:bg-red-100' : 'bg-emerald-50 text-emerald-500 group-hover:bg-emerald-100' }}">
+                                            <i class="fas {{ $isExpense ? 'fa-arrow-trend-down' : 'fa-arrow-trend-up' }}"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Date -->
+                                    <div class="col-span-2 hidden md:block">
+                                        <p class="font-bold text-slate-700">{{ $sale['date'] }}</p>
+                                        <p class="text-xs font-medium text-slate-400">{{ $sale['time_input'] }}</p>
+                                    </div>
+
+                                    <!-- Customer / Party -->
+                                    <div class="col-span-3">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-slate-800 truncate" title="{{ $sale['customer_name'] ?? $sale['expense_label'] }}">
+                                                {{ $sale['customer_name'] ?? $sale['expense_label'] }}
+                                            </span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="hidden md:inline-flex px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border {{ $badgeClass }}">
+                                                    {{ $badgeLabel }}
+                                                </span>
+                                                @if(!$isExpense)
+                                                    <span class="text-xs text-slate-400 flex items-center gap-1">
+                                                        <i class="fas fa-user-tag text-[10px]"></i> {{ $sale['salesperson'] }}
+                                                    </span>
+                                                @endif
                                             </div>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Details -->
+                                    <div class="col-span-3">
+                                        @if($isExpense)
+                                            <p class="text-sm text-slate-600 italic truncate">{{ $sale['notes'] ?? 'Tidak ada catatan' }}</p>
+                                        @else
+                                            <div class="flex flex-wrap gap-2">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-100 rounded-lg">
+                                                    <i class="fas fa-box text-slate-400"></i> 
+                                                    {{ $sale['items_count'] ?? 0 }} Item
+                                                </span>
+                                                @if(!empty($sale['payment_method']))
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-100 rounded-lg uppercase">
+                                                        <i class="fas fa-wallet text-slate-400"></i>
+                                                        {{ $sale['payment_method'] }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Amount & Actions -->
+                                    <div class="col-span-3 text-right">
+                                        <div class="flex flex-col items-end gap-0.5">
+                                            <span class="text-lg font-extrabold {{ $isExpense ? 'text-red-500' : 'text-emerald-600' }}">
+                                                {{ $isExpense ? '-' : '+' }} Rp {{ number_format($sale['grand_total'], 0, ',', '.') }}
+                                            </span>
+                                            @if(!$isExpense && ($sale['shipping_cost'] ?? 0) > 0)
+                                                <span class="text-[10px] font-medium text-slate-400">
+                                                    (Termasuk Ongkir Rp {{ number_format($sale['shipping_cost'], 0, ',', '.') }})
+                                                </span>
+                                            @endif
+                                        </div>
+                                        
+                                        @if(!$isExpense && !empty($sale['id']))
+                                            <div class="mt-2 md:opacity-0 md:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                                <a href="{{ route('reports.sales.edit', array_merge(['stockout' => $sale['id']], $filterQueryParams)) }}"
+                                                   class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline decoration-2 underline-offset-2">
+                                                    Edit Transaksi <i class="fas fa-arrow-right"></i>
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-16 text-center">
+                                <div class="w-16 h-16 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-300">
+                                    <i class="fas fa-receipt text-3xl"></i>
+                                </div>
+                                <div class="space-y-1">
+                                    <h3 class="text-lg font-bold text-slate-700">Belum Ada Transaksi</h3>
+                                    <p class="text-sm text-slate-500 max-w-xs mx-auto">Tidak ada data transaksi penjualan atau pengeluaran yang ditemukan untuk periode ini.</p>
+                                </div>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
                 <div class="hidden" aria-hidden="true" x-effect="if (!hasSalesData) { salesSlide = 0; } else if (salesSlide >= salesSlidesCount) { salesSlide = Math.max(salesSlidesCount - 1, 0); }"></div>
 
-                <div class="flex flex-col gap-3 px-6 py-4 border-t border-emerald-100 sm:flex-row sm:items-center sm:justify-between bg-white">
-                    <p class="text-sm text-slate-500" x-text="hasSalesData ? `Halaman ${salesSlide + 1} dari ${salesSlidesCount}` : 'Tidak ada data untuk ditampilkan'"></p>
+                <div class="flex flex-col gap-3 px-6 py-4 border-t border-emerald-100 sm:flex-row sm:items-center sm:justify-between bg-white rounded-b-2xl">
+                    <p class="text-sm font-medium text-slate-500" x-text="hasSalesData ? `Halaman ${salesSlide + 1} dari ${salesSlidesCount}` : 'Tidak ada data'"></p>
                     <div class="flex gap-2">
-                        <button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-700 transition bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed" @click="salesSlide = Math.max(salesSlide - 1, 0)" :disabled="!hasSalesData || salesSlide === 0">
-                            <i class="fas fa-chevron-left"></i>
-                            Sebelumnya
+                        <button type="button" 
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" 
+                            @click="salesSlide = Math.max(salesSlide - 1, 0)" 
+                            :disabled="!hasSalesData || salesSlide === 0">
+                            <i class="fas fa-chevron-left text-xs"></i>
+                            <span>Sebelumnya</span>
                         </button>
-                        <button type="button" class="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-emerald-700 transition bg-emerald-50 border border-emerald-100 rounded-xl hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed" @click="salesSlide = Math.min(salesSlide + 1, salesSlidesCount - 1)" :disabled="!hasSalesData || salesSlide >= salesSlidesCount - 1">
-                            Berikutnya
-                            <i class="fas fa-chevron-right"></i>
+                        <button type="button" 
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" 
+                            @click="salesSlide = Math.min(salesSlide + 1, salesSlidesCount - 1)" 
+                            :disabled="!hasSalesData || salesSlide >= salesSlidesCount - 1">
+                            <span>Berikutnya</span>
+                            <i class="fas fa-chevron-right text-xs"></i>
                         </button>
                     </div>
                 </div>
@@ -1227,7 +1318,7 @@
                             pointBorderColor: cfg.color,
                             backgroundColor: getGradient(cfg.color),
                         },
-                        hidden: isFlat,
+                        hidden: false,
                     };
                 });
 

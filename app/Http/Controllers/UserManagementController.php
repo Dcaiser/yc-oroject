@@ -108,7 +108,7 @@ class UserManagementController extends Controller
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'role' => ['required', 'in:admin,manager,staff'],
-                'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+                'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
             ], [
                 'name.required' => 'Nama lengkap wajib diisi.',
                 'name.min' => 'Nama minimal 2 karakter.',
@@ -258,7 +258,7 @@ class UserManagementController extends Controller
                 'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
                 'password' => ['nullable', 'string', 'min:8', 'confirmed'],
                 'role' => ['required', 'in:admin,manager,staff'],
-                'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+                'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
             ], [
                 'name.required' => 'Nama lengkap wajib diisi.',
                 'name.min' => 'Nama minimal 2 karakter.',
@@ -588,6 +588,41 @@ class UserManagementController extends Controller
 
             return redirect()->route('users.index')
                            ->with('error', 'Terjadi kesalahan saat mengexport data user.');
+        }
+    }
+
+    /**
+     * Toggle user active status
+     */
+    public function toggleStatus(User $user)
+    {
+        try {
+            // Prevent deactivating own account
+            if ($user->id === Auth::id()) {
+                return back()->with('error', 'Anda tidak dapat menonaktifkan akun sendiri.');
+            }
+
+            $user->update([
+                'is_active' => !$user->is_active
+            ]);
+
+            $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
+            
+            Log::info("User status toggled", [
+                'admin_id' => Auth::id(),
+                'target_user_id' => $user->id,
+                'new_status' => $user->is_active ? 'active' : 'inactive'
+            ]);
+
+            return back()->with('success', "User {$user->name} berhasil {$status}.");
+
+        } catch (\Exception $e) {
+            Log::error('Error toggling user status', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id
+            ]);
+
+            return back()->with('error', 'Gagal mengubah status user.');
         }
     }
 }

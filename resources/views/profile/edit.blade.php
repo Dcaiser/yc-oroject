@@ -131,35 +131,55 @@
         </div>
     </div>
 
-    <x-modal name="profile-avatar-preview" focusable maxWidth="sm">
+    <x-modal name="profile-avatar-preview" focusable maxWidth="md">
         <div class="relative overflow-hidden">
-            <div class="px-5 sm:px-6 py-4 bg-white/85 backdrop-blur rounded-t-3xl border-b border-emerald-100 flex items-center justify-between">
-                <h2 class="text-base sm:text-lg font-semibold text-emerald-900">Foto Profil</h2>
+            <!-- Header -->
+            <div class="sticky top-0 z-10 px-4 sm:px-6 py-4 bg-emerald-50/90 backdrop-blur border-b border-emerald-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600">
+                        <i class="fas fa-image"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-emerald-900">Pratinjau Foto Profil</h2>
+                        <p class="text-xs text-emerald-700/80 hidden sm:block">Lihat foto profil Anda</p>
+                    </div>
+                </div>
                 <button type="button"
-                        class="inline-flex items-center justify-center w-8 h-8 text-emerald-500 hover:text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full transition"
+                        class="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-slate-600 bg-white rounded-lg transition"
                         x-on:click="$dispatch('close')">
-                    <i class="fas fa-times text-sm"></i>
+                    <i class="fas fa-xmark"></i>
                 </button>
             </div>
 
-            <div class="px-5 sm:px-6 py-5 bg-white/95">
+            <!-- Content -->
+            <div class="p-6 bg-white">
                 @if ($profileAvatarUrl)
-                    <div class="flex justify-center">
-                        <div class="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-emerald-100 shadow bg-white overflow-hidden">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="relative w-48 h-48 sm:w-64 sm:h-64 rounded-2xl overflow-hidden border-4 border-emerald-100 shadow-xl bg-emerald-50">
                             <img src="{{ $profileAvatarUrl }}" alt="{{ $user->name }}" class="object-cover w-full h-full">
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-semibold text-slate-700">{{ $user->name }}</p>
+                            <p class="text-xs text-slate-500">{{ $user->email }}</p>
                         </div>
                     </div>
                 @else
-                    <div class="p-5 text-center border border-dashed border-emerald-200 rounded-2xl bg-emerald-50/70">
-                        <p class="text-sm font-semibold text-emerald-700">Belum ada foto profil.</p>
-                        <p class="mt-1 text-xs text-emerald-500">Unggah foto melalui formulir profil terlebih dahulu.</p>
+                    <div class="flex flex-col items-center gap-4 p-8 text-center border-2 border-dashed border-emerald-200 rounded-2xl bg-emerald-50/50">
+                        <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600">
+                            <i class="fas fa-user text-2xl"></i>
+                        </span>
+                        <div>
+                            <p class="text-sm font-semibold text-emerald-700">Belum ada foto profil</p>
+                            <p class="mt-1 text-xs text-emerald-600/80">Unggah foto melalui formulir "Informasi Profil"</p>
+                        </div>
                     </div>
                 @endif
             </div>
 
-            <div class="px-5 sm:px-6 py-3 bg-emerald-50/80 border-t border-emerald-100 rounded-b-3xl flex justify-end">
+            <!-- Footer -->
+            <div class="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
                 <button type="button"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow transition bg-linear-to-r from-emerald-500 to-teal-500 hover:scale-[1.02]"
+                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-md shadow-emerald-400/30 transition bg-emerald-600 hover:bg-emerald-700"
                         x-on:click="$dispatch('close')">
                     <i class="fas fa-check"></i>
                     Tutup
@@ -171,25 +191,6 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('[data-password-toggle]').forEach((button) => {
-                    const targetSelector = button.dataset.target;
-                    const target = document.querySelector(targetSelector);
-                    if (!target) {
-                        return;
-                    }
-
-                    const icon = button.querySelector('i');
-                    button.addEventListener('click', () => {
-                        if (target.type === 'password') {
-                            target.type = 'text';
-                            icon?.classList.replace('fa-eye-slash', 'fa-eye');
-                        } else {
-                            target.type = 'password';
-                            icon?.classList.replace('fa-eye', 'fa-eye-slash');
-                        }
-                    });
-                });
-
                 const avatarInput = document.querySelector('[data-profile-avatar-input]');
                 const previewImage = document.querySelector('[data-profile-avatar-preview]');
                 const placeholder = document.querySelector('[data-profile-avatar-placeholder]');

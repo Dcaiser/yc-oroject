@@ -10,7 +10,7 @@
 
     <div class="space-y-6"
         x-data="categoryPage()"
-        @keydown.escape.window="showCategoryModal = false; showUnitModal = false; showDeleteModal = false">
+        @keydown.escape.window="showCategoryModal = false; showUnitModal = false; closeDeleteModal()">
 
         <!-- Breadcrumb -->
         <x-breadcrumb :items="[['title' => 'Kategori & Satuan']]" />
@@ -162,16 +162,16 @@
                     </form>
 
                     {{-- Bulk Delete (shown when items selected) --}}
-                    <template x-if="selectedItems.length > 0">
+                    <template x-if="selectedCount > 0">
                         <button type="button" @click="confirmBulkDelete()"
                             class="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700">
                             <i class="fas fa-trash"></i>
-                            <span x-text="'Hapus (' + selectedItems.length + ')'"></span>
+                            <span x-text="'Hapus (' + selectedCount + ')' "></span>
                         </button>
                     </template>
 
                     {{-- Refresh --}}
-                    <a href="{{ route('category', ['tab' => $tab]) }}" 
+                    <a href="{{ route('category', ['tab' => $tab]) }}"
                         class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700">
                         <i class="fas fa-rotate-right"></i>
                     </a>
@@ -209,7 +209,7 @@
                         {{-- Select All --}}
                         <div class="mb-4 flex items-center gap-3">
                             <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" x-model="selectAllCategories" @change="toggleSelectAll('category')"
+                                <input type="checkbox" x-model="selectAll.category" @change="toggleSelectAll('category')"
                                     class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
                                 <span>Pilih Semua</span>
                             </label>
@@ -220,11 +220,13 @@
                         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             @foreach($categories as $category)
                                 <div class="group relative rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/50 transition hover:border-emerald-300 hover:shadow-md"
-                                    :class="{ 'ring-2 ring-emerald-500 border-emerald-500': selectedItems.includes({{ $category->id }}) }">
+                                    :class="{ 'ring-2 ring-emerald-500 border-emerald-500': selected.category.includes({{ $category->id }}) }">
                                     {{-- Checkbox --}}
                                     <div class="absolute left-3 top-3">
-                                        <input type="checkbox" :value="{{ $category->id }}" x-model="selectedItems"
-                                            class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                        <input type="checkbox" :value="{{ $category->id }}" x-model="selected.category"
+                                            @change="handleItemCheck('category')"
+                                            class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                            {{ $category->products_count > 0 ? 'disabled title="Kategori masih memiliki produk"' : '' }}>
                                     </div>
 
                                     {{-- Content --}}
@@ -251,11 +253,11 @@
 
                                         {{-- Actions --}}
                                         <div class="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-                                            <button type="button" @click="editCategory({{ json_encode($category) }})"
+                                            <button type="button" @click="openCategoryEdit({{ json_encode($category) }})"
                                                 class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                                                 <i class="fas fa-pen-to-square"></i>Edit
                                             </button>
-                                            <button type="button" @click="confirmDeleteCategory({{ $category->id }}, '{{ addslashes($category->name) }}', {{ $category->products_count }})"
+                                            <button type="button" @click="requestCategoryDelete({{ $category->id }}, '{{ addslashes($category->name) }}', {{ $category->products_count }})"
                                                 class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition {{ $category->products_count > 0 ? 'border-slate-200 text-slate-400 cursor-not-allowed' : 'border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300' }}"
                                                 {{ $category->products_count > 0 ? 'disabled' : '' }}>
                                                 <i class="fas fa-trash-can"></i>Hapus
@@ -368,7 +370,7 @@
                         {{-- Select All --}}
                         <div class="mb-4 flex items-center gap-3">
                             <label class="flex items-center gap-2 text-sm text-slate-600">
-                                <input type="checkbox" x-model="selectAllUnits" @change="toggleSelectAll('unit')"
+                                <input type="checkbox" x-model="selectAll.unit" @change="toggleSelectAll('unit')"
                                     class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
                                 <span>Pilih Semua</span>
                             </label>
@@ -379,11 +381,13 @@
                         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             @foreach($units as $unit)
                                 <div class="group relative rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm shadow-slate-200/50 transition hover:border-indigo-300 hover:shadow-md"
-                                    :class="{ 'ring-2 ring-indigo-500 border-indigo-500': selectedItems.includes({{ $unit->id }}) }">
+                                    :class="{ 'ring-2 ring-indigo-500 border-indigo-500': selected.unit.includes({{ $unit->id }}) }">
                                     {{-- Checkbox --}}
                                     <div class="absolute left-3 top-3">
-                                        <input type="checkbox" :value="{{ $unit->id }}" x-model="selectedItems"
-                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                        <input type="checkbox" :value="{{ $unit->id }}" x-model="selected.unit"
+                                            @change="handleItemCheck('unit')"
+                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            {{ $unit->produk_count > 0 ? 'disabled title="Satuan masih digunakan produk"' : '' }}>
                                     </div>
 
                                     {{-- Content --}}
@@ -410,11 +414,11 @@
 
                                         {{-- Actions --}}
                                         <div class="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-                                            <button type="button" @click="editUnit({{ json_encode($unit) }})"
+                                            <button type="button" @click="openUnitEdit({{ json_encode($unit) }})"
                                                 class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                                                 <i class="fas fa-pen-to-square"></i>Edit
                                             </button>
-                                            <button type="button" @click="confirmDeleteUnit({{ $unit->id }}, '{{ addslashes($unit->name) }}', {{ $unit->produk_count }})"
+                                            <button type="button" @click="requestUnitDelete({{ $unit->id }}, '{{ addslashes($unit->name) }}', {{ $unit->produk_count }})"
                                                 class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition {{ $unit->produk_count > 0 ? 'border-slate-200 text-slate-400 cursor-not-allowed' : 'border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300' }}"
                                                 {{ $unit->produk_count > 0 ? 'disabled' : '' }}>
                                                 <i class="fas fa-trash-can"></i>Hapus
@@ -511,7 +515,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl"
                 x-show="showCategoryModal"
                 x-transition:enter="transition ease-out duration-200"
@@ -522,7 +526,7 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.away="showCategoryModal = false"
                 @keydown.escape.window="showCategoryModal = false">
-                
+
                 {{-- Header --}}
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -599,7 +603,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl"
                 x-show="showUnitModal"
                 x-transition:enter="transition ease-out duration-200"
@@ -610,7 +614,7 @@
                 x-transition:leave-end="opacity-0 scale-95"
                 @click.away="showUnitModal = false"
                 @keydown.escape.window="showUnitModal = false">
-                
+
                 {{-- Header --}}
                 <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -654,7 +658,7 @@
                             <input type="number" id="unit_conversion" name="conversion_to_base" x-model="unitForm.conversion_to_base" required min="0.0001" step="0.0001"
                                 class="w-full rounded-xl border-slate-200 px-4 py-2.5 text-sm placeholder:text-slate-400 focus:border-indigo-500 focus:ring-indigo-500"
                                 placeholder="1">
-                            
+
                             {{-- Info Card --}}
                             <div class="mt-3 rounded-xl bg-indigo-50 p-3">
                                 <p class="text-xs font-medium text-indigo-700 mb-1.5"><i class="fas fa-lightbulb mr-1"></i>Panduan:</p>
@@ -699,7 +703,7 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
-            
+
             <div class="relative w-full max-w-sm rounded-2xl bg-white shadow-xl"
                 x-show="showDeleteModal"
                 x-transition:enter="transition ease-out duration-200"
@@ -708,9 +712,9 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-95"
-                @click.away="showDeleteModal = false"
-                @keydown.escape.window="showDeleteModal = false">
-                
+                @click.away="closeDeleteModal()"
+                @keydown.escape.window="closeDeleteModal()">
+
                 <div class="p-6 text-center">
                     {{-- Warning Icon --}}
                     <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-rose-500">
@@ -721,13 +725,18 @@
                     <p class="mt-2 text-sm text-slate-500" x-text="deleteModalMessage"></p>
 
                     <div class="mt-6 flex items-center justify-center gap-3">
-                        <button type="button" @click="showDeleteModal = false"
+                        <button type="button" @click="closeDeleteModal()"
                             class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:border-slate-300">
                             Batal
                         </button>
                         <form :action="deleteFormAction" method="POST" class="inline">
                             @csrf
                             @method('DELETE')
+                            <template x-if="deleteMode === 'bulk'">
+                                <template x-for="id in bulkIds" :key="`bulk-${id}`">
+                                    <input type="hidden" name="ids[]" :value="id">
+                                </template>
+                            </template>
                             <button type="submit"
                                 class="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-rose-500/20 transition hover:bg-rose-600">
                                 <i class="fas fa-trash-can"></i>
@@ -739,15 +748,23 @@
             </div>
         </div>
 
-        {{-- Bulk Delete Form (hidden) --}}
-        <form id="bulkDeleteForm" :action="bulkDeleteAction" method="POST" class="hidden">
-            @csrf
-            @method('DELETE')
-            <template x-for="id in selectedItems" :key="id">
-                <input type="hidden" name="ids[]" :value="id">
-            </template>
-        </form>
     </div>
+
+    @php
+        $deletableCategoryIds = collect($categories->items())
+            ->filter(function ($category) {
+                return ($category->products_count ?? 0) === 0;
+            })
+            ->pluck('id')
+            ->values();
+
+        $deletableUnitIds = collect($units->items())
+            ->filter(function ($unit) {
+                return ($unit->produk_count ?? 0) === 0;
+            })
+            ->pluck('id')
+            ->values();
+    @endphp
 
     @push('scripts')
     <script>
@@ -761,24 +778,35 @@
                 unitModalMode: 'create',
                 isSubmitting: false,
 
+                // Active tab context
+                activeTab: '{{ $tab }}',
+
                 // Forms
                 categoryForm: { id: null, name: '', description: '' },
                 unitForm: { id: null, name: '', conversion_to_base: 1 },
 
                 // Selection
-                selectedItems: [],
-                selectAllCategories: false,
-                selectAllUnits: false,
+                selectableCategoryIds: @json($deletableCategoryIds),
+                selectableUnitIds: @json($deletableUnitIds),
+                selected: {
+                    category: [],
+                    unit: []
+                },
+                selectAll: {
+                    category: false,
+                    unit: false
+                },
+                bulkIds: [],
 
                 // Delete modal
                 deleteModalTitle: '',
                 deleteModalMessage: '',
                 deleteFormAction: '',
-                bulkDeleteAction: '',
+                deleteMode: 'single',
 
                 // Computed
                 get categoryFormAction() {
-                    return this.categoryModalMode === 'create' 
+                    return this.categoryModalMode === 'create'
                         ? '{{ route("categories.store") }}'
                         : `/categories/${this.categoryForm.id}`;
                 },
@@ -787,96 +815,107 @@
                         ? '{{ route("units.store") }}'
                         : `/units/${this.unitForm.id}`;
                 },
+                get activeSelectedItems() {
+                    return this.activeTab === 'category' ? this.selected.category : this.selected.unit;
+                },
+                get selectedCount() {
+                    return this.activeSelectedItems.length;
+                },
 
                 // Methods
                 toggleSelectAll(type) {
-                    if (type === 'category') {
-                        if (this.selectAllCategories) {
-                            this.selectedItems = @json($categories->pluck('id'));
-                        } else {
-                            this.selectedItems = [];
-                        }
-                    } else {
-                        if (this.selectAllUnits) {
-                            this.selectedItems = @json($units->pluck('id'));
-                        } else {
-                            this.selectedItems = [];
-                        }
+                    const selectable = type === 'category' ? this.selectableCategoryIds : this.selectableUnitIds;
+                    if (!Array.isArray(selectable) || selectable.length === 0) {
+                        this.selected[type] = [];
+                        this.selectAll[type] = false;
+                        return;
                     }
+
+                    this.selected[type] = this.selectAll[type] ? [...selectable] : [];
+                },
+
+                handleItemCheck(type) {
+                    const selectable = type === 'category' ? this.selectableCategoryIds : this.selectableUnitIds;
+                    const allowedPool = Array.isArray(selectable) ? selectable : [];
+                    this.selected[type] = this.selected[type].filter(id => allowedPool.includes(id));
+                    this.selectAll[type] = allowedPool.length > 0 && this.selected[type].length === allowedPool.length;
                 },
 
                 confirmBulkDelete() {
-                    const count = this.selectedItems.length;
-                    const type = '{{ $tab }}' === 'category' ? 'kategori' : 'satuan';
-                    this.deleteModalTitle = `Hapus ${count} ${type}?`;
-                    this.deleteModalMessage = `Apakah Anda yakin ingin menghapus ${count} ${type} yang dipilih? Tindakan ini tidak dapat dibatalkan.`;
-                    this.bulkDeleteAction = '{{ $tab }}' === 'category' 
-                        ? '{{ route("categories.bulk-destroy") }}'
-                        : '{{ route("units.bulk-destroy") }}';
+                    const selected = [...this.activeSelectedItems];
+                    if (!selected.length) {
+                        return;
+                    }
+
+                    const isCategoryTab = this.activeTab === 'category';
+                    const type = isCategoryTab ? 'kategori' : 'satuan';
+
+                    this.deleteMode = 'bulk';
+                    this.bulkIds = selected;
+                    this.deleteModalTitle = `Hapus ${selected.length} ${type}?`;
+                    this.deleteModalMessage = `Apakah Anda yakin ingin menghapus ${selected.length} ${type} yang dipilih? Tindakan ini tidak dapat dibatalkan.`;
+                    this.deleteFormAction = isCategoryTab
+                        ? '{{ route("categories.bulk-destroy", [], false) }}'
+                        : '{{ route("units.bulk-destroy", [], false) }}';
                     this.showDeleteModal = true;
+                },
+
+                openCategoryEdit(category) {
+                    if (!category) { return; }
+                    this.categoryModalMode = 'edit';
+                    this.categoryForm = {
+                        id: category.id,
+                        name: category.name || '',
+                        description: category.description || ''
+                    };
+                    this.showCategoryModal = true;
+                },
+
+                requestCategoryDelete(id, name, productCount = 0) {
+                    if (productCount > 0) {
+                        alert(`Kategori "${name}" masih memiliki ${productCount} produk aktif.`);
+                        return;
+                    }
+
+                    this.deleteMode = 'single';
+                    this.bulkIds = [];
+                    this.deleteModalTitle = 'Hapus Kategori?';
+                    this.deleteModalMessage = `Apakah Anda yakin ingin menghapus kategori "${name}"? Tindakan ini tidak dapat dibatalkan.`;
+                    this.deleteFormAction = `/categories/${id}`;
+                    this.showDeleteModal = true;
+                },
+
+                openUnitEdit(unit) {
+                    if (!unit) { return; }
+                    this.unitModalMode = 'edit';
+                    this.unitForm = {
+                        id: unit.id,
+                        name: unit.name || '',
+                        conversion_to_base: unit.conversion_to_base || 1
+                    };
+                    this.showUnitModal = true;
+                },
+
+                requestUnitDelete(id, name, productCount = 0) {
+                    if (productCount > 0) {
+                        alert(`Satuan "${name}" masih digunakan oleh ${productCount} produk.`);
+                        return;
+                    }
+
+                    this.deleteMode = 'single';
+                    this.bulkIds = [];
+                    this.deleteModalTitle = 'Hapus Satuan?';
+                    this.deleteModalMessage = `Apakah Anda yakin ingin menghapus satuan "${name}"? Tindakan ini tidak dapat dibatalkan.`;
+                    this.deleteFormAction = `/units/${id}`;
+                    this.showDeleteModal = true;
+                },
+
+                closeDeleteModal() {
+                    this.showDeleteModal = false;
+                    this.deleteMode = 'single';
+                    this.bulkIds = [];
                 }
             }
-        }
-
-        // Global functions for onclick handlers
-        function openCategoryModal() {
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.categoryModalMode = 'create';
-            component.categoryForm = { id: null, name: '', description: '' };
-            component.showCategoryModal = true;
-        }
-
-        function editCategory(category) {
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.categoryModalMode = 'edit';
-            component.categoryForm = {
-                id: category.id,
-                name: category.name,
-                description: category.description || ''
-            };
-            component.showCategoryModal = true;
-        }
-
-        function confirmDeleteCategory(id, name, productCount) {
-            if (productCount > 0) {
-                alert(`Tidak dapat menghapus kategori "${name}" karena masih memiliki ${productCount} produk.`);
-                return;
-            }
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.deleteModalTitle = 'Hapus Kategori?';
-            component.deleteModalMessage = `Apakah Anda yakin ingin menghapus kategori "${name}"? Tindakan ini tidak dapat dibatalkan.`;
-            component.deleteFormAction = `/categories/${id}`;
-            component.showDeleteModal = true;
-        }
-
-        function openUnitModal() {
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.unitModalMode = 'create';
-            component.unitForm = { id: null, name: '', conversion_to_base: 1 };
-            component.showUnitModal = true;
-        }
-
-        function editUnit(unit) {
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.unitModalMode = 'edit';
-            component.unitForm = {
-                id: unit.id,
-                name: unit.name,
-                conversion_to_base: unit.conversion_to_base
-            };
-            component.showUnitModal = true;
-        }
-
-        function confirmDeleteUnit(id, name, productCount) {
-            if (productCount > 0) {
-                alert(`Tidak dapat menghapus satuan "${name}" karena masih digunakan ${productCount} produk.`);
-                return;
-            }
-            const component = Alpine.$data(document.querySelector('[x-data]'));
-            component.deleteModalTitle = 'Hapus Satuan?';
-            component.deleteModalMessage = `Apakah Anda yakin ingin menghapus satuan "${name}"? Tindakan ini tidak dapat dibatalkan.`;
-            component.deleteFormAction = `/units/${id}`;
-            component.showDeleteModal = true;
         }
     </script>
     @endpush

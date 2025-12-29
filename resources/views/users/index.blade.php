@@ -8,7 +8,7 @@
                 Manajemen User
             </h1>
             <a href="{{ route('users.create') }}"
-               class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-linear-to-r from-green-500 to-green-700">
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 font-medium text-white rounded-lg shadow transition hover:scale-[1.02] bg-gradient-to-r from-green-500 to-green-700">
                 <i class="fas fa-plus"></i>
                 <span>Tambah User</span>
             </a>
@@ -97,7 +97,7 @@
                 <div class="flex items-center gap-3">
                     <button id="bulk-delete-btn"
                             type="button"
-                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-linear-to-r from-red-500 to-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition rounded-lg shadow bg-gradient-to-r from-red-500 to-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled>
                         <i class="fas fa-trash"></i>
                         Hapus Dipilih
@@ -210,30 +210,30 @@
                 </form>
             </div>
 
-            <div class="p-6">
+            <div class="p-0">
                 <form id="bulk-delete-form" method="POST" action="{{ route('users.bulk-delete') }}">
                     @csrf
                     @method('DELETE')
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm text-left text-slate-700">
-                            <thead class="text-xs font-semibold tracking-wide uppercase bg-slate-50 text-slate-600 ring-1 ring-slate-100">
+                            <thead class="text-xs font-semibold tracking-wide uppercase bg-slate-50 text-slate-600 border-b border-slate-200">
                                 <tr>
-                                    <th class="px-3 py-4">
+                                    <th class="px-4 py-3 w-10">
                                         <input type="checkbox" id="select-all" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
                                     </th>
-                                    <th class="px-4 py-4">User</th>
-                                    <th class="px-4 py-4">Email</th>
-                                    <th class="px-4 py-4">Role</th>
-                                    <th class="px-4 py-4">Status</th>
-                                    <th class="px-4 py-4">Bergabung</th>
-                                    <th class="px-4 py-4 text-center">Aksi</th>
+                                    <th class="px-4 py-3">User</th>
+                                    <th class="px-4 py-3">Email</th>
+                                    <th class="px-4 py-3">Role</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3">Bergabung</th>
+                                    <th class="px-4 py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-emerald-100">
-                                @forelse($users as $user)
-                                    <tr class="transition hover:bg-emerald-50/70">
-                                        <td class="px-3 py-4 align-top">
+                            <tbody class="divide-y divide-slate-100">
+                                                                @forelse($users as $user)
+                                    <tr class="transition hover:bg-slate-50/80">
+                                        <td class="px-4 py-3 align-middle">
                                             @if($user->id !== auth()->id())
                                                 <input type="checkbox"
                                                        name="user_ids[]"
@@ -241,97 +241,125 @@
                                                        class="w-4 h-4 text-green-600 border-green-300 rounded user-checkbox focus:ring-green-500">
                                             @endif
                                         </td>
-                                        <td class="px-4 py-4 align-top">
+                                        <td class="px-4 py-3 align-middle">
                                             <div class="flex items-center gap-3">
-                                                <div class="shrink-0">
+                                                <div class="relative shrink-0">
                                                     @if($user->avatar)
-                                                        <img class="object-cover w-12 h-12 rounded-full ring-2 ring-emerald-100"
+                                                        <img class="object-cover w-9 h-9 rounded-full ring-1 ring-slate-200"
                                                              src="{{ asset('storage/' . $user->avatar) }}"
                                                              alt="{{ $user->name }}">
                                                     @else
-                                                        <div class="flex items-center justify-center w-12 h-12 text-emerald-600 bg-emerald-50 rounded-full">
-                                                            <i class="fas fa-user"></i>
+                                                        <div class="flex items-center justify-center w-9 h-9 text-emerald-600 bg-emerald-50 rounded-full ring-1 ring-emerald-100">
+                                                            <i class="fas fa-user text-sm"></i>
                                                         </div>
                                                     @endif
-                                                </div>
-                                                <div>
-                                                    <p class="text-sm font-semibold text-slate-800">{{ $user->name }}</p>
-                                                    @if($user->id === auth()->id())
-                                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 mt-1 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-full">
-                                                            <i class="fas fa-user-circle"></i>
-                                                            Anda
-                                                        </span>
+                                                    
+                                                    @if($user->isOnline())
+                                                        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" title="Online"></span>
+                                                    @else
+                                                        <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-slate-300 border-2 border-white rounded-full" title="Offline"></span>
                                                     @endif
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-sm font-semibold text-slate-800">{{ $user->name }}</span>
+                                                        @if($user->id === auth()->id())
+                                                            <span class="px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full">
+                                                                YOU
+                                                            </span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-4 align-top">
+                                        <td class="px-4 py-3 align-middle">
                                             <p class="text-sm text-slate-600">{{ $user->email }}</p>
                                         </td>
-                                        <td class="px-4 py-4 align-top">
+                                        <td class="px-4 py-3 align-middle">
                                             @php
                                                 $roleData = [
                                                     'admin' => [
-                                                        'bg' => 'from-slate-100 to-slate-200',
+                                                        'bg' => 'bg-slate-100',
                                                         'text' => 'text-slate-700',
                                                         'icon' => 'fas fa-user-gear',
-                                                            'border' => 'border-slate-300'
+                                                        'border' => 'border-slate-200'
                                                     ],
                                                     'manager' => [
-                                                            'bg' => 'from-sky-100 to-sky-200',
-                                                            'text' => 'text-sky-700',
+                                                        'bg' => 'bg-sky-50',
+                                                        'text' => 'text-sky-700',
                                                         'icon' => 'fas fa-user-tie',
-                                                            'border' => 'border-sky-200'
+                                                        'border' => 'border-sky-200'
                                                     ],
                                                     'staff' => [
-                                                            'bg' => 'from-teal-100 to-teal-200',
-                                                            'text' => 'text-teal-700',
+                                                        'bg' => 'bg-emerald-50',
+                                                        'text' => 'text-emerald-700',
                                                         'icon' => 'fas fa-user',
-                                                            'border' => 'border-teal-200'
+                                                        'border' => 'border-emerald-200'
                                                     ],
                                                 ];
                                                 $role = $roleData[$user->role] ?? $roleData['staff'];
                                             @endphp
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold border rounded-full bg-linear-to-r {{ $role['bg'] }} {{ $role['text'] }} {{ $role['border'] }}">
-                                                <i class="{{ $role['icon'] }}"></i>
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium border rounded-full {{ $role['bg'] }} {{ $role['text'] }} {{ $role['border'] }}">
+                                                <i class="{{ $role['icon'] }} text-[10px]"></i>
                                                 {{ ucfirst($user->role) }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-4 align-top">
-                                            <span class="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200 rounded-full bg-emerald-50">
-                                                <span class="flex w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                                                Aktif
-                                            </span>
+                                        <td class="px-4 py-3 align-middle">
+                                            @if($user->isOnline())
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium text-green-700 bg-green-50 border border-green-200 rounded-full">
+                                                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                                                    Online
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-full">
+                                                    <span class="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
+                                                    Offline
+                                                </span>
+                                            @endif
                                         </td>
-                                        <td class="px-4 py-4 align-top">
-                                            <div class="space-y-1 text-sm text-slate-600">
-                                                <p class="font-medium">{{ $user->created_at->format('d M Y') }}</p>
-                                                <p class="text-xs text-slate-500">{{ $user->created_at->diffForHumans() }}</p>
+                                        <td class="px-4 py-3 align-middle">
+                                            <div class="flex flex-col">
+                                                <span class="text-xs font-medium text-slate-700">{{ $user->created_at->format('d M Y') }}</span>
+                                                <span class="text-[10px] text-slate-400">{{ $user->created_at->diffForHumans() }}</span>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-4 align-top">
-                                            <div class="flex items-center justify-center gap-2">
+                                        <td class="px-4 py-3 align-middle text-center">
+                                            <div class="flex items-center justify-center gap-1">
+                                                @if($user->id !== auth()->id())
+                                                    <form action="{{ route('users.toggle-status', $user) }}" method="POST" class="inline-block">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" 
+                                                                class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-slate-100 {{ $user->is_active ? 'text-emerald-600' : 'text-slate-400' }}"
+                                                                title="{{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}">
+                                                            <i class="fas {{ $user->is_active ? 'fa-toggle-on' : 'fa-toggle-off' }} text-lg"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                                
                                                 <a href="{{ route('users.show', $user) }}"
-                                                   class="inline-flex items-center justify-center w-9 h-9 text-emerald-600 transition bg-emerald-50 rounded-lg hover:bg-emerald-100"
+                                                   class="w-8 h-8 flex items-center justify-center text-slate-500 transition hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                                                    title="Detail">
-                                                    <i class="text-sm fas fa-eye"></i>
+                                                    <i class="fas fa-eye text-sm"></i>
                                                 </a>
+                                                
                                                 <a href="{{ route('users.edit', $user) }}"
-                                                   class="inline-flex items-center justify-center w-9 h-9 text-blue-700 transition bg-blue-100 rounded-lg hover:bg-blue-200"
+                                                   class="w-8 h-8 flex items-center justify-center text-slate-500 transition hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                                                    title="Edit">
-                                                    <i class="text-sm fas fa-edit"></i>
+                                                    <i class="fas fa-pen text-sm"></i>
                                                 </a>
+
                                                 @if($user->id !== auth()->id())
                                                     <button type="button"
                                                             onclick="confirmDelete({{ $user->id }}, '{{ addslashes($user->name) }}')"
-                                                            class="inline-flex items-center justify-center w-9 h-9 text-red-600 transition bg-red-50 rounded-lg hover:bg-red-100"
+                                                            class="w-8 h-8 flex items-center justify-center text-slate-500 transition hover:text-red-600 hover:bg-red-50 rounded-lg"
                                                             title="Hapus">
-                                                        <i class="text-sm fas fa-trash"></i>
+                                                        <i class="fas fa-trash text-sm"></i>
                                                     </button>
                                                 @else
-                                                    <span class="inline-flex items-center justify-center w-9 h-9 text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
+                                                    <span class="w-8 h-8 flex items-center justify-center text-slate-300 cursor-not-allowed"
                                                           title="Tidak dapat menghapus akun sendiri">
-                                                        <i class="text-sm fas fa-lock"></i>
+                                                        <i class="fas fa-lock text-sm"></i>
                                                     </span>
                                                 @endif
                                             </div>
@@ -345,7 +373,7 @@
                                                 <h3 class="text-lg font-semibold text-slate-800">Belum ada user</h3>
                                                 <p class="text-sm text-slate-500">Mulai dengan menambahkan user pertama Anda.</p>
                                                 <a href="{{ route('users.create') }}"
-                                                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-linear-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02] transition">
+                                                   class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02] transition">
                                                     <i class="fas fa-plus"></i>
                                                     Tambah User
                                                 </a>
@@ -379,7 +407,7 @@
 
                             @foreach ($users->getUrlRange(1, $users->lastPage()) as $page => $url)
                                 @if ($page == $users->currentPage())
-                                    <span class="px-3 py-2 text-sm font-semibold text-white rounded-lg shadow bg-linear-to-r from-emerald-500 to-emerald-600">
+                                    <span class="px-3 py-2 text-sm font-semibold text-white rounded-lg shadow bg-gradient-to-r from-emerald-500 to-emerald-600">
                                         {{ $page }}
                                     </span>
                                 @else
@@ -431,7 +459,7 @@
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-linear-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow bg-gradient-to-r from-red-500 to-red-600 hover:scale-[1.02] transition">
                         <i class="fas fa-trash"></i>
                         Hapus User
                     </button>
