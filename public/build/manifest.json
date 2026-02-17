@@ -1,15 +1,19 @@
 {
+  "_id-WEjKJXZm.js": {
+    "file": "assets/id-WEjKJXZm.js",
+    "name": "id",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
   "_vendor-alpine-Bq2KT4vH.js": {
     "file": "assets/vendor-alpine-Bq2KT4vH.js",
     "name": "vendor-alpine"
   },
-  "_vendor-chart-Bcjh2pZL.js": {
-    "file": "assets/vendor-chart-Bcjh2pZL.js",
+  "_vendor-chart-B8EWEgfi.js": {
+    "file": "assets/vendor-chart-B8EWEgfi.js",
     "name": "vendor-chart"
-  },
-  "_vendor-flatpickr-B_JH6AFf.js": {
-    "file": "assets/vendor-flatpickr-B_JH6AFf.js",
-    "name": "vendor-flatpickr"
   },
   "node_modules/@fontsource/manrope/files/manrope-latin-400-normal.woff": {
     "file": "assets/manrope-latin-400-normal-8tf8FM3T.woff",
@@ -43,8 +47,27 @@
     "file": "assets/manrope-latin-700-normal-BZp_XxE4.woff2",
     "src": "node_modules/@fontsource/manrope/files/manrope-latin-700-normal.woff2"
   },
+  "node_modules/chart.js/auto/auto.js": {
+    "file": "assets/auto-CZzCjBpw.js",
+    "name": "auto",
+    "src": "node_modules/chart.js/auto/auto.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-chart-B8EWEgfi.js"
+    ]
+  },
+  "node_modules/flatpickr/dist/esm/index.js": {
+    "file": "assets/vendor-flatpickr-BPBzpGOV.js",
+    "name": "vendor-flatpickr",
+    "src": "node_modules/flatpickr/dist/esm/index.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/flatpickr/dist/flatpickr.css": {
+    "file": "assets/flatpickr-BsM4JrO0.css",
+    "src": "node_modules/flatpickr/dist/flatpickr.css"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-caFPlTLE.css",
+    "file": "assets/app-C2cr8DhA.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -53,17 +76,17 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-C2mWOjSq.js",
+    "file": "assets/app-ClbTOrKG.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "imports": [
-      "_vendor-chart-Bcjh2pZL.js",
-      "_vendor-alpine-Bq2KT4vH.js",
-      "_vendor-flatpickr-B_JH6AFf.js"
+      "_vendor-alpine-Bq2KT4vH.js"
     ],
-    "css": [
-      "assets/app-BsM4JrO0.css"
+    "dynamicImports": [
+      "node_modules/chart.js/auto/auto.js",
+      "node_modules/flatpickr/dist/esm/index.js",
+      "_id-WEjKJXZm.js"
     ]
   }
 }
