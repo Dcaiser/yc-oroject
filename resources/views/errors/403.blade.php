@@ -4,7 +4,7 @@
 @section('code', '403')
 @section('message', 'Akses Ditolak')
 @section('icon')
-    <i class="fas fa-lock"></i>
+    <span aria-hidden="true">🔒</span>
 @endsection
 
 @section('description')

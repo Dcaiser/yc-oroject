@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ActivityController extends Controller
 {
@@ -15,14 +16,14 @@ class ActivityController extends Controller
         // Sorting
         $sortBy = $request->get('sort', 'created_at');
         $sortDir = $request->get('dir', 'desc');
-        
+
         // Validate sort column
         $allowedSorts = ['created_at', 'user', 'action', 'model'];
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
         }
         $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
-        
+
         $query = Activity::orderBy($sortBy, $sortDir);
 
         // Filter berdasarkan tipe aktivitas
@@ -58,11 +59,15 @@ class ActivityController extends Controller
         // Filter berdasarkan rentang tanggal
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
-        if ($dateFrom) {
-            $query->whereDate('created_at', '>=', $dateFrom);
-        }
-        if ($dateTo) {
-            $query->whereDate('created_at', '<=', $dateTo);
+        if ($dateFrom && $dateTo) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($dateFrom)->startOfDay(),
+                \Carbon\Carbon::parse($dateTo)->endOfDay(),
+            ]);
+        } elseif ($dateFrom) {
+            $query->where('created_at', '>=', \Carbon\Carbon::parse($dateFrom)->startOfDay());
+        } elseif ($dateTo) {
+            $query->where('created_at', '<=', \Carbon\Carbon::parse($dateTo)->endOfDay());
         }
 
         // Search berdasarkan user, action, atau model
@@ -84,21 +89,31 @@ class ActivityController extends Controller
 
         $activities = $query->paginate($perPage)->withQueryString();
 
-        // Stats
-        $stats = [
-            'total' => Activity::count(),
-            'today' => Activity::whereDate('created_at', now()->toDateString())->count(),
-            'this_week' => Activity::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
-            'actors' => Activity::distinct('user')->count('user'),
-        ];
+        $cacheTtl = now()->addSeconds(60);
 
-        $recentActivity = Activity::latest()->first();
+        // Stats
+        $stats = Cache::remember('activities:stats', $cacheTtl, function () {
+            return [
+                'total' => Activity::count(),
+                'today' => Activity::whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])->count(),
+                'this_week' => Activity::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+                'actors' => Activity::distinct('user')->count('user'),
+            ];
+        });
+
+        $recentActivity = Cache::remember('activities:recent:first', $cacheTtl, function () {
+            return Activity::latest()->first();
+        });
 
         // Get unique sources (models) for filter dropdown
-        $sources = Activity::distinct()->pluck('model')->filter()->sort()->values();
-        
+        $sources = Cache::remember('activities:filter:sources', $cacheTtl, function () {
+            return Activity::distinct()->pluck('model')->filter()->sort()->values();
+        });
+
         // Get unique users for filter dropdown
-        $users = Activity::distinct()->pluck('user')->filter()->sort()->values();
+        $users = Cache::remember('activities:filter:users', $cacheTtl, function () {
+            return Activity::distinct()->pluck('user')->filter()->sort()->values();
+        });
 
         // Mapping sumber ke route (untuk link ke data terkait)
         $sourceRoutes = [
@@ -114,10 +129,10 @@ class ActivityController extends Controller
         ];
 
         return view('activities.index', compact(
-            'activities', 
-            'stats', 
-            'recentActivity', 
-            'sources', 
+            'activities',
+            'stats',
+            'recentActivity',
+            'sources',
             'users',
             'sourceRoutes',
             'sortBy',
@@ -153,13 +168,13 @@ class ActivityController extends Controller
     public function bulkDelete(Request $request)
     {
         $ids = $request->input('ids', []);
-        
+
         if (empty($ids)) {
             return redirect()->route('activities.index')->with('error', 'Tidak ada aktivitas yang dipilih.');
         }
 
         Activity::whereIn('id', $ids)->delete();
-        
+
         return redirect()->route('activities.index')->with('success', count($ids) . ' aktivitas berhasil dihapus!');
     }
 }

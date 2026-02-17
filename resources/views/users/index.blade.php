@@ -253,7 +253,7 @@
                                                             <i class="fas fa-user text-sm"></i>
                                                         </div>
                                                     @endif
-                                                    
+
                                                     @if($user->isOnline())
                                                         <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" title="Online"></span>
                                                     @else
@@ -329,20 +329,20 @@
                                                     <form action="{{ route('users.toggle-status', $user) }}" method="POST" class="inline-block">
                                                         @csrf
                                                         @method('PATCH')
-                                                        <button type="submit" 
+                                                        <button type="submit"
                                                                 class="w-8 h-8 flex items-center justify-center rounded-lg transition hover:bg-slate-100 {{ $user->is_active ? 'text-emerald-600' : 'text-slate-400' }}"
                                                                 title="{{ $user->is_active ? 'Nonaktifkan User' : 'Aktifkan User' }}">
                                                             <i class="fas {{ $user->is_active ? 'fa-toggle-on' : 'fa-toggle-off' }} text-lg"></i>
                                                         </button>
                                                     </form>
                                                 @endif
-                                                
+
                                                 <a href="{{ route('users.show', $user) }}"
                                                    class="w-8 h-8 flex items-center justify-center text-slate-500 transition hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
                                                    title="Detail">
                                                     <i class="fas fa-eye text-sm"></i>
                                                 </a>
-                                                
+
                                                 <a href="{{ route('users.edit', $user) }}"
                                                    class="w-8 h-8 flex items-center justify-center text-slate-500 transition hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                                                    title="Edit">

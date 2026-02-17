@@ -4,7 +4,7 @@
 @section('code', '500')
 @section('message', 'Terjadi Kesalahan Server')
 @section('icon')
-    <i class="fas fa-triangle-exclamation"></i>
+    <span aria-hidden="true">⚠️</span>
 @endsection
 
 @section('description')

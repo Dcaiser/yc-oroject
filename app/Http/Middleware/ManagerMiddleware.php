@@ -12,7 +12,9 @@ class ManagerMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check() || (!Auth::user()->isManager() && !Auth::user()->isAdmin())) {
-            abort(403, 'Akses ditolak. Hanya Manager dan Admin yang dapat mengakses halaman ini.');
+            return redirect()
+                ->route('dashboard')
+                ->with('error', 'Akses ditolak. Halaman ini hanya untuk Manager atau Admin.');
         }
 
         return $next($request);

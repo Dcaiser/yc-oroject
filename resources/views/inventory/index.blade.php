@@ -218,7 +218,7 @@
                 <!-- Right Side -->
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm text-slate-500"><span class="font-medium text-slate-700">{{ $products->total() }}</span> produk</span>
-                    
+
                     <div class="relative" x-data="{ open: false }" @click.away="open = false">
                         <button type="button" @click="open = !open" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50">
                             <i class="fas fa-cog"></i><span class="hidden sm:inline">Kelola</span><i class="fas fa-chevron-down text-xs" :class="{ 'rotate-180': open }"></i>
@@ -290,7 +290,7 @@
             <!-- Content Area -->
             <div class="p-4">
         @if($products->count() > 0)
-            <form action="{{ route('updateAll') }}" method="POST" class="space-y-4" x-data="{ 
+            <form action="{{ route('updateAll') }}" method="POST" class="space-y-4" x-data="{
                 viewMode: 'card',
                 dirtyRows: {},
                 selectedItems: [],
@@ -334,8 +334,8 @@
                             <i class="fas fa-times"></i>
                             <span class="hidden sm:inline">Batal Pilih</span>
                         </button>
-                        <button type="button" 
-                                @click="if(confirm('Hapus ' + selectedItems.length + ' produk yang dipilih?')) { 
+                        <button type="button"
+                                @click="if(confirm('Hapus ' + selectedItems.length + ' produk yang dipilih?')) {
                                     const form = document.createElement('form');
                                     form.method = 'POST';
                                     form.action = '{{ route('products.bulkDelete') }}';
@@ -383,7 +383,7 @@
                         </div>
                         <!-- View Toggle -->
                         <div class="flex items-center gap-1 p-1 bg-white border border-slate-200 rounded-xl">
-                            <button type="button" @click="viewMode = 'card'" 
+                            <button type="button" @click="viewMode = 'card'"
                                     :class="viewMode === 'card' ? 'bg-emerald-50 text-emerald-600' : 'text-slate-400 hover:text-slate-600'"
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all">
                                 <i class="fas fa-grip"></i>
@@ -395,7 +395,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- TABLE VIEW -->
                     <div x-show="viewMode === 'table'" x-cloak>
                         <div class="overflow-x-auto rounded-xl border border-slate-100">
@@ -444,7 +444,7 @@
                                         <tr class="hover:bg-slate-50/50 transition" :class="{ 'bg-emerald-50/30': selectedItems.includes({{ $product->id }}) }">
                                             <td class="px-4 py-3">
                                                 <label class="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" 
+                                                    <input type="checkbox"
                                                            :checked="selectedItems.includes({{ $product->id }})"
                                                            @change="toggleItem({{ $product->id }})"
                                                            class="sr-only peer">
@@ -494,7 +494,7 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     <!-- CARD VIEW -->
                     <div x-show="viewMode === 'card'" class="space-y-4">
                     @foreach($products as $product)
@@ -525,8 +525,8 @@
                                 ];
                             }
                         @endphp
-                        <div class="p-6 border border-emerald-100 rounded-3xl bg-white shadow-sm transition-all overflow-hidden" 
-                             :class="{ 
+                        <div class="p-6 border border-emerald-100 rounded-3xl bg-white shadow-sm transition-all overflow-hidden"
+                             :class="{
                                  'border-amber-300 ring-2 ring-amber-100/80': dirtyRows[{{ $product->id }}],
                                  'border-emerald-400 ring-2 ring-emerald-100 bg-emerald-50/30': selectedItems.includes({{ $product->id }})
                              }">
@@ -534,7 +534,7 @@
                                 <!-- Checkbox -->
                                 <div class="shrink-0 sm:pt-1">
                                     <label class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" 
+                                        <input type="checkbox"
                                                :checked="selectedItems.includes({{ $product->id }})"
                                                @change="toggleItem({{ $product->id }})"
                                                class="sr-only peer">
@@ -755,7 +755,7 @@
                             Menampilkan <span class="font-medium text-slate-800">{{ $products->firstItem() ?? 0 }}</span> - <span class="font-medium text-slate-800">{{ $products->lastItem() ?? 0 }}</span> dari <span class="font-medium text-slate-800">{{ $products->total() }}</span> produk
                         </div>
                     </div>
-                    
+
                     @if($products->hasPages())
                     <div class="flex flex-wrap items-center gap-1.5">
                         {{-- Previous --}}

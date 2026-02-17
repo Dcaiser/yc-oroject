@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Exports\SalesTransactionExport;
 use App\Exports\StockMovementExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -58,43 +59,149 @@ class ReportController extends Controller
             $periodDescription = $startDate->format('d M Y') . ' - ' . $endDate->format('d M Y');
         }
 
-        // Summary Stats
-        $totalActivities = Activity::whereBetween('created_at', [$startDate, $endDate])->count();
-        
-        $stockIn = Stockin::whereBetween('created_at', [$startDate, $endDate])->sum('stock_qty');
-        $stockOut = Stockout::whereBetween('created_at', [$startDate, $endDate])->sum('stock_qty');
-        
-        $endingStock = Produk::sum('stock_quantity'); 
+        $reportCacheKey = 'reports:index:' . md5(json_encode([
+            'mode' => $mode,
+            'start' => $startDate->toDateTimeString(),
+            'end' => $endDate->toDateTimeString(),
+            'year' => $year,
+            'week' => $week,
+            'week_month' => $weekMonth,
+            'week_year' => $weekYear,
+        ]));
 
-        $uniqueUsers = Activity::whereBetween('created_at', [$startDate, $endDate])
-            ->distinct('user')
-            ->count('user');
+        $cachedPayload = Cache::remember($reportCacheKey, now()->addSeconds(90), function () use ($startDate, $endDate) {
+            $totalActivities = Activity::whereBetween('created_at', [$startDate, $endDate])->count();
+
+            $stockIn = Stockin::whereBetween('created_at', [$startDate, $endDate])->sum('stock_qty');
+            $stockOut = Stockout::whereBetween('created_at', [$startDate, $endDate])->sum('stock_qty');
+
+            $endingStock = Produk::sum('stock_quantity');
+
+            $uniqueUsers = Activity::whereBetween('created_at', [$startDate, $endDate])
+                ->distinct('user')
+                ->count('user');
+
+            $activitiesByDate = Activity::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('DATE(created_at) as date, count(*) as count')
+                ->groupBy('date')
+                ->pluck('count', 'date');
+
+            $stockInByDate = Stockin::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
+                ->groupBy('date')
+                ->pluck('total_qty', 'date');
+
+            $stockOutByDate = Stockout::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
+                ->groupBy('date')
+                ->pluck('total_qty', 'date');
+
+            $salesItemsByDate = PosTransactionItem::join('pos_transactions', 'pos_transaction_items.pos_transaction_id', '=', 'pos_transactions.id')
+                ->whereBetween('pos_transactions.created_at', [$startDate, $endDate])
+                ->selectRaw('DATE(pos_transactions.created_at) as date, SUM(pos_transaction_items.qty) as total_qty')
+                ->groupBy('date')
+                ->pluck('total_qty', 'date');
+
+            $sales = PosTransaction::query()
+                ->select([
+                    'id',
+                    'created_at',
+                    'customer_type',
+                    'customer_name',
+                    'grand_total',
+                    'subtotal',
+                    'shipping_cost',
+                    'status',
+                    'payment_method',
+                    'created_by',
+                ])
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->with(['creator:id,name'])
+                ->withCount('items')
+                ->latest()
+                ->get()
+                ->map(function ($transaction) {
+                    return [
+                        'entry_type' => 'sale',
+                        'customer_type' => $transaction->customer_type,
+                        'date' => $transaction->created_at->translatedFormat('d M Y'),
+                        'timestamp' => $transaction->created_at,
+                        'time_input' => $transaction->created_at->format('H:i'),
+                        'customer_name' => $transaction->customer_name,
+                        'salesperson' => $transaction->creator ? $transaction->creator->name : 'System',
+                        'grand_total' => $transaction->grand_total,
+                        'subtotal' => $transaction->subtotal,
+                        'shipping_cost' => $transaction->shipping_cost,
+                        'id' => $transaction->id,
+                        'status' => $transaction->status,
+                        'items_count' => $transaction->items_count,
+                        'payment_method' => $transaction->payment_method,
+                        'expense_label' => null,
+                    ];
+                });
+
+            $expenses = Expense::query()
+                ->select(['id', 'expense_date', 'amount', 'description', 'notes', 'created_at'])
+                ->whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->latest()
+                ->get()
+                ->map(function ($expense) {
+                    $time = $expense->created_at ? $expense->created_at->format('H:i:s') : '00:00:00';
+                    $dateStr = $expense->expense_date instanceof \Carbon\Carbon
+                        ? $expense->expense_date->format('Y-m-d')
+                        : \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d');
+
+                    return [
+                        'entry_type' => 'expense',
+                        'customer_type' => 'expense',
+                        'date' => Carbon::parse($dateStr)->translatedFormat('d M Y'),
+                        'timestamp' => Carbon::parse($dateStr . ' ' . $time),
+                        'time_input' => $expense->created_at ? $expense->created_at->format('H:i') : '',
+                        'expense_label' => $expense->description,
+                        'customer_name' => null,
+                        'notes' => $expense->notes,
+                        'grand_total' => $expense->amount,
+                        'salesperson' => 'System',
+                    ];
+                });
+
+            $salesTransactions = $sales->concat($expenses)->sortByDesc('timestamp')->values()->all();
+
+            $recentActivities = Activity::whereBetween('created_at', [$startDate, $endDate])
+                ->latest()
+                ->take(5)
+                ->get();
+
+            return [
+                'totalActivities' => $totalActivities,
+                'stockIn' => $stockIn,
+                'stockOut' => $stockOut,
+                'endingStock' => $endingStock,
+                'uniqueUsers' => $uniqueUsers,
+                'activitiesByDate' => $activitiesByDate,
+                'stockInByDate' => $stockInByDate,
+                'stockOutByDate' => $stockOutByDate,
+                'salesItemsByDate' => $salesItemsByDate,
+                'salesTransactions' => $salesTransactions,
+                'recentActivities' => $recentActivities,
+            ];
+        });
+
+        $totalActivities = $cachedPayload['totalActivities'];
+        $stockIn = $cachedPayload['stockIn'];
+        $stockOut = $cachedPayload['stockOut'];
+        $endingStock = $cachedPayload['endingStock'];
+        $uniqueUsers = $cachedPayload['uniqueUsers'];
 
         // Table Data (Inventory Summary by Date)
         $tableData = [];
         $period = CarbonPeriod::create($startDate, $endDate);
-        
-        // Optimization: Fetch aggregated data directly from database
-        $activitiesByDate = Activity::whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(created_at) as date, count(*) as count')
-            ->groupBy('date')
-            ->pluck('count', 'date');
-            
-        $stockInByDate = Stockin::whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
-            ->groupBy('date')
-            ->pluck('total_qty', 'date');
-            
-        $stockOutByDate = Stockout::whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
-            ->groupBy('date')
-            ->pluck('total_qty', 'date');
 
-        $salesItemsByDate = PosTransactionItem::join('pos_transactions', 'pos_transaction_items.pos_transaction_id', '=', 'pos_transactions.id')
-            ->whereBetween('pos_transactions.created_at', [$startDate, $endDate])
-            ->selectRaw('DATE(pos_transactions.created_at) as date, SUM(pos_transaction_items.qty) as total_qty')
-            ->groupBy('date')
-            ->pluck('total_qty', 'date');
+        // Optimization: Fetch aggregated data from cache/database
+        $activitiesByDate = $cachedPayload['activitiesByDate'];
+        $stockInByDate = $cachedPayload['stockInByDate'];
+        $stockOutByDate = $cachedPayload['stockOutByDate'];
+        $salesItemsByDate = $cachedPayload['salesItemsByDate'];
 
         $chartLabels = [];
         $chartTotal = [];
@@ -104,14 +211,14 @@ class ReportController extends Controller
 
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
-            
+
             $dayActivitiesCount = $activitiesByDate->get($dateStr, 0);
             $dayStockIn = $stockInByDate->get($dateStr, 0);
-            
+
             $manualStockOut = $stockOutByDate->get($dateStr, 0);
             $salesStockOut = $salesItemsByDate->get($dateStr, 0);
             $dayStockOut = $manualStockOut + $salesStockOut;
-            
+
             // Chart Data (All days)
             $chartLabels[] = $date->format('d M');
             $chartTotal[] = $dayActivitiesCount;
@@ -126,7 +233,7 @@ class ReportController extends Controller
                     'total' => $dayActivitiesCount,
                     'stock_in' => $dayStockIn,
                     'stock_out' => $dayStockOut,
-                    'ending_stock' => $endingStock, 
+                    'ending_stock' => $endingStock,
                 ];
             }
         }
@@ -142,56 +249,7 @@ class ReportController extends Controller
         ];
 
         // Sales Transactions
-        $sales = PosTransaction::whereBetween('created_at', [$startDate, $endDate])
-            ->with(['creator']) 
-            ->withCount('items')
-            ->latest()
-            ->get()
-            ->map(function ($transaction) {
-                return [
-                    'entry_type' => 'sale',
-                    'customer_type' => $transaction->customer_type,
-                    'date' => $transaction->created_at->translatedFormat('d M Y'),
-                    'timestamp' => $transaction->created_at,
-                    'time_input' => $transaction->created_at->format('H:i'),
-                    'customer_name' => $transaction->customer_name,
-                    'salesperson' => $transaction->creator ? $transaction->creator->name : 'System',
-                    'grand_total' => $transaction->grand_total,
-                    'subtotal' => $transaction->subtotal,
-                    'shipping_cost' => $transaction->shipping_cost,
-                    'id' => $transaction->id,
-                    'status' => $transaction->status,
-                    'items_count' => $transaction->items_count,
-                    'payment_method' => $transaction->payment_method,
-                    'expense_label' => null, // Ensure key exists
-                ];
-            });
-
-        $expenses = Expense::whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->latest()
-            ->get()
-            ->map(function ($expense) {
-                $time = $expense->created_at ? $expense->created_at->format('H:i:s') : '00:00:00';
-                // Ensure expense_date is treated as a date string Y-m-d before appending time
-                $dateStr = $expense->expense_date instanceof \Carbon\Carbon 
-                    ? $expense->expense_date->format('Y-m-d') 
-                    : \Carbon\Carbon::parse($expense->expense_date)->format('Y-m-d');
-                
-                return [
-                    'entry_type' => 'expense',
-                    'customer_type' => 'expense',
-                    'date' => Carbon::parse($dateStr)->translatedFormat('d M Y'),
-                    'timestamp' => Carbon::parse($dateStr . ' ' . $time),
-                    'time_input' => $expense->created_at ? $expense->created_at->format('H:i') : '',
-                    'expense_label' => $expense->description,
-                    'customer_name' => null, // Ensure key exists
-                    'notes' => $expense->notes,
-                    'grand_total' => $expense->amount,
-                    'salesperson' => 'System',
-                ];
-            });
-
-        $salesTransactions = $sales->concat($expenses)->sortByDesc('timestamp')->values()->all();
+        $salesTransactions = $cachedPayload['salesTransactions'];
 
 
         // Chart Data
@@ -199,7 +257,7 @@ class ReportController extends Controller
 
         // Options for filters
         $availableYears = range(Carbon::now()->year, Carbon::now()->subYears(5)->year);
-        $weekOptions = []; 
+        $weekOptions = [];
         // Generate week options for current year or selected year
         $targetYear = $mode === 'year' ? $year : Carbon::now()->year;
         $weeksInYear = (new Carbon($targetYear . '-01-01'))->weeksInYear;
@@ -229,7 +287,7 @@ class ReportController extends Controller
             'week_month' => $weekMonth,
             'week_year' => $weekYear,
         ];
-        
+
         $filterQuery = $request->query();
 
         $summary = [
@@ -240,10 +298,7 @@ class ReportController extends Controller
             'uniqueUsers' => $uniqueUsers,
         ];
 
-        $recentActivities = Activity::whereBetween('created_at', [$startDate, $endDate])
-            ->latest()
-            ->take(5)
-            ->get();
+        $recentActivities = $cachedPayload['recentActivities'];
 
         return view('reports.index', compact(
             'periodDescription',
@@ -268,7 +323,7 @@ class ReportController extends Controller
 
         // Group by day
         $period = CarbonPeriod::create($startDate, $endDate);
-        
+
         // Optimization: Fetch all transactions and expenses once
         $transactions = PosTransaction::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'paid')
@@ -282,10 +337,10 @@ class ReportController extends Controller
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
             $labels[] = $date->format('d M');
-            
+
             $dayIncome = $transactions->get($dateStr, collect())->sum('grand_total');
             $dayExpense = $expenses->get($dateStr, collect())->sum('amount');
-            
+
             $incomeData[] = $dayIncome;
             $expenseData[] = $dayExpense;
         }
@@ -326,7 +381,7 @@ class ReportController extends Controller
     public function updateSale(Request $request, $id)
     {
         $transaction = PosTransaction::with('items')->findOrFail($id);
-        
+
         $validated = $request->validate([
             'transaction_date' => 'required|date',
             'transaction_time' => 'nullable',
@@ -342,15 +397,15 @@ class ReportController extends Controller
         ]);
 
         $dateTime = $validated['transaction_date'] . ' ' . ($validated['transaction_time'] ?? '00:00:00');
-        
+
         $transaction->created_at = Carbon::parse($dateTime);
         $transaction->customer_name = $validated['customer_name'];
         $transaction->customer_type = $validated['customer_type'];
         $transaction->shipping_cost = $validated['shipping_cost'] ?? 0;
         $transaction->note = $validated['note'];
-        
+
         $subtotal = 0;
-        
+
         foreach ($request->items as $itemId => $itemData) {
             $item = $transaction->items()->find($itemId);
             if ($item) {
@@ -360,11 +415,11 @@ class ReportController extends Controller
                 $item->price = $itemData['price'];
                 $item->subtotal = $item->qty * $item->price;
                 $item->save();
-                
+
                 $subtotal += $item->subtotal;
             }
         }
-        
+
         $transaction->subtotal = $subtotal;
         $transaction->grand_total = $subtotal + $transaction->shipping_cost;
         $transaction->save();
@@ -396,8 +451,10 @@ class ReportController extends Controller
             $endDate = Carbon::createFromDate($year, 12, 31)->endOfYear();
         }
 
-        $transactions = PosTransaction::with(['items', 'creator'])
+        $transactions = PosTransaction::query()
+            ->select(['id', 'created_at', 'customer_name', 'customer_type', 'shipping_cost'])
             ->whereBetween('created_at', [$startDate, $endDate])
+            ->with(['items:id,pos_transaction_id,product_name,qty,unit,price,subtotal'])
             ->get();
 
         $expenses = Expense::whereBetween('expense_date', [$startDate->toDateString(), $endDate->toDateString()])->get();
@@ -478,12 +535,12 @@ class ReportController extends Controller
             ->selectRaw('DATE(created_at) as date, count(*) as count')
             ->groupBy('date')
             ->pluck('count', 'date');
-            
+
         $stockInByDate = Stockin::whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
             ->groupBy('date')
             ->pluck('total_qty', 'date');
-            
+
         $stockOutByDate = Stockout::whereBetween('created_at', [$startDate, $endDate])
             ->selectRaw('DATE(created_at) as date, SUM(stock_qty) as total_qty')
             ->groupBy('date')
@@ -495,7 +552,7 @@ class ReportController extends Controller
             ->groupBy('date')
             ->pluck('total_qty', 'date');
 
-        $endingStock = Produk::sum('stock_quantity'); 
+        $endingStock = Produk::sum('stock_quantity');
         $period = CarbonPeriod::create($startDate, $endDate);
         $tableData = [];
 
@@ -503,7 +560,7 @@ class ReportController extends Controller
             $dateStr = $date->format('Y-m-d');
             $dayActivitiesCount = $activitiesByDate->get($dateStr, 0);
             $dayStockIn = $stockInByDate->get($dateStr, 0);
-            
+
             $manualStockOut = $stockOutByDate->get($dateStr, 0);
             $salesStockOut = $salesItemsByDate->get($dateStr, 0);
             $dayStockOut = $manualStockOut + $salesStockOut;
@@ -514,7 +571,7 @@ class ReportController extends Controller
                     'total' => $dayActivitiesCount,
                     'stock_in' => $dayStockIn,
                     'stock_out' => $dayStockOut,
-                    'ending_stock' => $endingStock, 
+                    'ending_stock' => $endingStock,
                 ];
             }
         }

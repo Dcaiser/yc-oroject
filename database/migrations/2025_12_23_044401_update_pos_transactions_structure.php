@@ -15,7 +15,7 @@ return new class extends Migration
             if (!Schema::hasColumn('pos_transactions', 'created_by')) {
                 $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             }
-            
+
             // Ensure money columns are big integers if they exist
             if (Schema::hasColumn('pos_transactions', 'expense_amount')) {
                 $table->unsignedBigInteger('expense_amount')->default(0)->change();

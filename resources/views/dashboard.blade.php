@@ -258,7 +258,7 @@
                             <div class="h-2 rounded-full bg-emerald-500 transition-all" style="width: {{ $salesSummary['paid_rate'] ?? 0 }}%"></div>
                         </div>
                     </div>
-                    
+
                     <!-- Customer stat moved here -->
                     @php $customerCard = $statCards[4] ?? null; @endphp
                     @if($customerCard)
@@ -368,7 +368,7 @@
                 clockElement.textContent = `${hours}:${minutes}`;
             }
         }
-        
+
         // Update immediately and then every second
         updateClock();
         setInterval(updateClock, 1000);

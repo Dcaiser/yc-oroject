@@ -4,7 +4,7 @@
 @section('code', '404')
 @section('message', 'Halaman Tidak Ditemukan')
 @section('icon')
-    <i class="fas fa-search"></i>
+    <span aria-hidden="true">🔍</span>
 @endsection
 
 @section('description')

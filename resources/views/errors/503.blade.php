@@ -4,7 +4,7 @@
 @section('code', '503')
 @section('message', 'Sedang Dalam Pemeliharaan')
 @section('icon')
-    <i class="fas fa-cog"></i>
+    <span aria-hidden="true">🛠️</span>
 @endsection
 
 @section('description')

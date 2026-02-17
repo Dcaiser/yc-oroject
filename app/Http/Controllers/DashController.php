@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\PosTransaction;
 use App\Models\Produk;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class DashController extends Controller
 {
@@ -18,29 +19,42 @@ class DashController extends Controller
     {
         $user = auth()->user();
         $lowStockThreshold = config('inventory.low_stock_threshold', 20);
+        $cacheTtl = now()->addSeconds(60);
+        $todayStart = now()->startOfDay();
+        $todayEnd = now()->endOfDay();
 
-        $stats = [
-            'total_products' => Produk::count(),
-            'total_stock' => (int) Produk::sum('stock_quantity'),
-            'low_stock' => Produk::where('stock_quantity', '>', 0)
+        $stats = Cache::remember('dashboard:stats', $cacheTtl, function () use ($lowStockThreshold) {
+            return [
+                'total_products' => Produk::count(),
+                'total_stock' => (int) Produk::sum('stock_quantity'),
+                'low_stock' => Produk::where('stock_quantity', '>', 0)
+                    ->where('stock_quantity', '<=', $lowStockThreshold)
+                    ->count(),
+                'out_of_stock' => Produk::where('stock_quantity', '<=', 0)->count(),
+                'total_customers' => Customer::count(),
+            ];
+        });
+
+        $inventoryAlerts = Cache::remember('dashboard:inventory-alerts', $cacheTtl, function () use ($lowStockThreshold) {
+            return Produk::select('id', 'name', 'stock_quantity', 'satuan')
+                ->whereNotNull('stock_quantity')
                 ->where('stock_quantity', '<=', $lowStockThreshold)
-                ->count(),
-            'out_of_stock' => Produk::where('stock_quantity', '<=', 0)->count(),
-            'total_customers' => Customer::count(),
-        ];
+                ->orderBy('stock_quantity')
+                ->take(5)
+                ->get();
+        });
 
-        $inventoryAlerts = Produk::select('id', 'name', 'stock_quantity', 'satuan')
-            ->whereNotNull('stock_quantity')
-            ->where('stock_quantity', '<=', $lowStockThreshold)
-            ->orderBy('stock_quantity')
-            ->take(5)
-            ->get();
+        $todayActivitiesCount = Cache::remember('dashboard:today-activities-count', $cacheTtl, function () use ($todayStart, $todayEnd) {
+            return Activity::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+        });
 
-        $todayActivitiesCount = Activity::whereDate('created_at', today())->count();
+        $recentActivities = Cache::remember('dashboard:recent-activities', $cacheTtl, function () {
+            return Activity::latest()->limit(7)->get();
+        });
 
-        $recentActivities = Activity::latest()->limit(7)->get();
-
-        $salesSummary = $this->buildSalesSummary();
+        $salesSummary = Cache::remember('dashboard:sales-summary', $cacheTtl, function () use ($todayStart, $todayEnd) {
+            return $this->buildSalesSummary($todayStart, $todayEnd);
+        });
 
         $quickActions = $this->quickActionsForRole($user);
 
@@ -110,16 +124,21 @@ class DashController extends Controller
         //
     }
 
-    protected function buildSalesSummary(): array
+    protected function buildSalesSummary($todayStart, $todayEnd): array
     {
-        $totalSalesToday = PosTransaction::whereDate('created_at', today())->sum('grand_total');
-        $ordersToday = PosTransaction::whereDate('created_at', today())->count();
+        $totalSalesToday = PosTransaction::whereBetween('created_at', [$todayStart, $todayEnd])->sum('grand_total');
+        $ordersToday = PosTransaction::whereBetween('created_at', [$todayStart, $todayEnd])->count();
 
-        $pendingPayments = PosTransaction::where(function ($query) {
-            $query->whereIn('status', ['pending', 'unpaid'])
-                ->orWhereNull('status')
-                ->orWhere('balance_due', '>', 0);
-        })->count();
+        $pendingByBalance = PosTransaction::where('balance_due', '>', 0)->count();
+
+        $pendingByStatusWithoutBalance = PosTransaction::where('balance_due', '<=', 0)
+            ->where(function ($query) {
+                $query->whereIn('status', ['pending', 'unpaid'])
+                    ->orWhereNull('status');
+            })
+            ->count();
+
+        $pendingPayments = $pendingByBalance + $pendingByStatusWithoutBalance;
 
         $paidRate = $ordersToday > 0
             ? max(0, min(100, round((($ordersToday - $pendingPayments) / $ordersToday) * 100)))

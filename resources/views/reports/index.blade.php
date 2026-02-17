@@ -717,7 +717,7 @@
                 </div>
                 <div class="p-6 pb-4">
                     <div class="h-80">
-                        <canvas id="reports-line-chart" aria-label="Grafik aktivitas" role="img"></canvas>
+                        <canvas id="reports-line-chart" data-chartjs aria-label="Grafik aktivitas" role="img"></canvas>
                     </div>
                 </div>
             </div>
@@ -867,7 +867,7 @@
                                 x-transition:enter-start="opacity-0 scale-95"
                                 x-transition:enter-end="opacity-100 scale-100"
                                 class="group relative bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-lg hover:border-emerald-200 transition-all duration-300">
-                                
+
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                                     <!-- Mobile Top Row -->
                                     <div class="md:hidden flex justify-between items-center pb-3 border-b border-slate-50 mb-3">
@@ -919,7 +919,7 @@
                                         @else
                                             <div class="flex flex-wrap gap-2">
                                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-slate-50 border border-slate-100 rounded-lg">
-                                                    <i class="fas fa-box text-slate-400"></i> 
+                                                    <i class="fas fa-box text-slate-400"></i>
                                                     {{ $sale['items_count'] ?? 0 }} Item
                                                 </span>
                                                 @if(!empty($sale['payment_method']))
@@ -944,7 +944,7 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        
+
                                         @if(!$isExpense && !empty($sale['id']))
                                             <div class="mt-2 md:opacity-0 md:translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                                                 <a href="{{ route('reports.sales.edit', array_merge(['stockout' => $sale['id']], $filterQueryParams)) }}"
@@ -975,16 +975,16 @@
                 <div class="flex flex-col gap-3 px-6 py-4 border-t border-emerald-100 sm:flex-row sm:items-center sm:justify-between bg-white rounded-b-2xl">
                     <p class="text-sm font-medium text-slate-500" x-text="hasSalesData ? `Halaman ${salesSlide + 1} dari ${salesSlidesCount}` : 'Tidak ada data'"></p>
                     <div class="flex gap-2">
-                        <button type="button" 
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" 
-                            @click="salesSlide = Math.max(salesSlide - 1, 0)" 
+                        <button type="button"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                            @click="salesSlide = Math.max(salesSlide - 1, 0)"
                             :disabled="!hasSalesData || salesSlide === 0">
                             <i class="fas fa-chevron-left text-xs"></i>
                             <span>Sebelumnya</span>
                         </button>
-                        <button type="button" 
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" 
-                            @click="salesSlide = Math.min(salesSlide + 1, salesSlidesCount - 1)" 
+                        <button type="button"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-emerald-700 transition bg-white border border-emerald-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                            @click="salesSlide = Math.min(salesSlide + 1, salesSlidesCount - 1)"
                             :disabled="!hasSalesData || salesSlide >= salesSlidesCount - 1">
                             <span>Berikutnya</span>
                             <i class="fas fa-chevron-right text-xs"></i>
@@ -1249,222 +1249,227 @@
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                const canvas = document.getElementById('reports-line-chart');
-                if (!canvas) {
-                    return;
-                }
-
-                const ctx = canvas.getContext('2d');
-                const payload = @json($chartPayload);
-                const labels = payload.labels ?? [];
-                const labelCount = labels.length;
-                const denseThreshold = 40;
-                const labelStep = labelCount > 18 ? Math.ceil(labelCount / 12) : 1;
-                const hidePoints = labelCount > denseThreshold;
-
-                const datasets = [
-                    { key: 'total', label: 'Total Aktivitas', color: '#16a34a' },
-                    { key: 'stock_in', label: 'Stok Masuk', color: '#0284c7' },
-                    { key: 'stock_out', label: 'Stok Keluar', color: '#f59e0b' },
-                    { key: 'ending_stock', label: 'Stok Akhir', color: '#6366f1' },
-                ];
-
-                const toRGBA = (hex, alpha) => {
-                    const sanitized = hex.replace('#', '');
-                    const bigint = parseInt(sanitized, 16);
-                    const r = (bigint >> 16) & 255;
-                    const g = (bigint >> 8) & 255;
-                    const b = bigint & 255;
-                    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-                };
-
-                const gradientCache = new Map();
-                const getGradient = (color) => {
-                    if (gradientCache.has(color)) {
-                        return gradientCache.get(color);
+                const initChart = () => {
+                    const canvas = document.getElementById('reports-line-chart');
+                    if (!canvas || typeof window.Chart !== 'function') {
+                        return;
                     }
 
-                    const height = canvas.offsetHeight || canvas.clientHeight || 300;
-                    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                    gradient.addColorStop(0, toRGBA(color, 0.2));
-                    gradient.addColorStop(1, toRGBA(color, 0.02));
+                    const ctx = canvas.getContext('2d');
+                    const payload = @json($chartPayload);
+                    const labels = payload.labels ?? [];
+                    const labelCount = labels.length;
+                    const denseThreshold = 40;
+                    const labelStep = labelCount > 18 ? Math.ceil(labelCount / 12) : 1;
+                    const hidePoints = labelCount > denseThreshold;
 
-                    gradientCache.set(color, gradient);
-                    return gradient;
-                };
+                    const datasets = [
+                        { key: 'total', label: 'Total Aktivitas', color: '#16a34a' },
+                        { key: 'stock_in', label: 'Stok Masuk', color: '#0284c7' },
+                        { key: 'stock_out', label: 'Stok Keluar', color: '#f59e0b' },
+                        { key: 'ending_stock', label: 'Stok Akhir', color: '#6366f1' },
+                    ];
 
-                const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(Number(value) || 0);
-
-                let globalMax = 0;
-                let globalMin = 0;
-
-                const series = datasets.map((cfg) => {
-                    const rawData = Array.isArray(payload.datasets?.[cfg.key]) ? payload.datasets[cfg.key] : [];
-                    const parsedData = rawData.map((value) => Number(value) || 0);
-                    const localMax = parsedData.length ? Math.max(...parsedData) : 0;
-                    const localMin = parsedData.length ? Math.min(...parsedData) : 0;
-                    globalMax = Math.max(globalMax, localMax);
-                    globalMin = Math.min(globalMin, localMin);
-
-                    const isFlat = parsedData.every((value) => value === 0);
-
-                    return {
-                        label: cfg.label,
-                        data: parsedData,
-                        meta: { localMax, localMin },
-                        style: {
-                            borderColor: cfg.color,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: cfg.color,
-                            backgroundColor: getGradient(cfg.color),
-                        },
-                        hidden: false,
+                    const toRGBA = (hex, alpha) => {
+                        const sanitized = hex.replace('#', '');
+                        const bigint = parseInt(sanitized, 16);
+                        const r = (bigint >> 16) & 255;
+                        const g = (bigint >> 8) & 255;
+                        const b = bigint & 255;
+                        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
                     };
-                });
 
-                const yPadding = globalMax > 0 ? Math.max(globalMax * 0.05, 2) : 2;
-                const suggestedMax = globalMax > 0 ? globalMax + yPadding : 5;
-                const suggestedMin = globalMin < 0 ? globalMin - Math.abs(globalMin) * 0.05 : 0;
-
-                const hoverGuidePlugin = {
-                    id: 'hoverGuide',
-                    afterDraw(chart) {
-                        const activeElements = chart.tooltip?.getActiveElements?.();
-                        if (!activeElements || !activeElements.length) {
-                            return;
+                    const gradientCache = new Map();
+                    const getGradient = (color) => {
+                        if (gradientCache.has(color)) {
+                            return gradientCache.get(color);
                         }
 
-                        const { ctx: chartCtx, chartArea } = chart;
-                        const [{ element }] = activeElements;
-                        chartCtx.save();
-                        chartCtx.beginPath();
-                        chartCtx.moveTo(element.x, chartArea.top);
-                        chartCtx.lineTo(element.x, chartArea.bottom);
-                        chartCtx.lineWidth = 1;
-                        chartCtx.setLineDash([6, 4]);
-                        chartCtx.strokeStyle = 'rgba(15, 118, 110, 0.35)';
-                        chartCtx.stroke();
-                        chartCtx.restore();
-                    },
+                        const height = canvas.offsetHeight || canvas.clientHeight || 300;
+                        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                        gradient.addColorStop(0, toRGBA(color, 0.2));
+                        gradient.addColorStop(1, toRGBA(color, 0.02));
+
+                        gradientCache.set(color, gradient);
+                        return gradient;
+                    };
+
+                    const formatNumber = (value) => new Intl.NumberFormat('id-ID').format(Number(value) || 0);
+
+                    let globalMax = 0;
+                    let globalMin = 0;
+
+                    const series = datasets.map((cfg) => {
+                        const rawData = Array.isArray(payload.datasets?.[cfg.key]) ? payload.datasets[cfg.key] : [];
+                        const parsedData = rawData.map((value) => Number(value) || 0);
+                        const localMax = parsedData.length ? Math.max(...parsedData) : 0;
+                        const localMin = parsedData.length ? Math.min(...parsedData) : 0;
+                        globalMax = Math.max(globalMax, localMax);
+                        globalMin = Math.min(globalMin, localMin);
+
+                        return {
+                            label: cfg.label,
+                            data: parsedData,
+                            style: {
+                                borderColor: cfg.color,
+                                pointBackgroundColor: '#ffffff',
+                                pointBorderColor: cfg.color,
+                                backgroundColor: getGradient(cfg.color),
+                            },
+                            hidden: false,
+                        };
+                    });
+
+                    const yPadding = globalMax > 0 ? Math.max(globalMax * 0.05, 2) : 2;
+                    const suggestedMax = globalMax > 0 ? globalMax + yPadding : 5;
+                    const suggestedMin = globalMin < 0 ? globalMin - Math.abs(globalMin) * 0.05 : 0;
+
+                    const hoverGuidePlugin = {
+                        id: 'hoverGuide',
+                        afterDraw(chart) {
+                            const activeElements = chart.tooltip?.getActiveElements?.();
+                            if (!activeElements || !activeElements.length) {
+                                return;
+                            }
+
+                            const { ctx: chartCtx, chartArea } = chart;
+                            const [{ element }] = activeElements;
+                            chartCtx.save();
+                            chartCtx.beginPath();
+                            chartCtx.moveTo(element.x, chartArea.top);
+                            chartCtx.lineTo(element.x, chartArea.bottom);
+                            chartCtx.lineWidth = 1;
+                            chartCtx.setLineDash([6, 4]);
+                            chartCtx.strokeStyle = 'rgba(15, 118, 110, 0.35)';
+                            chartCtx.stroke();
+                            chartCtx.restore();
+                        },
+                    };
+
+                    const chart = new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: series.map((entry) => ({
+                                label: entry.label,
+                                data: entry.data,
+                                borderColor: entry.style.borderColor,
+                                backgroundColor: entry.style.backgroundColor,
+                                pointBackgroundColor: entry.style.pointBackgroundColor,
+                                pointBorderColor: entry.style.borderColor,
+                                borderWidth: 2,
+                                tension: 0.4,
+                                pointRadius: hidePoints ? 0 : 3,
+                                pointHoverRadius: hidePoints ? 4 : 6,
+                                pointBorderWidth: hidePoints ? 0 : 2,
+                                hitRadius: hidePoints ? 6 : 10,
+                                fill: entry.label === 'Total Aktivitas' ? 'origin' : 'start',
+                                spanGaps: true,
+                                hidden: entry.hidden,
+                            })),
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: { top: 8, right: 12, bottom: 0, left: 8 },
+                            },
+                            elements: {
+                                line: {
+                                    capBezierPoints: true,
+                                },
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        usePointStyle: true,
+                                        padding: 12,
+                                        boxWidth: 10,
+                                    },
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: 'rgba(15, 118, 110, 0.95)',
+                                    titleColor: '#f8fafc',
+                                    bodyColor: '#f8fafc',
+                                    borderColor: 'rgba(45, 212, 191, 0.4)',
+                                    borderWidth: 1,
+                                    padding: 14,
+                                    callbacks: {
+                                        title(contexts) {
+                                            return contexts?.[0]?.label ?? '';
+                                        },
+                                        label(context) {
+                                            const value = formatNumber(context.parsed.y);
+                                            return `${context.dataset.label}: ${value}`;
+                                        },
+                                        footer(contexts) {
+                                            const sum = contexts.reduce((total, item) => total + (item.parsed?.y ?? 0), 0);
+                                            return `Total: ${formatNumber(sum)}`;
+                                        },
+                                    },
+                                },
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                intersect: false,
+                                axis: 'x',
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: suggestedMin >= 0,
+                                    suggestedMax,
+                                    suggestedMin,
+                                    ticks: {
+                                        precision: 0,
+                                        maxTicksLimit: 6,
+                                        callback: (value) => formatNumber(value),
+                                        padding: 4,
+                                    },
+                                    grid: {
+                                        color: '#e2e8f0',
+                                        drawTicks: false,
+                                        borderDash: [4, 6],
+                                    },
+                                },
+                                x: {
+                                    ticks: {
+                                        maxRotation: 0,
+                                        autoSkip: false,
+                                        padding: 4,
+                                        callback(value, index, ticks) {
+                                            if (labelStep <= 1) {
+                                                return ticks[index]?.label ?? '';
+                                            }
+                                            return index % labelStep === 0 ? ticks[index]?.label ?? '' : '';
+                                        },
+                                    },
+                                    grid: {
+                                        color: '#f1f5f9',
+                                        drawTicks: false,
+                                        borderDash: [4, 6],
+                                    },
+                                },
+                            },
+                            animation: {
+                                duration: 750,
+                                easing: 'easeOutQuart',
+                            },
+                        },
+                        plugins: [hoverGuidePlugin],
+                    });
+
+                    window.addEventListener('beforeunload', () => chart.destroy(), { once: true });
                 };
 
-                const chart = new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: series.map((entry) => ({
-                            label: entry.label,
-                            data: entry.data,
-                            borderColor: entry.style.borderColor,
-                            backgroundColor: entry.style.backgroundColor,
-                            pointBackgroundColor: entry.style.pointBackgroundColor,
-                            pointBorderColor: entry.style.borderColor,
-                            borderWidth: 2,
-                            tension: 0.4,
-                            pointRadius: hidePoints ? 0 : 3,
-                            pointHoverRadius: hidePoints ? 4 : 6,
-                            pointBorderWidth: hidePoints ? 0 : 2,
-                            hitRadius: hidePoints ? 6 : 10,
-                            fill: entry.label === 'Total Aktivitas' ? 'origin' : 'start',
-                            spanGaps: true,
-                            hidden: entry.hidden,
-                        })),
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: { top: 8, right: 12, bottom: 0, left: 8 },
-                        },
-                        elements: {
-                            line: {
-                                capBezierPoints: true,
-                            },
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top',
-                                labels: {
-                                    usePointStyle: true,
-                                    padding: 12,
-                                    boxWidth: 10,
-                                },
-                            },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                backgroundColor: 'rgba(15, 118, 110, 0.95)',
-                                titleColor: '#f8fafc',
-                                bodyColor: '#f8fafc',
-                                borderColor: 'rgba(45, 212, 191, 0.4)',
-                                borderWidth: 1,
-                                padding: 14,
-                                callbacks: {
-                                    title(contexts) {
-                                        return contexts?.[0]?.label ?? '';
-                                    },
-                                    label(context) {
-                                        const value = formatNumber(context.parsed.y);
-                                        return `${context.dataset.label}: ${value}`;
-                                    },
-                                    footer(contexts) {
-                                        const sum = contexts.reduce((total, item) => total + (item.parsed?.y ?? 0), 0);
-                                        return `Total: ${formatNumber(sum)}`;
-                                    },
-                                },
-                            },
-                        },
-                        interaction: {
-                            mode: 'nearest',
-                            intersect: false,
-                            axis: 'x',
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: suggestedMin >= 0,
-                                suggestedMax,
-                                suggestedMin,
-                                ticks: {
-                                    precision: 0,
-                                    maxTicksLimit: 6,
-                                    callback: (value) => formatNumber(value),
-                                    padding: 4,
-                                },
-                                grid: {
-                                    color: '#e2e8f0',
-                                    drawTicks: false,
-                                    borderDash: [4, 6],
-                                },
-                            },
-                            x: {
-                                ticks: {
-                                    maxRotation: 0,
-                                    autoSkip: false,
-                                    padding: 4,
-                                    callback(value, index, ticks) {
-                                        if (labelStep <= 1) {
-                                            return ticks[index]?.label ?? '';
-                                        }
-                                        return index % labelStep === 0 ? ticks[index]?.label ?? '' : '';
-                                    },
-                                },
-                                grid: {
-                                    color: '#f1f5f9',
-                                    drawTicks: false,
-                                    borderDash: [4, 6],
-                                },
-                            },
-                        },
-                        animation: {
-                            duration: 750,
-                            easing: 'easeOutQuart',
-                        },
-                    },
-                    plugins: [hoverGuidePlugin],
-                });
-
-                window.addEventListener('beforeunload', () => chart.destroy());
+                if (typeof window.Chart === 'function') {
+                    initChart();
+                } else {
+                    document.addEventListener('chartjs:ready', initChart, { once: true });
+                }
             });
         </script>
     @endpush

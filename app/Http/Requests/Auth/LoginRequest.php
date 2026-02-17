@@ -64,7 +64,7 @@ class LoginRequest extends FormRequest
 
             // Check if user exists but is inactive to give specific message (optional)
             // For now, we keep it generic or we can check manually
-            
+
             throw ValidationException::withMessages([
                 'email' => 'Email atau password salah, atau akun Anda dinonaktifkan.',
             ]);

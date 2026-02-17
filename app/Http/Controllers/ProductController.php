@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Support\Str;
-use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -256,8 +255,10 @@ Activity::create([
         $categoryCode = $this->buildCodeFragment($category->name ?? 'CAT');
         $supplierCode = $this->buildCodeFragment($supplier->name ?? 'SUP');
         $dateCode     = now()->format('ymd');
+        $todayStart   = now()->startOfDay();
+        $todayEnd     = now()->endOfDay();
 
-        $baseSequence = Produk::whereDate('created_at', now()->toDateString())->count() + 1;
+        $baseSequence = Produk::whereBetween('created_at', [$todayStart, $todayEnd])->count() + 1;
         $attempt      = 0;
 
         do {

@@ -607,7 +607,7 @@ class UserManagementController extends Controller
             ]);
 
             $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
-            
+
             Log::info("User status toggled", [
                 'admin_id' => Auth::id(),
                 'target_user_id' => $user->id,

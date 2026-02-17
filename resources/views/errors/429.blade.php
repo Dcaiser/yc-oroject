@@ -4,7 +4,7 @@
 @section('code', '429')
 @section('message', 'Terlalu Banyak Permintaan')
 @section('icon')
-    <i class="fas fa-ban"></i>
+    <span aria-hidden="true">⛔</span>
 @endsection
 
 @section('description')

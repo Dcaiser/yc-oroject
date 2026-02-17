@@ -4,7 +4,7 @@
 @section('code', '419')
 @section('message', 'Halaman Kedaluwarsa')
 @section('icon')
-    <i class="fas fa-clock"></i>
+    <span aria-hidden="true">⏰</span>
 @endsection
 
 @section('description')

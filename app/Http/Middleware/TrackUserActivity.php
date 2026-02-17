@@ -20,7 +20,7 @@ class TrackUserActivity
         if (Auth::check()) {
             $expiresAt = now()->addMinutes(5); // User dianggap offline jika tidak ada aktivitas selama 5 menit
             Cache::put('user-is-online-' . Auth::id(), true, $expiresAt);
-            
+
             // Opsional: Update last_seen di database jika kolom ada (untuk persistensi jangka panjang)
             // User::where('id', Auth::id())->update(['last_seen' => now()]);
         }
