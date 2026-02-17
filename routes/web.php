@@ -4,14 +4,13 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Categorycontroller;
 use App\Http\Controllers\InventController;
-use App\Http\Controllers\activityController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UnitsController;
 use App\Http\Controllers\CustomerController;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\DashController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\ManagerMiddleware;
@@ -48,10 +47,10 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
     Route::patch('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
-    
+
     // Bulk delete route (must be before destroy to avoid conflict with {user} parameter)
     Route::delete('/users/bulk-delete', [UserManagementController::class, 'bulkDelete'])->name('users.bulk-delete');
-    
+
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     Route::get('/users/export', [UserManagementController::class, 'export'])->name('users.export');
 });
@@ -69,12 +68,14 @@ Route::middleware(['auth', ManagerMiddleware::class])->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/pos', [Poscontroller::class, 'index'])->name('pos');
-    Route::post('/pos/checkout', [Poscontroller::class, 'checkout'])->name('pos.checkout');
+    Route::get('/pos', [PosController::class, 'index'])->name('pos');
+    Route::get('/pos/products/data', [PosController::class, 'productsData'])->name('pos.products.data');
+    Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
 
-    Route::get('/pos/status', [Poscontroller::class, 'status'])->name('pos.payments');
-    Route::post('/pos/status/{transaction}/pay', [Poscontroller::class, 'applyPayment'])->name('pos.payments.pay');
-    Route::patch('/pos/status/{transaction}/status', [Poscontroller::class, 'updateStatus'])->name('pos.payments.status');
+    Route::get('/pos/status', [PosController::class, 'status'])->name('pos.payments');
+    Route::get('/pos/status/{transaction}/detail', [PosController::class, 'statusDetail'])->name('pos.payments.detail');
+    Route::post('/pos/status/{transaction}/pay', [PosController::class, 'applyPayment'])->name('pos.payments.pay');
+    Route::patch('/pos/status/{transaction}/status', [PosController::class, 'updateStatus'])->name('pos.payments.status');
 });
 
 

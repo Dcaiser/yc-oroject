@@ -33,13 +33,12 @@
 
     <form action="{{ route('pos.checkout') }}" method="POST"
       id="pos-form"
-      x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }}, {{ json_encode($categories ?? []) }})"
+            x-data="posApp({{ Js::from($posProducts ?? []) }}, {{ Js::from($customertypes ?? []) }}, {{ Js::from($regularCustomers ?? []) }}, {{ Js::from($categories ?? []) }}, '{{ $systemCurrency }}', {{ (int)($posProductsTotal ?? 0) }}, '{{ $posProductsEndpoint ?? '' }}', {{ (int)($posProductsChunkLimit ?? 200) }})"
+            x-init="initApp()"
       x-ref="checkoutForm"
       @submit.prevent="processCheckout">
     @csrf
         <div
-            x-data="posApp({{ $product->toJson() }}, {{ json_encode($customertypes) }}, {{ json_encode($regularCustomers ?? []) }}, {{ json_encode($categories ?? []) }}, '{{ $systemCurrency }}')"
-            x-init="initApp()"
             class="space-y-6 pb-12 max-w-full overflow-x-hidden">
 
             <!-- Toast Notification -->
@@ -84,7 +83,7 @@
             <div x-show="cart.length > 0" x-cloak class="fixed bottom-4 right-4 z-40 lg:hidden">
                 <button type="button"
                         @click="mobileCartOpen = true"
-                        class="relative flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all">
+                        class="relative flex items-center gap-3 px-5 py-4 bg-linear-to-r from-emerald-600 to-emerald-500 text-white rounded-2xl shadow-xl hover:shadow-2xl active:scale-95 transition-all">
                     <div class="relative">
                         <i class="fas fa-shopping-cart text-lg"></i>
                         <span class="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center text-[10px] font-bold bg-white text-emerald-600 rounded-full"
@@ -262,7 +261,7 @@
                             <button type="button"
                                     @click="mobileCartOpen = false; validateAndShowConfirmModal()"
                                     :disabled="cart.length === 0 || (paymentMethod === 'cash' && paymentReceived < grandTotal())"
-                                    class="w-full py-4 text-base font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition">
+                                    class="w-full py-4 text-base font-bold text-white bg-linear-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition">
                                 <i class="fas fa-check-circle mr-2"></i>
                                 Proses Pembayaran
                             </button>
@@ -445,7 +444,7 @@
                             <div class="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
                                 <span class="inline-flex items-center gap-2">
                                     <i class="fas fa-box text-emerald-500"></i>
-                                    <span x-text="filteredProducts().length + ' produk'"></span>
+                                    <span x-text="formatNumber(productResultsTotal) + ' produk'"></span>
                                 </span>
                                 <!-- Barcode Scanner Button -->
                                 <button type="button"
@@ -461,12 +460,13 @@
                         <div x-show="showBarcodeScanner" x-cloak class="p-5 border-b border-slate-200 bg-slate-50">
                             <div class="flex items-center justify-between mb-3">
                                 <h3 class="font-semibold text-slate-900">Scan Barcode</h3>
-                                <button type="button" @click="showBarcodeScanner = false" class="text-slate-400 hover:text-slate-600">
+                                <button type="button" @click="closeBarcodeScanner()" class="text-slate-400 hover:text-slate-600">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
                             <div class="relative">
                                 <input type="text"
+                                       x-ref="barcodeInput"
                                        x-model="barcodeInput"
                                        @input="processBarcodeInput"
                                        @keydown.enter="handleBarcodeEnter"
@@ -474,6 +474,73 @@
                                        class="w-full px-4 py-3 text-center font-semibold text-lg border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 bg-white">
                                 <div class="text-center mt-2">
                                     <p class="text-xs text-slate-500">Tekan Enter setelah scan, atau ketik kode manual</p>
+                                    <p x-show="isBarcodeSearching" x-cloak class="text-xs text-blue-600 mt-1 font-medium">Mencari produk...</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 rounded-xl border border-slate-200 bg-white p-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <p class="text-xs font-semibold text-slate-600">Scan via Kamera</p>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button"
+                                                @click="testCamera()"
+                                                :disabled="isCameraTesting"
+                                                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition">
+                                            <i class="fas" :class="isCameraTesting ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+                                            <span x-text="isCameraTesting ? 'Testing...' : 'Test Kamera'"></span>
+                                        </button>
+                                        <button type="button"
+                                                x-show="!isCameraScanning"
+                                                @click="startCameraScanner()"
+                                                class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Mulai Kamera</span>
+                                        </button>
+                                        <button type="button"
+                                                x-show="isCameraScanning"
+                                                @click="stopCameraScanner()"
+                                                class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition">
+                                            <i class="fas fa-pause-circle"></i>
+                                            <span>Hentikan</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div x-show="isCameraScanning" x-cloak class="mt-2 flex items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                                          :class="cameraScannerMode === 'native' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'">
+                                        <i class="fas fa-circle text-[8px]"></i>
+                                        <span x-text="cameraScannerMode === 'native' ? 'Mode Native' : 'Mode Fallback'"></span>
+                                    </span>
+                                    <span class="text-[11px] text-slate-500"
+                                          x-text="cameraScannerMode === 'native' ? 'BarcodeDetector browser' : 'Decoder lokal Html5Qrcode'"></span>
+                                </div>
+
+                                <label class="mt-2 inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+                                    <input type="checkbox"
+                                           class="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                           x-model="cameraAutoStopOnSuccess">
+                                    <span>Hentikan kamera otomatis setelah scan berhasil</span>
+                                </label>
+
+                                <template x-if="!cameraScanSupported">
+                                    <p class="mt-2 text-xs text-amber-700">Perangkat/browser belum mendukung akses kamera. Gunakan scanner USB atau input manual.</p>
+                                </template>
+
+                                <template x-if="cameraError">
+                                    <p class="mt-2 text-xs text-rose-600" x-text="cameraError"></p>
+                                </template>
+
+                                <template x-if="cameraTestMessage">
+                                    <p class="mt-2 text-xs" :class="cameraTestOk ? 'text-emerald-700' : 'text-amber-700'" x-text="cameraTestMessage"></p>
+                                </template>
+
+                                <div x-show="isCameraScanning && cameraScannerMode === 'native'" x-cloak class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-black">
+                                    <video x-ref="barcodeCameraVideo" autoplay playsinline muted class="h-56 w-full object-cover"></video>
+                                </div>
+
+                                <div x-show="isCameraScanning && cameraScannerMode === 'html5qrcode'" x-cloak class="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-black">
+                                    <div id="barcode-camera-reader" class="min-h-56 w-full"></div>
                                 </div>
                             </div>
                         </div>
@@ -537,7 +604,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: -150, behavior: 'smooth' })"
                                                 x-show="categoryScrollLeft > 0"
-                                                class="absolute left-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-start bg-gradient-to-r from-white via-white/95 to-transparent pl-1 opacity-0 transition-opacity hover:opacity-100"
+                                                class="absolute left-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-start bg-linear-to-r from-white via-white/95 to-transparent pl-1 opacity-0 transition-opacity hover:opacity-100"
                                                 :class="{ 'opacity-80': categoryScrollLeft > 0 }">
                                             <i class="fas fa-chevron-left text-xs text-emerald-600"></i>
                                         </button>
@@ -567,7 +634,7 @@
                                         <button type="button"
                                                 @click="$refs.categoryScroller.scrollBy({ left: 150, behavior: 'smooth' })"
                                                 x-show="categoryScrollRight > 5"
-                                                class="absolute right-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-end bg-gradient-to-l from-white via-white/95 to-transparent pr-1 opacity-0 transition-opacity hover:opacity-100"
+                                                class="absolute right-0 top-0 bottom-0 z-10 flex w-6 cursor-pointer items-center justify-end bg-linear-to-l from-white via-white/95 to-transparent pr-1 opacity-0 transition-opacity hover:opacity-100"
                                                 :class="{ 'opacity-80': categoryScrollRight > 5 }">
                                             <i class="fas fa-chevron-right text-xs text-emerald-600"></i>
                                         </button>
@@ -610,7 +677,7 @@
                                          :class="[isOutOfStock(product) ? 'opacity-60' : '', getCartQty(product.id) > 0 ? 'ring-2 ring-emerald-500 border-emerald-500' : '']">
 
                                         <!-- Product Image -->
-                                        <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden cursor-pointer"
+                                        <div class="relative aspect-4/3 bg-slate-100 overflow-hidden cursor-pointer"
                                              @click="!isOutOfStock(product) && addToCart(product)">
                                             <template x-if="product.image_url">
                                                 <img :src="product.image_url"
@@ -622,7 +689,7 @@
                                             </template>
                                             <!-- Placeholder -->
                                             <div x-show="!product.image_url || !product.imageLoaded"
-                                                 class="absolute inset-0 flex flex-col items-center justify-center text-slate-300 bg-gradient-to-br from-slate-50 to-slate-100">
+                                                 class="absolute inset-0 flex flex-col items-center justify-center text-slate-300 bg-linear-to-br from-slate-50 to-slate-100">
                                                 <i class="fas fa-box-open text-3xl"></i>
                                             </div>
 
@@ -691,7 +758,7 @@
                             <div class="flex flex-col gap-3 pt-4 mt-4 border-t border-emerald-100" x-show="totalPages() > 1">
                                 <div class="text-xs font-semibold text-slate-600">
                                     Menampilkan <span class="text-slate-900" x-text="paginationRangeLabel()"></span>
-                                    dari <span class="text-slate-900" x-text="filteredProducts().length"></span> produk
+                                    dari <span class="text-slate-900" x-text="formatNumber(productResultsTotal)"></span> produk
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <button type="button" @click="goToPreviousPage()" :disabled="currentPage === 1"
@@ -790,7 +857,7 @@
 
                         <!-- Quick Total Bar -->
                         <div x-show="cart.length > 0"
-                             class="px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
+                             class="px-4 py-3 bg-linear-to-r from-emerald-600 to-emerald-500 flex items-center justify-between">
                             <div class="text-white">
                                 <p class="text-[10px] uppercase tracking-wide opacity-80">Total Belanja</p>
                                 <p class="text-lg font-bold" x-text="formatCurrency(total)"></p>
@@ -906,7 +973,7 @@
 
                         <!-- Grand Total Bar -->
                         <div x-show="cart.length > 0"
-                             class="px-4 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500">
+                             class="px-4 py-4 bg-linear-to-r from-emerald-600 to-emerald-500">
                             <div class="flex items-center justify-between text-white">
                                 <span class="text-base font-bold">Grand Total</span>
                                 <span class="text-2xl font-extrabold" x-text="formatCurrency(grandTotal())"></span>
@@ -1141,7 +1208,7 @@
     <button type="button"
             @click="processPayment"
             :disabled="cart.length === 0 || (paymentMethod === 'cash' && paymentReceived < grandTotal()) || isSubmitting"
-            class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
+            class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 text-base font-bold text-white transition rounded-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-[0.98]">
         <template x-if="!isSubmitting">
             <span class="inline-flex items-center gap-2">
                 <i class="fas fa-check-circle"></i>
@@ -1230,7 +1297,7 @@
                             </button>
     <button type="button"
             @click="processPayment"
-            class="flex-1 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
+            class="flex-1 px-4 py-3 text-sm font-bold text-white bg-linear-to-r from-emerald-500 to-emerald-600 rounded-xl hover:scale-[1.02] transition">
         Ya, Simpan
     </button>
                         </div>
@@ -1542,12 +1609,19 @@
             });
         });
 
-        function posApp(productsData, customerTypesData, regularCustomersData, categoriesData, systemCurrency) {
+        function posApp(productsData, customerTypesData, regularCustomersData, categoriesData, systemCurrency, productsTotal, productsEndpoint, productsChunkLimit) {
             return {
                 // Data properties
                 customertypes: ['pelanggan', 'reseller', 'agent'],
                 customerType: 'pelanggan',
                 products: [],
+                productResultsTotal: Number(productsTotal) || 0,
+                productRangeFrom: 0,
+                productRangeTo: 0,
+                serverLastPage: 1,
+                productsEndpoint: productsEndpoint || '',
+                productsChunkLimit: Number(productsChunkLimit) || 200,
+                productsRequestId: 0,
                 regularCustomers: Array.isArray(regularCustomersData) ? regularCustomersData : [],
                 categories: Array.isArray(categoriesData) ? categoriesData : [],
                 currencySymbol: systemCurrency === 'IDR' ? 'Rp' : systemCurrency,
@@ -1614,6 +1688,31 @@
                 showBarcodeScanner: false,
                 barcodeInput: '',
                 barcodeTimeout: null,
+                isBarcodeSearching: false,
+                lastScannedCode: '',
+                lastScanAt: 0,
+                cameraScanSupported: false,
+                isCameraScanning: false,
+                isCameraTesting: false,
+                cameraError: '',
+                cameraTestMessage: '',
+                cameraTestOk: false,
+                cameraStream: null,
+                cameraDetector: null,
+                cameraScannerMode: 'none',
+                cameraScanTimeout: null,
+                cameraDetectBusy: false,
+                cameraLastDetectedCode: '',
+                cameraLastDetectedAt: 0,
+                cameraAutoStopOnSuccess: true,
+                cameraScanIntervalMs: 220,
+                cameraResumeOnVisible: false,
+                cameraLifecycleBound: false,
+                html5QrInstance: null,
+                html5QrScriptLoading: false,
+                html5QrScriptLoaded: false,
+                barcodeScanBusy: false,
+                scannerPreferencesKey: 'pos_scanner_preferences',
 
                 // Mobile
                 mobileCartOpen: false,
@@ -1632,11 +1731,16 @@
                             prices: p.prices || []
                         })) : [];
 
+                    this.productRangeFrom = this.products.length > 0 ? 1 : 0;
+                    this.productRangeTo = this.products.length;
+                    this.serverLastPage = Math.max(1, Math.ceil((this.productResultsTotal || this.products.length) / this.perPage));
+
                     this.filteredCustomerResults = this.regularCustomers;
 
                     // Load saved state
                     this.loadCartFromStorage();
                     this.loadHeldTransactions();
+                    this.loadScannerPreferences();
 
                     // Load summary expanded state
                     const savedSummaryState = localStorage.getItem('pos_summary_expanded');
@@ -1647,8 +1751,15 @@
                     // Set up watchers
                     this.setupWatchers();
 
+                    this.cameraScanSupported = !!window?.navigator?.mediaDevices?.getUserMedia;
+
+                    // Fetch first page from server to keep filters/pagination server-driven
+                    this.fetchProductsFromServer();
+
                     // Set up keyboard shortcuts
                     this.setupKeyboardShortcuts();
+
+                    this.setupCameraLifecycle();
 
                     // Auto focus on product search
                     setTimeout(() => {
@@ -1675,6 +1786,102 @@
                         this.searchQueryDebounced = value;
                         this.currentPage = 1;
                     }, 300));
+
+                    this.$watch('searchQueryDebounced', () => {
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('selectedCategory', () => {
+                        this.currentPage = 1;
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('showInStockOnly', () => {
+                        this.currentPage = 1;
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('sortBy', () => {
+                        this.currentPage = 1;
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('perPage', () => {
+                        this.currentPage = 1;
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('currentPage', () => {
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('customerType', () => {
+                        this.fetchProductsFromServer();
+                    });
+
+                    this.$watch('cameraAutoStopOnSuccess', () => {
+                        this.saveScannerPreferences();
+                    });
+                },
+
+                async fetchProductsFromServer() {
+                    if (!this.productsEndpoint) {
+                        return;
+                    }
+
+                    const requestId = ++this.productsRequestId;
+                    this.isLoading = true;
+
+                    try {
+                        const endpointUrl = new URL(this.productsEndpoint, window.location.origin);
+                        endpointUrl.searchParams.set('page', String(this.currentPage));
+                        endpointUrl.searchParams.set('per_page', String(this.perPage));
+                        endpointUrl.searchParams.set('search', this.searchQueryDebounced || '');
+                        endpointUrl.searchParams.set('category', String(this.selectedCategory || 'all'));
+                        endpointUrl.searchParams.set('in_stock', this.showInStockOnly ? '1' : '0');
+                        endpointUrl.searchParams.set('sort', this.sortBy || 'name_asc');
+                        endpointUrl.searchParams.set('customer_type', this.customerType || 'pelanggan');
+
+                        const response = await fetch(endpointUrl.toString(), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Gagal memuat daftar produk.');
+                        }
+
+                        const payload = await response.json();
+
+                        if (requestId !== this.productsRequestId) {
+                            return;
+                        }
+
+                        const incoming = Array.isArray(payload?.data) ? payload.data : [];
+                        this.products = incoming.map(product => ({
+                            ...product,
+                            imageLoaded: false,
+                            prices: Array.isArray(product?.prices) ? product.prices : []
+                        }));
+
+                        const meta = payload?.meta || {};
+                        this.productResultsTotal = Number(meta.total || 0);
+                        this.serverLastPage = Math.max(1, Number(meta.last_page || 1));
+                        this.productRangeFrom = Number(meta.from || 0);
+                        this.productRangeTo = Number(meta.to || 0);
+
+                        if (this.currentPage > this.serverLastPage) {
+                            this.currentPage = this.serverLastPage;
+                        }
+                    } catch (error) {
+                        console.error('POS products fetch error:', error);
+                    } finally {
+                        if (requestId === this.productsRequestId) {
+                            this.isLoading = false;
+                        }
+                    }
                 },
 
                 setupKeyboardShortcuts() {
@@ -1727,7 +1934,7 @@
                     this.showHeldTransactions = false;
                     this.showClearCartModal = false;
                     this.mobileCartOpen = false;
-                    this.showBarcodeScanner = false;
+                    this.closeBarcodeScanner();
                 },
 
                 // ========== CUSTOMER MANAGEMENT ==========
@@ -2018,64 +2225,15 @@
                 }, 300),
 
                 filteredProducts() {
-                    if (!Array.isArray(this.products)) return [];
-
-                    let items = [...this.products];
-                    const query = this.searchQueryDebounced.trim().toLowerCase();
-
-                    if (query) {
-                        items = items.filter(product => {
-                            const name = (product.name || '').toLowerCase();
-                            const sku = (product.sku || '').toLowerCase();
-                            const description = (product.description || '').toLowerCase();
-                            const barcode = (product.barcode || '').toLowerCase();
-                            return name.includes(query) ||
-                                   sku.includes(query) ||
-                                   description.includes(query) ||
-                                   barcode.includes(query);
-                        });
-                    }
-
-                    if (this.selectedCategory !== 'all') {
-                        items = items.filter(product =>
-                            String(this.extractCategoryId(product)) === String(this.selectedCategory)
-                        );
-                    }
-
-                    if (this.showInStockOnly) {
-                        items = items.filter(product => (Number(product.stock_quantity) || 0) > 0);
-                    }
-
-                    // Sorting
-                    items.sort((a, b) => {
-                        const priceA = this.getPrice(a);
-                        const priceB = this.getPrice(b);
-
-                        switch (this.sortBy) {
-                            case 'price_asc': return priceA - priceB;
-                            case 'price_desc': return priceB - priceA;
-                            case 'name_asc':
-                            default: return (a.name || '').localeCompare(b.name || '', 'id', { sensitivity: 'base' });
-                        }
-                    });
-
-                    return items;
+                    return Array.isArray(this.products) ? this.products : [];
                 },
 
                 paginatedProducts() {
-                    const items = this.filteredProducts();
-                    const totalPages = Math.max(1, Math.ceil(items.length / this.perPage));
-
-                    if (this.currentPage > totalPages) this.currentPage = totalPages;
-                    if (this.currentPage < 1) this.currentPage = 1;
-
-                    const start = (this.currentPage - 1) * this.perPage;
-                    return items.slice(start, start + this.perPage);
+                    return this.filteredProducts();
                 },
 
                 totalPages() {
-                    const count = this.filteredProducts().length;
-                    return Math.max(1, Math.ceil(count / this.perPage));
+                    return Math.max(1, Number(this.serverLastPage || 1));
                 },
 
                 goToPage(page) {
@@ -2109,12 +2267,11 @@
                 },
 
                 paginationRangeLabel() {
-                    const itemsCount = this.filteredProducts().length;
-                    if (!itemsCount) return '0';
+                    if (!this.productResultsTotal || !this.productRangeFrom || !this.productRangeTo) {
+                        return '0';
+                    }
 
-                    const start = (this.currentPage - 1) * this.perPage + 1;
-                    const end = Math.min(start + this.perPage - 1, itemsCount);
-                    return `${this.formatNumber(start)} – ${this.formatNumber(end)}`;
+                    return `${this.formatNumber(this.productRangeFrom)} – ${this.formatNumber(this.productRangeTo)}`;
                 },
 
                 resetFilters() {
@@ -2124,6 +2281,7 @@
                     this.showInStockOnly = false;
                     this.sortBy = 'name_asc';
                     this.currentPage = 1;
+                    this.fetchProductsFromServer();
                 },
 
                 // ========== PRODUCT HELPERS ==========
@@ -2169,10 +2327,313 @@
 
                     if (this.showBarcodeScanner) {
                         this.$nextTick(() => {
-                            const input = document.querySelector('[x-model="barcodeInput"]');
-                            input?.focus();
+                            this.$refs.barcodeInput?.focus();
                         });
+                    } else {
+                        this.closeBarcodeScanner();
                     }
+                },
+
+                closeBarcodeScanner() {
+                    this.showBarcodeScanner = false;
+                    this.barcodeInput = '';
+                    this.isBarcodeSearching = false;
+                    this.cameraResumeOnVisible = false;
+                    this.stopCameraScanner(false);
+                    if (this.barcodeTimeout) {
+                        clearTimeout(this.barcodeTimeout);
+                        this.barcodeTimeout = null;
+                    }
+                },
+
+                setupCameraLifecycle() {
+                    if (this.cameraLifecycleBound) {
+                        return;
+                    }
+
+                    this.cameraLifecycleBound = true;
+
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.hidden) {
+                            if (this.isCameraScanning) {
+                                this.cameraResumeOnVisible = true;
+                                this.stopCameraScanner(false, true);
+                            }
+                            return;
+                        }
+
+                        if (this.showBarcodeScanner && this.cameraResumeOnVisible && !this.isCameraScanning) {
+                            this.cameraResumeOnVisible = false;
+                            this.startCameraScanner();
+                        }
+                    });
+
+                    window.addEventListener('pagehide', () => {
+                        this.stopCameraScanner(false);
+                    });
+                },
+
+                async testCamera() {
+                    if (this.isCameraTesting) {
+                        return;
+                    }
+
+                    this.isCameraTesting = true;
+                    this.cameraTestMessage = '';
+                    this.cameraTestOk = false;
+                    this.cameraError = '';
+
+                    if (!this.cameraScanSupported) {
+                        this.cameraTestMessage = 'Perangkat/browser tidak mendukung akses kamera.';
+                        this.isCameraTesting = false;
+                        return;
+                    }
+
+                    if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+                        this.cameraTestMessage = 'Test gagal: butuh HTTPS atau localhost.';
+                        this.isCameraTesting = false;
+                        return;
+                    }
+
+                    if (this.isCameraScanning) {
+                        this.cameraTestOk = true;
+                        this.cameraTestMessage = 'Kamera sedang aktif dan siap digunakan.';
+                        this.showToast('Kamera sedang aktif dan siap digunakan.');
+                        this.isCameraTesting = false;
+                        return;
+                    }
+
+                    try {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        const videoInputs = devices.filter(device => device.kind === 'videoinput');
+
+                        if (videoInputs.length === 0) {
+                            this.cameraTestMessage = 'Tidak ada kamera terdeteksi pada perangkat ini.';
+                            this.isCameraTesting = false;
+                            return;
+                        }
+
+                        const testStream = await navigator.mediaDevices.getUserMedia({
+                            audio: false,
+                            video: { facingMode: { ideal: 'environment' } },
+                        });
+
+                        testStream.getTracks().forEach(track => track.stop());
+
+                        this.cameraTestOk = true;
+                        this.cameraTestMessage = `Kamera siap (${videoInputs.length} device terdeteksi).`;
+                        this.showToast('Test kamera berhasil. Kamera siap digunakan.');
+                    } catch (error) {
+                        const message = error?.name === 'NotAllowedError'
+                            ? 'Izin kamera ditolak. Izinkan akses kamera di browser.'
+                            : (error?.message || 'Gagal mengakses kamera saat test.');
+
+                        this.cameraTestMessage = message;
+                        this.cameraError = message;
+                        this.showErrorToast(message);
+                    } finally {
+                        this.isCameraTesting = false;
+                    }
+                },
+
+                async startCameraScanner() {
+                    if (!this.cameraScanSupported) {
+                        this.cameraError = 'Perangkat/browser belum mendukung scan kamera.';
+                        return;
+                    }
+
+                    if (!window.isSecureContext && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+                        this.cameraError = 'Akses kamera butuh HTTPS atau localhost.';
+                        return;
+                    }
+
+                    if (this.isCameraScanning) {
+                        return;
+                    }
+
+                    this.cameraError = '';
+                    this.cameraResumeOnVisible = true;
+                    const useNativeDetector = typeof window.BarcodeDetector !== 'undefined';
+
+                    try {
+                        if (useNativeDetector) {
+                            const stream = await navigator.mediaDevices.getUserMedia({
+                                audio: false,
+                                video: {
+                                    facingMode: { ideal: 'environment' },
+                                    width: { ideal: 1280 },
+                                    height: { ideal: 720 },
+                                    frameRate: { ideal: 24, max: 30 },
+                                },
+                            });
+
+                            this.cameraStream = stream;
+                            this.isCameraScanning = true;
+                            this.cameraScannerMode = 'native';
+
+                            await this.$nextTick();
+
+                            const video = this.$refs.barcodeCameraVideo;
+                            if (!video) {
+                                throw new Error('Preview kamera tidak tersedia.');
+                            }
+
+                            video.srcObject = stream;
+                            await video.play();
+
+                            if (!this.cameraDetector) {
+                                const preferredFormats = ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code'];
+                                try {
+                                    this.cameraDetector = new BarcodeDetector({
+                                        formats: preferredFormats,
+                                    });
+                                } catch (error) {
+                                    this.cameraDetector = new BarcodeDetector();
+                                }
+                            }
+
+                            this.runCameraScanLoop();
+                        } else {
+                            this.cameraScannerMode = 'html5qrcode';
+                            this.isCameraScanning = true;
+                            await this.$nextTick();
+                            await this.startHtml5QrScanner();
+                        }
+                    } catch (error) {
+                        this.cameraError = error?.message || 'Tidak dapat mengakses kamera.';
+                        this.stopCameraScanner(false);
+                    }
+                },
+
+                ensureHtml5QrScript() {
+                    if (typeof window.Html5Qrcode !== 'undefined') {
+                        this.html5QrScriptLoaded = true;
+                        return Promise.resolve();
+                    }
+
+                    return Promise.reject(new Error('Decoder scanner kamera belum termuat. Jalankan build frontend.'));
+                },
+
+                async startHtml5QrScanner() {
+                    await this.ensureHtml5QrScript();
+
+                    if (typeof window.Html5Qrcode === 'undefined') {
+                        throw new Error('Decoder barcode kamera tidak tersedia.');
+                    }
+
+                    if (!this.html5QrInstance) {
+                        this.html5QrInstance = new window.Html5Qrcode('barcode-camera-reader');
+                    }
+
+                    await this.html5QrInstance.start(
+                        { facingMode: 'environment' },
+                        {
+                            fps: 12,
+                            qrbox: { width: 280, height: 160 },
+                            aspectRatio: 1.777,
+                            disableFlip: false,
+                        },
+                        async (decodedText) => {
+                            if (!decodedText) return;
+
+                            const now = Date.now();
+                            if (this.cameraLastDetectedCode === decodedText && (now - this.cameraLastDetectedAt) <= 1200) {
+                                return;
+                            }
+
+                            this.cameraLastDetectedCode = decodedText;
+                            this.cameraLastDetectedAt = now;
+                            this.barcodeInput = decodedText;
+                            await this.scanBarcode(decodedText, { source: 'camera' });
+                        },
+                        () => {}
+                    );
+                },
+
+                stopCameraScanner(restoreFocus = true, preserveResume = false) {
+                    this.isCameraScanning = false;
+                    this.cameraDetectBusy = false;
+
+                    if (!preserveResume) {
+                        this.cameraResumeOnVisible = false;
+                    }
+
+                    if (this.cameraScanTimeout) {
+                        clearTimeout(this.cameraScanTimeout);
+                        this.cameraScanTimeout = null;
+                    }
+
+                    const video = this.$refs.barcodeCameraVideo;
+                    if (video) {
+                        video.pause?.();
+                        video.srcObject = null;
+                    }
+
+                    if (this.html5QrInstance) {
+                        this.html5QrInstance.stop()
+                            .then(() => this.html5QrInstance?.clear?.())
+                            .catch(() => {})
+                            .finally(() => {
+                                this.html5QrInstance = null;
+                            });
+                    }
+
+                    if (this.cameraStream) {
+                        this.cameraStream.getTracks().forEach(track => track.stop());
+                        this.cameraStream = null;
+                    }
+
+                    this.cameraScannerMode = 'none';
+
+                    if (restoreFocus && this.showBarcodeScanner) {
+                        this.$nextTick(() => this.$refs.barcodeInput?.focus());
+                    }
+                },
+
+                runCameraScanLoop() {
+                    if (!this.isCameraScanning) {
+                        return;
+                    }
+
+                    this.cameraScanTimeout = setTimeout(async () => {
+                        if (!this.isCameraScanning) {
+                            return;
+                        }
+
+                        if (this.cameraDetectBusy) {
+                            this.runCameraScanLoop();
+                            return;
+                        }
+
+                        const video = this.$refs.barcodeCameraVideo;
+                        if (!video || video.readyState < 2 || !this.cameraDetector) {
+                            this.runCameraScanLoop();
+                            return;
+                        }
+
+                        this.cameraDetectBusy = true;
+
+                        try {
+                            const detected = await this.cameraDetector.detect(video);
+                            const firstCode = detected?.[0]?.rawValue ? String(detected[0].rawValue).trim() : '';
+
+                            if (firstCode) {
+                                const now = Date.now();
+                                if (this.cameraLastDetectedCode !== firstCode || (now - this.cameraLastDetectedAt) > 1200) {
+                                    this.cameraLastDetectedCode = firstCode;
+                                    this.cameraLastDetectedAt = now;
+                                    this.barcodeInput = firstCode;
+                                    await this.scanBarcode(firstCode, { source: 'camera' });
+                                }
+                            }
+                        } catch (error) {
+                            // ignore frame-level detection errors
+                        } finally {
+                            this.cameraDetectBusy = false;
+                        }
+
+                        this.runCameraScanLoop();
+                    }, this.cameraScanIntervalMs);
                 },
 
                 processBarcodeInput() {
@@ -2181,7 +2642,7 @@
                         if (this.barcodeInput.length >= 3) {
                             this.scanBarcode(this.barcodeInput);
                         }
-                    }, 100);
+                    }, 180);
                 },
 
                 handleBarcodeEnter() {
@@ -2191,26 +2652,159 @@
                     }
                 },
 
-                scanBarcode(code) {
-                    const product = this.products.find(p =>
-                        p.barcode === code ||
-                        p.sku === code ||
-                        String(p.id) === code
-                    );
+                normalizeScannedCode(code) {
+                    return String(code || '')
+                        .replace(/[\r\n\t]+/g, '')
+                        .trim();
+                },
 
-                    if (product) {
-                        this.addToCart(product);
-                        this.showToast(`Produk ditemukan: ${product.name}`);
-                        this.barcodeInput = '';
+                findLocalProductByCode(code) {
+                    const normalizedCode = this.normalizeScannedCode(code).toLowerCase();
+                    if (!normalizedCode) return null;
 
-                        if (this.showBarcodeScanner) {
-                            setTimeout(() => {
-                                const input = document.querySelector('[x-model="barcodeInput"]');
-                                input?.focus();
-                            }, 100);
+                    return this.products.find(p => {
+                        const barcode = String(p?.barcode || '').trim().toLowerCase();
+                        const sku = String(p?.sku || '').trim().toLowerCase();
+                        const idValue = String(p?.id || '').trim().toLowerCase();
+                        return barcode === normalizedCode || sku === normalizedCode || idValue === normalizedCode;
+                    }) || null;
+                },
+
+                async fetchProductByBarcode(code) {
+                    if (!this.productsEndpoint) {
+                        return null;
+                    }
+
+                    const normalizedCode = this.normalizeScannedCode(code);
+                    if (!normalizedCode) {
+                        return null;
+                    }
+
+                    const endpointUrl = new URL(this.productsEndpoint, window.location.origin);
+                    endpointUrl.searchParams.set('page', '1');
+                    endpointUrl.searchParams.set('per_page', '50');
+                    endpointUrl.searchParams.set('search', normalizedCode);
+                    endpointUrl.searchParams.set('category', 'all');
+                    endpointUrl.searchParams.set('in_stock', '0');
+                    endpointUrl.searchParams.set('sort', 'name_asc');
+                    endpointUrl.searchParams.set('customer_type', this.customerType || 'pelanggan');
+
+                    const response = await fetch(endpointUrl.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
                         }
-                    } else {
-                        this.showErrorToast(`Produk dengan kode "${code}" tidak ditemukan`);
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Gagal mencari produk barcode.');
+                    }
+
+                    const payload = await response.json();
+                    const incoming = Array.isArray(payload?.data) ? payload.data : [];
+                    const normalizedLookup = normalizedCode.toLowerCase();
+
+                    const exact = incoming.find(p => {
+                        const barcode = String(p?.barcode || '').trim().toLowerCase();
+                        const sku = String(p?.sku || '').trim().toLowerCase();
+                        const idValue = String(p?.id || '').trim().toLowerCase();
+                        return barcode === normalizedLookup || sku === normalizedLookup || idValue === normalizedLookup;
+                    });
+
+                    return exact || null;
+                },
+
+                async scanBarcode(code, options = {}) {
+                    const normalizedCode = this.normalizeScannedCode(code);
+                    if (!normalizedCode) {
+                        return;
+                    }
+
+                    if (this.barcodeScanBusy) {
+                        return;
+                    }
+
+                    this.barcodeScanBusy = true;
+
+                    try {
+                        const now = Date.now();
+                        if (this.lastScannedCode === normalizedCode && (now - this.lastScanAt) < 700) {
+                            return;
+                        }
+
+                        this.lastScannedCode = normalizedCode;
+                        this.lastScanAt = now;
+
+                        let product = this.findLocalProductByCode(normalizedCode);
+
+                        if (!product) {
+                            this.isBarcodeSearching = true;
+                            try {
+                                product = await this.fetchProductByBarcode(normalizedCode);
+                            } catch (error) {
+                                this.showErrorToast(error?.message || 'Pencarian barcode gagal');
+                                this.isBarcodeSearching = false;
+                                return;
+                            } finally {
+                                this.isBarcodeSearching = false;
+                            }
+                        }
+
+                        if (product) {
+                            const existsInList = this.products.some(p => String(p.id) === String(product.id));
+                            if (!existsInList) {
+                                this.products.unshift({
+                                    ...product,
+                                    imageLoaded: false,
+                                    prices: Array.isArray(product?.prices) ? product.prices : []
+                                });
+                            }
+
+                            this.addToCart(product);
+                            this.showToast(`Produk ditemukan: ${product.name}`);
+                            this.barcodeInput = '';
+
+                            if (options?.source === 'camera' && this.cameraAutoStopOnSuccess) {
+                                this.stopCameraScanner(false);
+                            }
+
+                            if (this.showBarcodeScanner) {
+                                setTimeout(() => {
+                                    this.$refs.barcodeInput?.focus();
+                                }, 100);
+                            }
+                        } else {
+                            this.showErrorToast(`Produk dengan kode "${normalizedCode}" tidak ditemukan`);
+                        }
+                    } finally {
+                        this.barcodeScanBusy = false;
+                    }
+                },
+
+                saveScannerPreferences() {
+                    try {
+                        const data = {
+                            cameraAutoStopOnSuccess: !!this.cameraAutoStopOnSuccess,
+                        };
+                        localStorage.setItem(this.scannerPreferencesKey, JSON.stringify(data));
+                    } catch (error) {
+                        // ignore preference write failures
+                    }
+                },
+
+                loadScannerPreferences() {
+                    try {
+                        const raw = localStorage.getItem(this.scannerPreferencesKey);
+                        if (!raw) {
+                            return;
+                        }
+
+                        const parsed = JSON.parse(raw);
+                        if (typeof parsed?.cameraAutoStopOnSuccess === 'boolean') {
+                            this.cameraAutoStopOnSuccess = parsed.cameraAutoStopOnSuccess;
+                        }
+                    } catch (error) {
+                        localStorage.removeItem(this.scannerPreferencesKey);
                     }
                 },
 

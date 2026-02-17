@@ -1,5 +1,5 @@
 import './bootstrap';
-import Chart from 'chart.js/auto';
+import { Html5Qrcode } from "html5-qrcode";
 import {
     Activity, AlignLeft, ArrowDown, ArrowDownAZ, ArrowLeft, ArrowRight, ArrowUp, ArrowUpAZ, ArrowUpDown, BadgeCheck, Banknote, Ban, Barcode, BatteryLow, BookOpen, Box, Boxes, Briefcase, Calculator, Calendar, CalendarCheck, CalendarDays, CalendarMinus, CalendarRange, Camera, ChartLine, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, CircleAlert, CircleCheck, CirclePause, CirclePlus, CircleUser, CircleX, ClipboardCheck, ClipboardList, Clock, CloudUpload, Contact, Crown, Database, EllipsisVertical, Eye, EyeOff, FileDown, FileInput, FileSpreadsheet, FileText, Filter, Flame, Folder, FolderOpen, Gauge, Grip, History, Home, IdCard, Image, Inbox, Info, KeyRound, Layers, Lightbulb, List, ListOrdered, LoaderCircle, Lock, LogIn, LogOut, Mail, MailOpen, Menu, Minus, PackageOpen, Pencil, Phone, PhoneOff, Play, Plus, Printer, Receipt, RefreshCw, RotateCcw, RotateCw, Ruler, Save, Scale, Search, Send, Settings, Shield, ShieldCheck, ShoppingCart, SlidersHorizontal, Sprout, Star, StickyNote, Store, Tag, Tags, ToggleLeft, ToggleRight, Trash2, TrendingDown, TrendingUp, TriangleAlert, Truck, Type, Upload, User, UserCog, UserPen, UserPlus, Users, Wallet, Warehouse, Weight, X, Zap, ZoomOut
 } from 'lucide';
@@ -8,17 +8,55 @@ const icons = {
     Activity, AlignLeft, ArrowDown, ArrowDownAZ, ArrowLeft, ArrowRight, ArrowUp, ArrowUpAZ, ArrowUpDown, BadgeCheck, Banknote, Ban, Barcode, BatteryLow, BookOpen, Box, Boxes, Briefcase, Calculator, Calendar, CalendarCheck, CalendarDays, CalendarMinus, CalendarRange, Camera, ChartLine, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronUp, CircleAlert, CircleCheck, CirclePause, CirclePlus, CircleUser, CircleX, ClipboardCheck, ClipboardList, Clock, CloudUpload, Contact, Crown, Database, EllipsisVertical, Eye, EyeOff, FileDown, FileInput, FileSpreadsheet, FileText, Filter, Flame, Folder, FolderOpen, Gauge, Grip, History, Home, IdCard, Image, Inbox, Info, KeyRound, Layers, Lightbulb, List, ListOrdered, LoaderCircle, Lock, LogIn, LogOut, Mail, MailOpen, Menu, Minus, PackageOpen, Pencil, Phone, PhoneOff, Play, Plus, Printer, Receipt, RefreshCw, RotateCcw, RotateCw, Ruler, Save, Scale, Search, Send, Settings, Shield, ShieldCheck, ShoppingCart, SlidersHorizontal, Sprout, Star, StickyNote, Store, Tag, Tags, ToggleLeft, ToggleRight, Trash2, TrendingDown, TrendingUp, TriangleAlert, Truck, Type, Upload, User, UserCog, UserPen, UserPlus, Users, Wallet, Warehouse, Weight, X, Zap, ZoomOut
 };
 
-import Alpine from 'alpinejs';
-import flatpickr from 'flatpickr';
-import { Indonesian } from 'flatpickr/dist/l10n/id.js';
-import 'flatpickr/dist/flatpickr.css';
+import Alpine from "alpinejs";
 
 // Expose Alpine globally
 window.Alpine = Alpine;
+window.Html5Qrcode = Html5Qrcode;
 Alpine.start();
 
-// Expose Chart.js globally for blade templates
-window.Chart = Chart;
+let chartJsLoader;
+let flatpickrLoader;
+window.Chart = window.Chart || null;
+
+async function ensureChartJsLoaded() {
+    if (window.Chart) {
+        return window.Chart;
+    }
+
+    if (!chartJsLoader) {
+        chartJsLoader = import("chart.js/auto")
+            .then((module) => {
+                window.Chart = module.default ?? module;
+                document.dispatchEvent(new CustomEvent("chartjs:ready"));
+                return window.Chart;
+            })
+            .catch((error) => {
+                chartJsLoader = null;
+                throw error;
+            });
+    }
+
+    return chartJsLoader;
+}
+
+async function loadFlatpickrDependencies() {
+    if (!flatpickrLoader) {
+        flatpickrLoader = Promise.all([
+            import("flatpickr"),
+            import("flatpickr/dist/l10n/id.js"),
+            import("flatpickr/dist/flatpickr.css"),
+        ]).then(([flatpickrModule, localeModule]) => {
+            const flatpickr = flatpickrModule.default ?? flatpickrModule;
+            const Indonesian =
+                localeModule.Indonesian ?? localeModule.default?.Indonesian;
+
+            return { flatpickr, Indonesian };
+        });
+    }
+
+    return flatpickrLoader;
+}
 
 // Font Awesome to Lucide PascalCase mapping
 const faToLucide = {
@@ -305,32 +343,51 @@ let datepickerInitTimeout;
 
 function initEmeraldDatepickers() {
 	const elements = document.querySelectorAll('[data-datepicker]');
+	if (!elements.length) {
+        return;
+    }
 
-	elements.forEach((element) => {
-		if (element._flatpickr) return;
+	loadFlatpickrDependencies()
+        .then(({ flatpickr, Indonesian }) => {
+            elements.forEach((element) => {
+                if (element._flatpickr) return;
 
-		flatpickr(element, {
-			dateFormat: 'Y-m-d',
-			allowInput: true,
-			locale: Indonesian,
-			monthSelectorType: 'dropdown',
-			minDate: element.dataset.minDate || null,
-			maxDate: element.dataset.maxDate || null,
-			disableMobile: true,
-			prevArrow: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
-			nextArrow: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
-			onReady(selectedDates, dateStr, instance) {
-				instance.calendarContainer.classList.add('flatpickr-theme-emerald');
-			},
-			onOpen(selectedDates, dateStr, instance) {
-				instance.calendarContainer.classList.add('flatpickr-theme-emerald');
-			},
-			onChange() {
-				element.dispatchEvent(new Event('input', { bubbles: true }));
-				element.dispatchEvent(new Event('change', { bubbles: true }));
-			}
-		});
-	});
+                flatpickr(element, {
+                    dateFormat: "Y-m-d",
+                    allowInput: true,
+                    locale: Indonesian,
+                    monthSelectorType: "dropdown",
+                    minDate: element.dataset.minDate || null,
+                    maxDate: element.dataset.maxDate || null,
+                    disableMobile: true,
+                    prevArrow:
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+                    nextArrow:
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+                    onReady(selectedDates, dateStr, instance) {
+                        instance.calendarContainer.classList.add(
+                            "flatpickr-theme-emerald",
+                        );
+                    },
+                    onOpen(selectedDates, dateStr, instance) {
+                        instance.calendarContainer.classList.add(
+                            "flatpickr-theme-emerald",
+                        );
+                    },
+                    onChange() {
+                        element.dispatchEvent(
+                            new Event("input", { bubbles: true }),
+                        );
+                        element.dispatchEvent(
+                            new Event("change", { bubbles: true }),
+                        );
+                    },
+                });
+            });
+        })
+        .catch((error) => {
+            console.error("Failed to initialize datepicker:", error);
+        });
 }
 
 function scheduleDatepickerInit() {
@@ -341,6 +398,11 @@ function scheduleDatepickerInit() {
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
 	convertFaToLucide();
+	if (document.querySelector("[data-chartjs]")) {
+        ensureChartJsLoaded().catch((error) => {
+            console.error("Failed to load Chart.js:", error);
+        });
+    }
 	scheduleDatepickerInit();
 });
 

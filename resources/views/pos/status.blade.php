@@ -33,18 +33,16 @@
 
         <!-- Header Stats Cards -->
         @php
-            $totalTransactions = $payments->count();
-            $paidCount = $payments->filter(fn($p) => in_array(strtolower((string) ($p->status ?? '')), ['paid', 'dibayar']))->count();
-            $unpaidCount = $payments->filter(fn($p) => strtolower((string) ($p->status ?? '')) === 'pending')->count();
-            $totalRevenue = $payments->sum('grand_total');
-            $totalReceived = $payments->sum('payment_received');
-            $totalBalance = $payments->sum('balance_due');
-
-            // Statistik metode pembayaran
-            $cashTransactions = $payments->where('payment_method', 'cash')->count();
-            $transferTransactions = $payments->where('payment_method', 'transfer')->count();
-            $cashAmount = $payments->where('payment_method', 'cash')->sum('grand_total');
-            $transferAmount = $payments->where('payment_method', 'transfer')->sum('grand_total');
+            $paymentStats = $paymentStats ?? [
+                'total_transactions' => 0,
+                'paid_count' => 0,
+                'unpaid_count' => 0,
+                'paid_percentage' => 0,
+                'cash_transactions' => 0,
+                'transfer_transactions' => 0,
+                'cash_amount' => 0,
+                'transfer_amount' => 0,
+            ];
         @endphp
 
         <div class="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
@@ -53,10 +51,10 @@
                 <div class="flex items-center justify-between">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">Total Transaksi</p>
-                        <p class="text-xl font-bold text-slate-900 mt-1 truncate">{{ number_format($totalTransactions) }}</p>
+                        <p class="text-xl font-bold text-slate-900 mt-1 truncate">{{ number_format($paymentStats['total_transactions']) }}</p>
                         <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $selectedDate ? 'Pada ' . \Carbon\Carbon::parse($selectedDate)->translatedFormat('d M Y') : 'Semua waktu' }}</p>
                     </div>
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex-shrink-0 ml-2">
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl shrink-0 ml-2">
                         <i class="fas fa-receipt"></i>
                     </span>
                 </div>
@@ -70,10 +68,10 @@
                 <div class="flex items-center justify-between">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">Sudah Dibayar</p>
-                        <p class="text-xl font-bold text-emerald-600 mt-1 truncate">{{ number_format($paidCount) }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $totalTransactions > 0 ? round(($paidCount / $totalTransactions) * 100) . '% dari total' : '0%' }}</p>
+                        <p class="text-xl font-bold text-emerald-600 mt-1 truncate">{{ number_format($paymentStats['paid_count']) }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">{{ ($paymentStats['paid_percentage'] ?? 0) . '% dari total' }}</p>
                     </div>
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex-shrink-0 ml-2">
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl shrink-0 ml-2">
                         <i class="fas fa-circle-check"></i>
                     </span>
                 </div>
@@ -87,10 +85,10 @@
                 <div class="flex items-center justify-between">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">Belum Dibayar</p>
-                        <p class="text-xl font-bold text-amber-600 mt-1 truncate">{{ number_format($unpaidCount) }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $unpaidCount > 0 ? 'Perlu tindakan' : 'Semua lunas' }}</p>
+                        <p class="text-xl font-bold text-amber-600 mt-1 truncate">{{ number_format($paymentStats['unpaid_count']) }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">{{ ($paymentStats['unpaid_count'] ?? 0) > 0 ? 'Perlu tindakan' : 'Semua lunas' }}</p>
                     </div>
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex-shrink-0 ml-2">
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-amber-100 text-amber-600 rounded-xl shrink-0 ml-2">
                         <i class="fas fa-clock"></i>
                     </span>
                 </div>
@@ -101,10 +99,10 @@
                 <div class="flex items-center justify-between">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">Cash</p>
-                        <p class="text-xl font-bold text-emerald-600 mt-1 truncate">{{ number_format($cashTransactions) }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5 truncate">Rp {{ number_format($cashAmount, 0, ',', '.') }}</p>
+                        <p class="text-xl font-bold text-emerald-600 mt-1 truncate">{{ number_format($paymentStats['cash_transactions']) }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">Rp {{ number_format($paymentStats['cash_amount'], 0, ',', '.') }}</p>
                     </div>
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex-shrink-0 ml-2">
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl shrink-0 ml-2">
                         <i class="fas fa-money-bill-wave"></i>
                     </span>
                 </div>
@@ -115,10 +113,10 @@
                 <div class="flex items-center justify-between">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide truncate">Transfer</p>
-                        <p class="text-xl font-bold text-blue-600 mt-1 truncate">{{ number_format($transferTransactions) }}</p>
-                        <p class="text-xs text-slate-500 mt-0.5 truncate">Rp {{ number_format($transferAmount, 0, ',', '.') }}</p>
+                        <p class="text-xl font-bold text-blue-600 mt-1 truncate">{{ number_format($paymentStats['transfer_transactions']) }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 truncate">Rp {{ number_format($paymentStats['transfer_amount'], 0, ',', '.') }}</p>
                     </div>
-                    <span class="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex-shrink-0 ml-2">
+                    <span class="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-xl shrink-0 ml-2">
                         <i class="fas fa-university"></i>
                     </span>
                 </div>
@@ -154,12 +152,12 @@
                         </span>
                         <input type="text"
                                x-model="searchQuery"
-                               @input.debounce.300ms="filterData()"
+                               @input="queueServerFilterApply()"
                                placeholder="Cari customer, referensi, metode..."
                                class="w-full py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 bg-white border-2 border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 placeholder:font-normal placeholder:text-slate-400">
                         <button type="button"
                                 x-show="searchQuery"
-                                @click="searchQuery = ''; filterData()"
+                                @click="searchQuery = ''; applyServerFilters()"
                                 class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-red-500 transition">
                             <i class="fas fa-times"></i>
                         </button>
@@ -272,6 +270,10 @@
                             <input type="date" name="date" value="{{ $selectedDate }}"
                                    class="w-full h-10 rounded-xl border-2 border-emerald-100 bg-white pl-10 pr-4 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400">
                         </div>
+                        <input type="hidden" name="search" :value="searchQuery">
+                        <input type="hidden" name="status" :value="statusFilter">
+                        <input type="hidden" name="payment_method" :value="paymentMethodFilter">
+                        <input type="hidden" name="per_page" value="{{ (int)($perPage ?? 80) }}">
                         <button type="submit"
                                 class="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-500 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 whitespace-nowrap">
                             <i class="fas fa-filter"></i>
@@ -295,7 +297,7 @@
                         <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
                             <i class="fas fa-search text-slate-400 text-xs"></i>
                             "<span class="truncate max-w-[100px]" x-text="searchQuery"></span>"
-                            <button type="button" @click="searchQuery = ''; filterData()" class="ml-1 text-slate-400 hover:text-red-500">
+                            <button type="button" @click="searchQuery = ''; applyServerFilters()" class="ml-1 text-slate-400 hover:text-red-500">
                                 <i class="fas fa-times text-xs"></i>
                             </button>
                         </span>
@@ -429,26 +431,18 @@
                                                     $isCancelled = $status === 'cancelled';
                                                 @endphp
                                                 <tr class="hover:bg-slate-50/50 transition-colors duration-150"
-                                                    x-show="isPaymentVisible({{ json_encode([
-                                                        'id' => $payment->id,
-                                                        'customer_name' => $payment->customer_name,
-                                                        'reference' => $payment->reference,
-                                                        'order_id' => $payment->order_id ?? null,
-                                                        'status' => $status,
-                                                        'payment_method' => $paymentMethod,
-                                                        'date' => $dateKey
-                                                    ]) }})"
+                                                    x-show="isPaymentIdVisible({{ $payment->id }})"
                                                     data-payment-id="{{ $payment->id }}"
                                                     data-date-group="{{ $dateKey }}">
                                                     <!-- Time & Ref -->
                                                     <td class="px-3 py-2">
                                                         <div class="text-xs font-semibold text-slate-900">{{ $createdAt?->format('H:i') ?? '-' }}</div>
-                                                        <div class="text-[10px] text-slate-500 font-medium mt-0.5 truncate max-w-[80px]">{{ $payment->reference ?? '-' }}</div>
+                                                        <div class="text-[10px] text-slate-500 font-medium mt-0.5 truncate max-w-20">{{ $payment->reference ?? '-' }}</div>
                                                     </td>
                                                     <!-- Customer -->
                                                     <td class="px-3 py-2">
                                                         <div class="flex items-center gap-2">
-                                                            <div class="flex-shrink-0">
+                                                            <div class="shrink-0">
                                                                 <div class="h-7 w-7 inline-flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 font-semibold text-xs">
                                                                     {{ strtoupper(substr($payment->customer_name ?? 'G', 0, 2)) }}
                                                                 </div>
@@ -525,13 +519,13 @@
                                                     <!-- Actions -->
                                                     <td class="px-3 py-2 text-right relative">
                                                         <div class="flex items-center justify-end gap-1">
-                                                            <button type="button" @click="showDetail({{ json_encode($payment) }})"
+                                                            <button type="button" @click="showDetailById({{ $payment->id }})"
                                                                 class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-300"
                                                                 title="Lihat Detail">
                                                                 <i class="fas fa-eye text-xs"></i>
                                                             </button>
                                                             @if(!$isPaid && !$isCancelled)
-                                                                <button type="button" @click="openPayModal({{ json_encode($payment) }})"
+                                                                <button type="button" @click="openPayModalById({{ $payment->id }})"
                                                                     class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-emerald-200 bg-white text-emerald-500 transition hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-300"
                                                                     title="Tandai Dibayar">
                                                                     <i class="fas fa-check text-xs"></i>
@@ -633,22 +627,14 @@
                                         $isPaid = in_array($status, ['paid', 'dibayar'], true);
                                         $isCancelled = $status === 'cancelled';
                                     @endphp
-                                    <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
-                                         x-show="isPaymentVisible({{ json_encode([
-                                            'id' => $payment->id,
-                                            'customer_name' => $payment->customer_name,
-                                            'reference' => $payment->reference,
-                                            'order_id' => $payment->order_id ?? null,
-                                            'status' => $status,
-                                            'payment_method' => $paymentMethod,
-                                            'date' => $dateKey
-                                        ]) }})"
+                                     <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
+                                         x-show="isPaymentIdVisible({{ $payment->id }})"
                                          data-payment-id="{{ $payment->id }}"
                                          data-date-group="{{ $dateKey }}">
                                         <!-- Header -->
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="flex items-center gap-3 flex-1 min-w-0">
-                                                <div class="h-8 w-8 flex-shrink-0 inline-flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 font-semibold text-xs">
+                                                <div class="h-8 w-8 shrink-0 inline-flex items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 font-semibold text-xs">
                                                     {{ strtoupper(substr($payment->customer_name ?? 'G', 0, 2)) }}
                                                 </div>
                                                 <div class="min-w-0 flex-1">
@@ -719,13 +705,13 @@
 
                                         <!-- Actions -->
                                         <div class="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-                                            <button type="button" @click="showDetail({{ json_encode($payment) }})"
+                                            <button type="button" @click="showDetailById({{ $payment->id }})"
                                                 class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-600">
                                                 <i class="fas fa-eye text-xs"></i>
                                                 Detail
                                             </button>
                                             @if(!$isPaid && !$isCancelled)
-                                                <button type="button" @click="openPayModal({{ json_encode($payment) }})"
+                                                <button type="button" @click="openPayModalById({{ $payment->id }})"
                                                     class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 px-2 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-600">
                                                     <i class="fas fa-check text-xs"></i>
                                                     Bayar
@@ -792,9 +778,39 @@
             </div>
         </div>
 
+        @if(isset($paymentsPaginator) && $paymentsPaginator->total() > 0)
+            <div class="flex flex-col gap-3 rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-slate-200 sm:flex-row sm:items-center sm:justify-between">
+                <div class="text-sm text-slate-500">
+                    @php
+                        $from = $paymentsPaginator->firstItem() ?? 0;
+                        $to = $paymentsPaginator->lastItem() ?? 0;
+                    @endphp
+                    Menampilkan <span class="font-semibold text-slate-700">{{ $from }}-{{ $to }}</span> dari <span class="font-semibold text-slate-700">{{ $paymentsPaginator->total() }}</span> transaksi
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <form action="{{ route('pos.payments') }}" method="GET" class="flex items-center gap-2 text-xs sm:text-sm">
+                        <input type="hidden" name="date" value="{{ $selectedDate }}">
+                        <input type="hidden" name="search" :value="searchQuery">
+                        <input type="hidden" name="status" :value="statusFilter">
+                        <input type="hidden" name="payment_method" :value="paymentMethodFilter">
+                        <label for="per_page" class="font-semibold text-slate-600 whitespace-nowrap">Per halaman</label>
+                        <select id="per_page" name="per_page" onchange="this.form.submit()"
+                                class="h-9 rounded-lg border border-slate-200 bg-white px-2 text-slate-700 focus:border-emerald-400 focus:ring-emerald-400">
+                            @foreach([20, 40, 80, 120, 200] as $option)
+                                <option value="{{ $option }}" {{ (int)($perPage ?? 80) === $option ? 'selected' : '' }}>{{ $option }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                    <div>
+                        {{ $paymentsPaginator->links() }}
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Detail Modal -->
         <div x-show="showDetailModal" x-cloak
-             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+             class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -884,6 +900,9 @@
                     <!-- Items -->
                     <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
                         <p class="text-xs font-bold uppercase tracking-wide text-slate-700 mb-3">Rincian Item</p>
+                        <template x-if="detailLoading">
+                            <p class="text-xs text-slate-500 mb-2">Memuat detail transaksi...</p>
+                        </template>
                         <div class="space-y-3">
                             <template x-for="item in (selectedPayment?.items || [])" :key="item.id">
                                 <div class="flex items-center justify-between text-sm">
@@ -976,7 +995,7 @@
                     <template x-if="selectedPayment?.note">
                         <div class="rounded-xl bg-amber-50 border border-amber-200 p-3">
                             <p class="text-xs font-bold text-amber-700 mb-1">Catatan</p>
-                            <p class="text-sm text-amber-800 break-words" x-text="selectedPayment.note"></p>
+                            <p class="text-sm text-amber-800 wrap-break-word" x-text="selectedPayment.note"></p>
                         </div>
                     </template>
                 </div>
@@ -1002,7 +1021,7 @@
 
         <!-- Payment Modal -->
         <div x-show="showPayModal" x-cloak
-             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+             class="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -1091,17 +1110,25 @@
 
     @push('scripts')
     @php
-        $paymentDataForJs = $payments->map(function($p) {
+        $paymentSummariesById = $payments->mapWithKeys(function ($p) {
             return [
-                'id' => $p->id,
-                'customer_name' => $p->customer_name,
-                'reference' => $p->reference,
-                'order_id' => $p->order_id ?? null,
-                'status' => strtolower($p->status ?? 'pending'),
-                'payment_method' => strtolower($p->payment_method ?? 'cash'),
-                'date' => $p->created_at ? $p->created_at->format('Y-m-d') : 'unknown'
+                (string) $p->id => [
+                    'id' => $p->id,
+                    'order_id' => $p->order_id,
+                    'reference' => $p->reference,
+                    'customer_name' => $p->customer_name,
+                    'customer_type' => $p->customer_type,
+                    'grand_total' => (int) ($p->grand_total ?? 0),
+                    'payment_received' => (int) ($p->payment_received ?? 0),
+                    'balance_due' => (int) ($p->balance_due ?? 0),
+                    'change_due' => (int) ($p->change_due ?? 0),
+                    'payment_method' => strtolower((string) ($p->payment_method ?? 'cash')),
+                    'status' => strtolower((string) ($p->status ?? 'pending')),
+                    'date' => $p->created_at ? $p->created_at->format('Y-m-d') : 'unknown',
+                    'created_at' => optional($p->created_at)?->toIso8601String(),
+                ],
             ];
-        })->values();
+        });
     @endphp
     <script>
         function paymentPage() {
@@ -1114,34 +1141,99 @@
                 paymentAmount: '',
 
                 // Filter states
-                searchQuery: '',
-                statusFilter: 'all',
-                paymentMethodFilter: 'all',
+                searchQuery: @json($filterState['search'] ?? ''),
+                statusFilter: @json($filterState['status'] ?? 'all'),
+                paymentMethodFilter: @json($filterState['payment_method'] ?? 'all'),
                 datePreset: '{{ $selectedDate ? "custom" : "all" }}',
                 isLoading: false,
                 filteredCount: {{ $payments->count() }},
+                filterDebounceTimer: null,
 
                 // Toast
                 toastMessage: '',
                 toastVisible: false,
                 toastType: 'success',
+                detailLoading: false,
 
                 // All payments data for filtering
-                allPayments: @json($paymentDataForJs),
+                paymentDetailsById: @json($paymentSummariesById),
+                paymentDetailCache: {},
+                paymentDetailEndpointTemplate: '{{ route("pos.payments.detail", ":id") }}',
+                allPayments: [],
+                visiblePaymentIds: {},
+                visibleCountByDate: {},
 
                 initPage() {
+                    this.allPayments = Object.values(this.paymentDetailsById).map(payment => ({
+                        id: payment.id,
+                        customer_name: payment.customer_name,
+                        reference: payment.reference,
+                        order_id: payment.order_id || null,
+                        status: (payment.status || 'pending').toLowerCase(),
+                        payment_method: (payment.payment_method || 'cash').toLowerCase(),
+                        date: payment.date || 'unknown'
+                    }));
                     this.filterData();
                 },
 
                 // Filter methods
                 setStatusFilter(status) {
                     this.statusFilter = status;
-                    this.filterData();
+                    this.applyServerFilters();
                 },
 
                 setPaymentMethodFilter(method) {
                     this.paymentMethodFilter = method;
-                    this.filterData();
+                    this.applyServerFilters();
+                },
+
+                queueServerFilterApply() {
+                    if (this.filterDebounceTimer) {
+                        clearTimeout(this.filterDebounceTimer);
+                    }
+
+                    this.filterDebounceTimer = setTimeout(() => {
+                        this.applyServerFilters();
+                    }, 350);
+                },
+
+                applyServerFilters() {
+                    window.location.href = this.buildFilterUrl({
+                        date: '{{ $selectedDate }}',
+                        per_page: '{{ (int)($perPage ?? 80) }}'
+                    });
+                },
+
+                buildFilterUrl(extra = {}) {
+                    const params = new URLSearchParams();
+
+                    const dateValue = (extra.date ?? '').toString().trim();
+                    if (dateValue) {
+                        params.set('date', dateValue);
+                    }
+
+                    const perPageValue = parseInt(extra.per_page || '{{ (int)($perPage ?? 80) }}', 10);
+                    if (!Number.isNaN(perPageValue) && perPageValue > 0) {
+                        params.set('per_page', String(perPageValue));
+                    }
+
+                    const query = (this.searchQuery || '').trim();
+                    if (query) {
+                        params.set('search', query);
+                    }
+
+                    if (this.statusFilter && this.statusFilter !== 'all') {
+                        params.set('status', this.statusFilter);
+                    }
+
+                    if (this.paymentMethodFilter && this.paymentMethodFilter !== 'all') {
+                        params.set('payment_method', this.paymentMethodFilter);
+                    }
+
+                    const queryString = params.toString();
+                    return queryString
+                        ? `{{ route("pos.payments") }}?${queryString}`
+                        : '{{ route("pos.payments") }}';
                 },
 
                 setDatePreset(preset) {
@@ -1157,15 +1249,15 @@
                         yesterday.setDate(yesterday.getDate() - 1);
                         targetDate = yesterday.toISOString().split('T')[0];
                     } else if (preset === 'week') {
-                        window.location.href = '{{ route("pos.payments") }}';
+                        window.location.href = this.buildFilterUrl({ per_page: '{{ (int)($perPage ?? 80) }}' });
                         return;
                     } else if (preset === 'all') {
-                        window.location.href = '{{ route("pos.payments") }}';
+                        window.location.href = this.buildFilterUrl({ per_page: '{{ (int)($perPage ?? 80) }}' });
                         return;
                     }
 
                     if (targetDate) {
-                        window.location.href = '{{ route("pos.payments") }}?date=' + targetDate;
+                        window.location.href = this.buildFilterUrl({ date: targetDate, per_page: '{{ (int)($perPage ?? 80) }}' });
                     }
                 },
 
@@ -1173,7 +1265,7 @@
                     this.searchQuery = '';
                     this.statusFilter = 'all';
                     this.paymentMethodFilter = 'all';
-                    this.filterData();
+                    this.applyServerFilters();
                 },
 
                 refreshPage() {
@@ -1183,18 +1275,23 @@
 
                 filterData() {
                     let count = 0;
-                    const query = this.searchQuery.toLowerCase().trim();
+                    const visiblePaymentIds = {};
+                    const visibleCountByDate = {};
 
                     this.allPayments.forEach(payment => {
-                        if (this.isPaymentVisible(payment)) {
+                        if (this.matchesFilters(payment)) {
+                            visiblePaymentIds[payment.id] = true;
+                            visibleCountByDate[payment.date] = (visibleCountByDate[payment.date] || 0) + 1;
                             count++;
                         }
                     });
 
+                    this.visiblePaymentIds = visiblePaymentIds;
+                    this.visibleCountByDate = visibleCountByDate;
                     this.filteredCount = count;
                 },
 
-                isPaymentVisible(payment) {
+                matchesFilters(payment) {
                     if (!payment) return false;
 
                     const statusValue = (payment.status || '').toLowerCase();
@@ -1239,18 +1336,72 @@
                     return true;
                 },
 
+                isPaymentIdVisible(paymentId) {
+                    return !!this.visiblePaymentIds[paymentId];
+                },
+
                 hasVisibleItemsInGroup(dateKey) {
-                    return this.allPayments.some(p => p.date === dateKey && this.isPaymentVisible(p));
+                    return (this.visibleCountByDate[dateKey] || 0) > 0;
                 },
 
                 getVisibleCountInGroup(dateKey) {
-                    return this.allPayments.filter(p => p.date === dateKey && this.isPaymentVisible(p)).length;
+                    return this.visibleCountByDate[dateKey] || 0;
                 },
 
                 // Modal methods
                 showDetail(payment) {
                     this.selectedPayment = payment;
+                    this.detailLoading = false;
                     this.showDetailModal = true;
+                },
+
+                async showDetailById(paymentId) {
+                    const key = String(paymentId);
+                    const summary = this.paymentDetailsById[key] || this.paymentDetailsById[paymentId] || null;
+
+                    if (!summary) {
+                        this.showToast('Detail transaksi tidak ditemukan', 'error');
+                        return;
+                    }
+
+                    if (this.paymentDetailCache[key]) {
+                        this.showDetail(this.paymentDetailCache[key]);
+                        return;
+                    }
+
+                    this.selectedPayment = summary;
+                    this.showDetailModal = true;
+                    this.detailLoading = true;
+
+                    try {
+                        const endpoint = this.paymentDetailEndpointTemplate.replace(':id', encodeURIComponent(paymentId));
+                        const response = await fetch(endpoint, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            credentials: 'same-origin',
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok || !result?.success || !result?.data) {
+                            throw new Error(result?.message || 'Gagal memuat detail transaksi');
+                        }
+
+                        this.paymentDetailCache[key] = result.data;
+                        this.selectedPayment = result.data;
+                    } catch (error) {
+                        this.showToast(error?.message || 'Gagal memuat detail transaksi', 'error');
+                    } finally {
+                        this.detailLoading = false;
+                    }
+                },
+
+                openPayModalById(paymentId) {
+                    const payment = this.paymentDetailsById[String(paymentId)] || this.paymentDetailsById[paymentId] || null;
+                    if (!payment) return;
+                    this.openPayModal(payment);
                 },
 
                 openPayModal(payment) {

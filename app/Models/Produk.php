@@ -3,9 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Produk extends Model
 {
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            self::bumpPosCacheVersion('pos:products:cache_version');
+        });
+
+        static::deleted(function () {
+            self::bumpPosCacheVersion('pos:products:cache_version');
+        });
+    }
+
+    private static function bumpPosCacheVersion(string $key): void
+    {
+        $current = (int) Cache::get($key, 1);
+        Cache::forever($key, $current + 1);
+    }
+
     public function category()
     {
         return $this->belongsTo(Kategori::class, 'category_id');
